@@ -3,8 +3,7 @@ package jp.bitspace.salon.controller;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import jp.bitspace.salon.model.Menu;
-import jp.bitspace.salon.service.MenuService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jp.bitspace.salon.model.Menu;
+import jp.bitspace.salon.service.MenuService;
+
 @RestController
 @RequestMapping("/api/menus")
 public class MenuController {
@@ -24,12 +26,14 @@ public class MenuController {
     public MenuController(MenuService menuService) {
         this.menuService = menuService;
     }
-
+    
+    /**
+     * 全メニュー取得（サロンID指定）.
+     * @param salonId サロンID
+     * @return 全メニュー
+     */
     @GetMapping
-    public List<Menu> getMenus(@RequestParam(name = "salonId", required = false) Long salonId) {
-        if (salonId == null) {
-            return menuService.findAll();
-        }
+    public List<Menu> getMenus(@RequestParam(name = "salonId") Long salonId) {
         return menuService.findBySalonId(salonId);
     }
 
