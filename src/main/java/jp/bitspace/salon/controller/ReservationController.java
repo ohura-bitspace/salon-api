@@ -1,0 +1,94 @@
+package jp.bitspace.salon.controller;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import jp.bitspace.salon.controller.dto.CreateReservationRequest;
+import jp.bitspace.salon.model.Reservation;
+import jp.bitspace.salon.model.ReservationItem;
+import jp.bitspace.salon.service.ReservationService;
+
+/**
+ * 予約テーブルコントローラ.
+ */
+@RestController
+@RequestMapping("/api/reservations")
+public class ReservationController {
+    private final ReservationService reservationService;
+
+    public ReservationController(ReservationService reservationService) {
+        this.reservationService = reservationService;
+    }
+
+    @GetMapping
+    public List<Reservation> getReservations(@RequestParam(name = "salonId", required = false) Long salonId) {
+        if (salonId == null) {
+            return reservationService.findAll();
+        }
+        return reservationService.findBySalonId(salonId);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getReservation(@PathVariable Long id) {
+        Optional<Reservation> reservation = reservationService.findById(id);
+        if (reservation.isPresent()) {
+            return ResponseEntity.ok(reservation.get());
+        }
+        return ResponseEntity.status(404).body(Map.of("error", "Reservation not found"));
+    }
+
+    @GetMapping("/{id}/items")
+    public ResponseEntity<?> getReservationItems(@PathVariable Long id) {
+        Optional<Reservation> reservation = reservationService.findById(id);
+        if (reservation.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("error", "Reservation not found"));
+        }
+        List<ReservationItem> items = reservationService.findItemsByReservationId(id);
+        return ResponseEntity.ok(items);
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createReservation(@RequestBody CreateReservationRequest request) {
+        try {
+            Reservation created = reservationService.createWithItems(request);
+            return ResponseEntity.ok(created);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateReservation(@PathVariable Long id, @RequestBody Reservation updated) {
+        Optional<Reservation> existingOpt = reservationService.findById(id);
+        if (existingOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("error", "Reservation not found"));
+        }
+        Reservation existing = existingOpt.get();
+
+        existing.setStaffId(updated.getStaffId());
+        existing.setStartAt(updated.getStartAt());
+        existing.setEndAt(updated.getEndAt());
+        existing.setStatus(updated.getStatus());
+        existing.setMemo(updated.getMemo());
+
+        return ResponseEntity.ok(reservationService.save(existing));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteReservation(@PathVariable Long id) {
+        reservationService.deleteById(id);
+        return ResponseEntity.ok(Map.of("deleted", true));
+    }
+}

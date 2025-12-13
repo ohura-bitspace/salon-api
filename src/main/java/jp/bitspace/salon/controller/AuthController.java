@@ -1,15 +1,22 @@
 package jp.bitspace.salon.controller;
 
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import jp.bitspace.salon.model.Customer;
 import jp.bitspace.salon.model.Staff;
 import jp.bitspace.salon.service.CustomerService;
 import jp.bitspace.salon.service.StaffService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-import java.util.Optional;
-
+/**
+ * 認証系コントローラ.
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
