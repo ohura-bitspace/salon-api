@@ -30,6 +30,9 @@ public class Menu {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;
+
     @Column(name = "original_price", nullable = false)
     private Integer originalPrice = 0;
 

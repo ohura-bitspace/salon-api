@@ -69,6 +69,9 @@ CREATE TABLE menus (
     title VARCHAR(255) NOT NULL COMMENT 'メニュー名（例: 全身脱毛コース）',
     description TEXT COMMENT '説明文・補足',
     
+    -- イメージ画像がある場合
+    image_url VARCHAR(255) DEFAULT NULL COMMENT 'メニュー画像URL（/uploads/... や https://...）',
+    
     -- 価格設定
     original_price INT NOT NULL DEFAULT 0 COMMENT '定価',
     discounted_price INT DEFAULT NULL COMMENT '割引価格（クーポン用、NULLなら定価のみ）',
