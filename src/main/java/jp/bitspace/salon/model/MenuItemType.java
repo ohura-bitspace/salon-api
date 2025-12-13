@@ -1,7 +1,7 @@
 package jp.bitspace.salon.model;
 
 public enum MenuItemType {
-    COUPON,
-    MENU,
-    OPTION
+    COUPON, // クーポン
+    MENU,   // 通常メニュー
+    OPTION  // オプション
 }
