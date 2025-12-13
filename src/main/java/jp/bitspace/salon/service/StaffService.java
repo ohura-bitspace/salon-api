@@ -48,8 +48,7 @@ public class StaffService {
     public boolean verifyPassword(Staff staff, String rawPassword) {
     	// matches(平文パスワード, ハッシュ化されたパスワード)
     	boolean matches = passwordEncoder.matches(rawPassword, staff.getPasswordHash());
-    	System.out.println( rawPassword + ","+ staff.getPasswordHash() + "," + matches);
-    	System.out.println("★これをDBに入れて！: " + passwordEncoder.encode(rawPassword));
+    	//System.out.println( rawPassword + ","+ staff.getPasswordHash() + "," + matches);
         return matches;
     }
 
