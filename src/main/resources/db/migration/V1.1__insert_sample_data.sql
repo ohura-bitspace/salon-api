@@ -11,15 +11,14 @@ INSERT INTO salons (id, name, plan_type, is_active) VALUES
 -- 2. スタッフデータの投入
 -- ============================================================
 -- パスワードは全て 'password' をBCryptでハッシュ化したものです
--- $2a$10$oxSJl.keBwxmsMLkcT9lPeAIxfNTPH1o9fin1M95Ef9566gLcAU52
 
 INSERT INTO staffs (salon_id, name, email, password_hash, role) VALUES 
 -- サロン1 (Carnet) のオーナー
-(1, '山田 太郎', 'owner@carnet.jp', '$2a$10$oxSJl.keBwxmsMLkcT9lPeAIxfNTPH1o9fin1M95Ef9566gLcAU52', 'OWNER'),
+(1, '山田 太郎', 'owner@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', 'OWNER'),
 -- サロン1 (Carnet) のスタッフ
-(1, '鈴木 花子', 'staff@carnet.jp', '$2a$10$oxSJl.keBwxmsMLkcT9lPeAIxfNTPH1o9fin1M95Ef9566gLcAU52', 'STAFF'),
+(1, '鈴木 花子', 'staff@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', 'STAFF'),
 -- サロン2 (Mock) のオーナー（データ混在チェック用）
-(2, '田中 次郎', 'owner@mock.jp', '$2a$10$oxSJl.keBwxmsMLkcT9lPeAIxfNTPH1o9fin1M95Ef9566gLcAU52', 'OWNER');
+(2, '田中 次郎', 'owner@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', 'OWNER');
 
 -- ============================================================
 -- 3. 顧客データの投入

@@ -1,14 +1,21 @@
 package jp.bitspace.salon.service;
 
-import jp.bitspace.salon.model.Staff;
-import jp.bitspace.salon.repository.StaffRepository;
-import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import jp.bitspace.salon.model.Staff;
+import jp.bitspace.salon.repository.StaffRepository;
 
 @Service
 public class StaffService {
     private final StaffRepository staffRepository;
+    
+    // クラスのフィールドに追加（またはBean注入）
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public StaffService(StaffRepository staffRepository) {
         this.staffRepository = staffRepository;
@@ -35,13 +42,15 @@ public class StaffService {
     }
 
     /**
-     * パスワード照合ロジック
-     * TODO: 本番環境ではBCryptPasswordEncoderを使用すること
-     * 現在は開発用として単純な文字列比較を実施
+     * パスワード照合ロジック.</br>
+     * 本番環境ではBCryptPasswordEncoderを使用
      */
     public boolean verifyPassword(Staff staff, String rawPassword) {
-        // TODO: BCryptPasswordEncoder.matches(rawPassword, staff.getPasswordHash()) に置き換え
-        return staff.getPasswordHash().equals(rawPassword);
+    	// matches(平文パスワード, ハッシュ化されたパスワード)
+    	boolean matches = passwordEncoder.matches(rawPassword, staff.getPasswordHash());
+    	System.out.println( rawPassword + ","+ staff.getPasswordHash() + "," + matches);
+    	System.out.println("★これをDBに入れて！: " + passwordEncoder.encode(rawPassword));
+        return matches;
     }
 
     /**
