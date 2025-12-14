@@ -1,4 +1,4 @@
-package jp.bitspace.salon.config;
+package jp.bitspace.salon.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +19,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll()
             );
+        
+        // TODO 年明けに認証系実装
+        //.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
