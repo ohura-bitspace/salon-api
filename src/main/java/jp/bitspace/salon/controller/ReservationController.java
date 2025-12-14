@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,7 +67,7 @@ public class ReservationController {
      * @return レスポンス
      */
     @PostMapping
-    public ResponseEntity<?> createReservation(@RequestBody CreateReservationRequest request) {
+    public ResponseEntity<?> createReservation(@Valid @RequestBody CreateReservationRequest request) {
         try {
             Reservation created = reservationService.createWithItems(request);
             return ResponseEntity.ok(created);

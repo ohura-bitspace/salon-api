@@ -1,17 +1,16 @@
 package jp.bitspace.salon.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jp.bitspace.salon.controller.dto.CreateReservationItemRequest;
 import jp.bitspace.salon.controller.dto.CreateReservationRequest;
 import jp.bitspace.salon.model.Menu;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.model.ReservationItem;
-import jp.bitspace.salon.model.ReservationStatus;
 import jp.bitspace.salon.repository.MenuRepository;
 import jp.bitspace.salon.repository.ReservationItemRepository;
 import jp.bitspace.salon.repository.ReservationRepository;
@@ -59,50 +58,54 @@ public class ReservationService {
 
     @Transactional
     public Reservation createWithItems(CreateReservationRequest request) {
-        if (request.salonId() == null || request.customerId() == null || request.startTime() == null || request.endTime() == null) {
-            throw new IllegalArgumentException("salonId/customerId/startTime/endTime are required");
+        if (request.salonId() == null || request.startTime() == null) {
+            throw new IllegalArgumentException("salonId/startTime are required");
         }
+        if (request.customerId() == null) {
+            throw new IllegalArgumentException("customerId is required (until JWT auth is implemented)");
+        }
+        if (request.menuIds() == null || request.menuIds().isEmpty()) {
+            throw new IllegalArgumentException("menuIds is required");
+        }
+
+        int totalPrice = 0;
+        int totalDurationMinutes = 0;
+
+        for (Long menuId : request.menuIds()) {
+            if (menuId == null) {
+                throw new IllegalArgumentException("menuIds contains null");
+            }
+            Menu menu = menuRepository.findById(menuId)
+                    .orElseThrow(() -> new IllegalArgumentException("Menu not found: " + menuId));
+            if (!request.salonId().equals(menu.getSalonId())) {
+                throw new IllegalArgumentException("Menu does not belong to salonId: " + menuId);
+            }
+            totalPrice += determinePrice(menu, null);
+            totalDurationMinutes += menu.getDurationMinutes() != null ? menu.getDurationMinutes() : 0;
+        }
+
+        LocalDateTime endTime = request.startTime().plusMinutes(totalDurationMinutes);
 
         Reservation reservation = new Reservation();
         reservation.setSalonId(request.salonId());
         reservation.setCustomerId(request.customerId());
         reservation.setStaffId(request.staffId());
         reservation.setStartTime(request.startTime());
-        reservation.setEndTime(request.endTime());
-        reservation.setStatus(request.status() != null ? request.status() : ReservationStatus.PENDING);
+        reservation.setEndTime(endTime);
         reservation.setMemo(request.memo());
-
-        int total = 0;
-        if (request.items() != null) {
-            for (CreateReservationItemRequest itemReq : request.items()) {
-                if (itemReq == null || itemReq.menuId() == null) {
-                    throw new IllegalArgumentException("menuId is required for each item");
-                }
-                Menu menu = menuRepository.findById(itemReq.menuId())
-                    .orElseThrow(() -> new IllegalArgumentException("Menu not found: " + itemReq.menuId()));
-                if (!request.salonId().equals(menu.getSalonId())) {
-                    throw new IllegalArgumentException("Menu does not belong to salonId: " + itemReq.menuId());
-                }
-                int price = determinePrice(menu, itemReq.priceAtBooking());
-                total += price;
-            }
-        }
-        reservation.setTotalPrice(total);
+        reservation.setTotalPrice(totalPrice);
 
         Reservation saved = reservationRepository.save(reservation);
 
-        if (request.items() != null) {
-            for (CreateReservationItemRequest itemReq : request.items()) {
-                Menu menu = menuRepository.findById(itemReq.menuId())
-                    .orElseThrow(() -> new IllegalArgumentException("Menu not found: " + itemReq.menuId()));
-                int price = determinePrice(menu, itemReq.priceAtBooking());
+        for (Long menuId : request.menuIds()) {
+            Menu menu = menuRepository.findById(menuId)
+                    .orElseThrow(() -> new IllegalArgumentException("Menu not found: " + menuId));
 
-                ReservationItem item = new ReservationItem();
-                item.setReservationId(saved.getId());
-                item.setMenuId(itemReq.menuId());
-                item.setPriceAtBooking(price);
-                reservationItemRepository.save(item);
-            }
+            ReservationItem item = new ReservationItem();
+            item.setReservationId(saved.getId());
+            item.setMenuId(menuId);
+            item.setPriceAtBooking(determinePrice(menu, null));
+            reservationItemRepository.save(item);
         }
 
         return saved;

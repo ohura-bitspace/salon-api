@@ -3,32 +3,29 @@ package jp.bitspace.salon.controller.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import jp.bitspace.salon.model.ReservationStatus;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 /**
- * 新規予約作成APIのリクエストボディを表すレコード。
- * <p>
- * 予約のヘッダー情報（日時・顧客・スタッフ）と、
- * 選択されたメニュー明細リストを集約してサーバーへ送信するために使用します。
- * </p>
- *
- * @param salonId    予約対象のサロンID（マルチテナント識別用）
- * @param customerId 予約を行う顧客のID
- * @param staffId    担当スタッフのID。<br>
- * ※指名なし（フリー）の場合は {@code null} を許容します。
- * @param startTime    施術開始日時
- * @param endTime      施術終了日時
- * @param status     初期ステータス（通常は {@code PENDING} または {@code CONFIRMED}）
- * @param memo       店舗側管理用メモ、または顧客からの申し送り事項
- * @param items      選択されたメニュー（明細）のリスト。1件以上必須。
+ * 予約作成リクエスト.
  */
 public record CreateReservationRequest(
-    Long salonId,
-    Long customerId,
-    Long staffId,
-    LocalDateTime startTime,
-    LocalDateTime endTime,
-    ReservationStatus status,
-    String memo,
-    List<CreateReservationItemRequest> items
+		@NotNull
+	    Long salonId,
+
+	    // ※JWT認証を入れたら、ここは不要になります（トークンから取るため）。
+	    // 今はまだ認証未実装なので残しておいてOKです。
+	    Long customerId,
+
+	    Long staffId, // 指名なしならnull
+
+	    @NotNull
+	    @Future(message = "過去の日時は指定できません")
+	    LocalDateTime startTime, // 項目名は startAt が一般的ですが startTime でもOK
+
+	    @NotEmpty(message = "メニューを選択してください")
+	    List<Long> menuIds, // ★ここが重要！ 明細オブジェクトではなく「IDのリスト」にする
+
+	    String memo
 ) {}
