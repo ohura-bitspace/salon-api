@@ -36,6 +36,7 @@ public class ReservationController {
     public List<Reservation> getReservations(@RequestParam(name = "salonId") Long salonId) {
     	// TODO 1か月単位＋前後マージンとか
         return reservationService.findBySalonId(salonId);
+        
     }
 
     @GetMapping("/{id}")
@@ -56,7 +57,12 @@ public class ReservationController {
         List<ReservationItem> items = reservationService.findItemsByReservationId(id);
         return ResponseEntity.ok(items);
     }
-
+    
+    /**
+     * 予約作成.
+     * @param request 予約リクエスト
+     * @return レスポンス
+     */
     @PostMapping
     public ResponseEntity<?> createReservation(@RequestBody CreateReservationRequest request) {
         try {
