@@ -55,11 +55,22 @@ public class StaffService {
     /**
      * 管理者ログイン処理
      */
-    public Optional<Staff> authenticate(String email, String password) {
+    public Staff authenticate(String email, String password) {
         Optional<Staff> staff = findByEmail(email);
         if (staff.isPresent() && staff.get().getIsActive() && verifyPassword(staff.get(), password)) {
-            return staff;
+            return staff.get();
         }
-        return Optional.empty();
+        throw new IllegalArgumentException("Invalid credentials");
+    }
+
+    /**
+     * 互換用: Optionalで欲しい場合はこちらを使用.
+     */
+    public Optional<Staff> authenticateOptional(String email, String password) {
+        try {
+            return Optional.of(authenticate(email, password));
+        } catch (IllegalArgumentException ex) {
+            return Optional.empty();
+        }
     }
 }

@@ -35,6 +35,21 @@ public class JwtUtils {
                 .setSubject(String.valueOf(customerId))
                 .claim("salonId", salonId)
                 .claim("role", "CUSTOMER")
+                .claim("userType", "CUSTOMER")
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    // 管理側ログイン成功時に呼ぶメソッド
+    public String generateToken(Long staffId, String email, Long salonId, String role) {
+        return Jwts.builder()
+                .setSubject(String.valueOf(staffId))
+                .claim("email", email)
+                .claim("salonId", salonId)
+                .claim("role", role)
+                .claim("userType", "STAFF")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

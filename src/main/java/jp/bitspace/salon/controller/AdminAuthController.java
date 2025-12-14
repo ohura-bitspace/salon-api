@@ -1,16 +1,15 @@
 package jp.bitspace.salon.controller;
 
-import java.util.Map;
-import java.util.Optional;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jp.bitspace.salon.controller.dto.LoginRequest;
+import jp.bitspace.salon.controller.dto.LoginResponse;
 import jp.bitspace.salon.model.Staff;
-import jp.bitspace.salon.service.CustomerService;
+import jp.bitspace.salon.security.JwtUtils;
 import jp.bitspace.salon.service.StaffService;
 
 /**
@@ -20,23 +19,34 @@ import jp.bitspace.salon.service.StaffService;
 @RequestMapping("/api/admin/auth")
 public class AdminAuthController {
     private final StaffService staffService;
+    private final JwtUtils jwtUtils;
 
-    public AdminAuthController(StaffService staffService, CustomerService customerService) {
+    public AdminAuthController(StaffService staffService, JwtUtils jwtUtils) {
         this.staffService = staffService;
+        this.jwtUtils = jwtUtils;
     }
 
     /**
      * 管理者ログイン
      */
     @PostMapping("/login")
-    public ResponseEntity<?> adminLogin(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
-        String password = credentials.get("password");
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        Staff staff = staffService.authenticate(request.email(), request.password());
 
-        Optional<Staff> staff = staffService.authenticate(email, password);
-        if (staff.isPresent()) {
-            return ResponseEntity.ok(staff.get());
-        }
-        return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
+        String token = jwtUtils.generateToken(
+                staff.getId(),
+                staff.getEmail(),
+                staff.getSalonId(),
+                staff.getRole().name()
+        );
+
+        LoginResponse response = new LoginResponse(
+                token,
+                staff.getName(),
+                staff.getRole().name(),
+                staff.getSalonId()
+        );
+
+        return ResponseEntity.ok(response);
     }
 }
