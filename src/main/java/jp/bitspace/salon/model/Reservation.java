@@ -1,5 +1,7 @@
 package jp.bitspace.salon.model;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,7 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
@@ -30,11 +31,11 @@ public class Reservation {
     @Column(name = "staff_id")
     private Long staffId;
 
-    @Column(name = "start_at", nullable = false)
-    private LocalDateTime startAt;
+    @Column(name = "start_time", nullable = false)
+    private LocalDateTime startTime;
 
-    @Column(name = "end_at", nullable = false)
-    private LocalDateTime endAt;
+    @Column(name = "end_time", nullable = false)
+    private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

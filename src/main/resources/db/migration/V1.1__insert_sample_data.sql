@@ -107,7 +107,7 @@ VALUES
 -- スタッフID:1=山田(Owner), 2=鈴木(Staff)
 
 INSERT INTO reservations 
-(id, salon_id, customer_id, staff_id, start_at, end_at, status, total_price, memo) 
+(id, salon_id, customer_id, staff_id, start_time, end_time, status, total_price, memo) 
 VALUES 
 -- ID:1 [来店済] 佐藤花子さん / 過去の予約 / スタッフ鈴木担当
 (1, 1, 1, 2, '2025-11-01 10:00:00', '2025-11-01 11:30:00', 'VISITED', 9800, '初回のためカウンセリング長めに実施。肌トラブルなし。'),

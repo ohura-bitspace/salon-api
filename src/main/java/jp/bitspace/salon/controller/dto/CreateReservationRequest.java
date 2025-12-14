@@ -16,8 +16,8 @@ import jp.bitspace.salon.model.ReservationStatus;
  * @param customerId 予約を行う顧客のID
  * @param staffId    担当スタッフのID。<br>
  * ※指名なし（フリー）の場合は {@code null} を許容します。
- * @param startAt    施術開始日時
- * @param endAt      施術終了日時
+ * @param startTime    施術開始日時
+ * @param endTime      施術終了日時
  * @param status     初期ステータス（通常は {@code PENDING} または {@code CONFIRMED}）
  * @param memo       店舗側管理用メモ、または顧客からの申し送り事項
  * @param items      選択されたメニュー（明細）のリスト。1件以上必須。
@@ -26,8 +26,8 @@ public record CreateReservationRequest(
     Long salonId,
     Long customerId,
     Long staffId,
-    LocalDateTime startAt,
-    LocalDateTime endAt,
+    LocalDateTime startTime,
+    LocalDateTime endTime,
     ReservationStatus status,
     String memo,
     List<CreateReservationItemRequest> items

@@ -105,8 +105,8 @@ CREATE TABLE reservations (
     staff_id BIGINT DEFAULT NULL COMMENT '担当スタッフ（NULLなら指名なし）',
     
     -- 日時管理
-    start_at DATETIME NOT NULL COMMENT '開始日時',
-    end_at DATETIME NOT NULL COMMENT '終了日時',
+    start_time DATETIME NOT NULL COMMENT '開始日時',
+    end_time DATETIME NOT NULL COMMENT '終了日時',
     
     -- 予約状態
     -- PENDING: 仮予約, CONFIRMED: 確定, VISITED: 来店済, CANCELED: キャンセル

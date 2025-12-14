@@ -2,6 +2,10 @@ package jp.bitspace.salon.service;
 
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import jp.bitspace.salon.controller.dto.CreateReservationItemRequest;
 import jp.bitspace.salon.controller.dto.CreateReservationRequest;
 import jp.bitspace.salon.model.Menu;
@@ -11,8 +15,6 @@ import jp.bitspace.salon.model.ReservationStatus;
 import jp.bitspace.salon.repository.MenuRepository;
 import jp.bitspace.salon.repository.ReservationItemRepository;
 import jp.bitspace.salon.repository.ReservationRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ReservationService {
@@ -35,7 +37,7 @@ public class ReservationService {
     }
 
     public List<Reservation> findBySalonId(Long salonId) {
-        return reservationRepository.findBySalonIdOrderByStartAtDesc(salonId);
+        return reservationRepository.findBySalonIdOrderByStartTimeDesc(salonId);
     }
 
     public Optional<Reservation> findById(Long id) {
@@ -57,16 +59,16 @@ public class ReservationService {
 
     @Transactional
     public Reservation createWithItems(CreateReservationRequest request) {
-        if (request.salonId() == null || request.customerId() == null || request.startAt() == null || request.endAt() == null) {
-            throw new IllegalArgumentException("salonId/customerId/startAt/endAt are required");
+        if (request.salonId() == null || request.customerId() == null || request.startTime() == null || request.endTime() == null) {
+            throw new IllegalArgumentException("salonId/customerId/startTime/endTime are required");
         }
 
         Reservation reservation = new Reservation();
         reservation.setSalonId(request.salonId());
         reservation.setCustomerId(request.customerId());
         reservation.setStaffId(request.staffId());
-        reservation.setStartAt(request.startAt());
-        reservation.setEndAt(request.endAt());
+        reservation.setStartTime(request.startTime());
+        reservation.setEndTime(request.endTime());
         reservation.setStatus(request.status() != null ? request.status() : ReservationStatus.PENDING);
         reservation.setMemo(request.memo());
 

@@ -33,10 +33,8 @@ public class ReservationController {
     }
 
     @GetMapping
-    public List<Reservation> getReservations(@RequestParam(name = "salonId", required = false) Long salonId) {
-        if (salonId == null) {
-            return reservationService.findAll();
-        }
+    public List<Reservation> getReservations(@RequestParam(name = "salonId") Long salonId) {
+    	// TODO 1か月単位＋前後マージンとか
         return reservationService.findBySalonId(salonId);
     }
 
@@ -78,8 +76,8 @@ public class ReservationController {
         Reservation existing = existingOpt.get();
 
         existing.setStaffId(updated.getStaffId());
-        existing.setStartAt(updated.getStartAt());
-        existing.setEndAt(updated.getEndAt());
+        existing.setStartTime(updated.getStartTime());
+        existing.setEndTime(updated.getEndTime());
         existing.setStatus(updated.getStatus());
         existing.setMemo(updated.getMemo());
 
