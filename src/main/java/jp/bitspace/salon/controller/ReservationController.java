@@ -33,10 +33,11 @@ public class ReservationController {
     }
 
     @GetMapping
+    // 「引数のsalonId」と「ログイン中のsalonId」が一緒かチェック
+    //@PreAuthorize("#salonId == authentication.principal.salonId")
     public List<Reservation> getReservations(@RequestParam(name = "salonId") Long salonId) {
     	// TODO 1か月単位＋前後マージンとか
         return reservationService.findBySalonId(salonId);
-        
     }
 
     @GetMapping("/{id}")
