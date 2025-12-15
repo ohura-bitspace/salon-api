@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import jakarta.validation.Valid;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,20 +15,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import jp.bitspace.salon.controller.dto.CreateReservationRequest;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.model.ReservationItem;
 import jp.bitspace.salon.service.ReservationService;
 
 /**
- * 予約テーブルコントローラ.
+ * 管理側予約テーブルコントローラ.
  */
 @RestController
-@RequestMapping("/api/reservations")
-public class ReservationController {
+@RequestMapping("/api/admin/reservations")
+public class AdminReservationController {
     private final ReservationService reservationService;
 
-    public ReservationController(ReservationService reservationService) {
+    public AdminReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
