@@ -1,4 +1,4 @@
-package jp.bitspace.salon.dto;
+package jp.bitspace.salon.dto.request;
 
 import java.time.LocalDateTime;
 import java.util.List;

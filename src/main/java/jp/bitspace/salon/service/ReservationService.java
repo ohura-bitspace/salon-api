@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jp.bitspace.salon.dto.CreateReservationRequest;
+import jp.bitspace.salon.dto.request.CreateReservationRequest;
 import jp.bitspace.salon.model.Menu;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.model.ReservationItem;

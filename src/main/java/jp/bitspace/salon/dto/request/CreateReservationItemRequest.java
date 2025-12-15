@@ -1,4 +1,4 @@
-package jp.bitspace.salon.dto;
+package jp.bitspace.salon.dto.request;
 
 /**
  * 予約作成リクエストにおける「明細（メニュー選択）」情報を表すレコード。

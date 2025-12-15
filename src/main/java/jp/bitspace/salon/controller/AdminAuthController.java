@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jp.bitspace.salon.dto.LoginRequest;
-import jp.bitspace.salon.dto.LoginResponse;
+import jp.bitspace.salon.dto.request.LoginRequest;
+import jp.bitspace.salon.dto.response.LoginResponse;
 import jp.bitspace.salon.model.Staff;
 import jp.bitspace.salon.security.JwtUtils;
 import jp.bitspace.salon.service.StaffService;

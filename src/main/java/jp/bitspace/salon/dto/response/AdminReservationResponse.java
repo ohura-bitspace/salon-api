@@ -1,4 +1,4 @@
-package jp.bitspace.salon.dto;
+package jp.bitspace.salon.dto.response;
 
 import java.time.LocalDateTime;
 
