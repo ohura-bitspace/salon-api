@@ -31,8 +31,9 @@ public class AdminAuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    	// 認証処理
         Staff staff = staffService.authenticate(request.email(), request.password());
-
+        // JWTトークンの発行
         String token = jwtUtils.generateToken(
                 staff.getId(),
                 staff.getEmail(),
