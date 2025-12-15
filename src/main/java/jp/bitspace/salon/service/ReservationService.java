@@ -3,32 +3,44 @@ package jp.bitspace.salon.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jp.bitspace.salon.dto.request.CreateReservationRequest;
+import jp.bitspace.salon.dto.response.AdminReservationResponse;
+import jp.bitspace.salon.model.Customer;
 import jp.bitspace.salon.model.Menu;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.model.ReservationItem;
+import jp.bitspace.salon.model.Staff;
+import jp.bitspace.salon.repository.CustomerRepository;
 import jp.bitspace.salon.repository.MenuRepository;
 import jp.bitspace.salon.repository.ReservationItemRepository;
 import jp.bitspace.salon.repository.ReservationRepository;
+import jp.bitspace.salon.repository.StaffRepository;
 
 @Service
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationItemRepository reservationItemRepository;
     private final MenuRepository menuRepository;
+    private final CustomerRepository customerRepository;
+    private final StaffRepository staffRepository;
 
     public ReservationService(
         ReservationRepository reservationRepository,
         ReservationItemRepository reservationItemRepository,
-        MenuRepository menuRepository
+        MenuRepository menuRepository,
+        CustomerRepository customerRepository,
+        StaffRepository staffRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationItemRepository = reservationItemRepository;
         this.menuRepository = menuRepository;
+        this.customerRepository = customerRepository;
+        this.staffRepository = staffRepository;
     }
 
     public List<Reservation> findAll() {
@@ -37,6 +49,14 @@ public class ReservationService {
 
     public List<Reservation> findBySalonId(Long salonId) {
         return reservationRepository.findBySalonIdOrderByStartTimeDesc(salonId);
+    }
+
+    /**
+     * 管理側向け: 予約一覧を画面用DTOに整形して返却.
+     */
+    public List<AdminReservationResponse> findAdminBySalonId(Long salonId) {
+        List<Reservation> reservations = reservationRepository.findBySalonIdOrderByStartTimeDesc(salonId);
+        return reservations.stream().map(this::toAdminReservationResponse).collect(Collectors.toList());
     }
 
     public Optional<Reservation> findById(Long id) {
@@ -119,5 +139,52 @@ public class ReservationService {
             return menu.getDiscountedPrice();
         }
         return menu.getOriginalPrice() != null ? menu.getOriginalPrice() : 0;
+    }
+
+    private AdminReservationResponse toAdminReservationResponse(Reservation reservation) {
+        String customerName = "不明";
+        if (reservation.getCustomerId() != null) {
+            Optional<Customer> customerOpt = customerRepository.findById(reservation.getCustomerId());
+            if (customerOpt.isPresent()) {
+                Customer customer = customerOpt.get();
+                if (customer.getLastName() != null && customer.getFirstName() != null) {
+                    customerName = customer.getLastName() + " " + customer.getFirstName();
+                } else if (customer.getLineDisplayName() != null) {
+                    customerName = customer.getLineDisplayName();
+                }
+            }
+        }
+
+        String staffName = "未定";
+        if (reservation.getStaffId() != null) {
+            Optional<Staff> staffOpt = staffRepository.findById(reservation.getStaffId());
+            if (staffOpt.isPresent()) {
+                staffName = staffOpt.get().getName();
+            }
+        }
+
+        List<ReservationItem> items = reservationItemRepository.findByReservationId(reservation.getId());
+        String menuNames = items.stream()
+                .map(item -> menuRepository.findById(item.getMenuId()).map(Menu::getTitle).orElse("不明"))
+                .collect(Collectors.joining("、"));
+
+        String statusText = switch (reservation.getStatus()) {
+            case PENDING -> "仮予約";
+            case CONFIRMED -> "確定";
+            case VISITED -> "来店";
+            case CANCELED -> "キャンセル";
+        };
+
+        return new AdminReservationResponse(
+                String.valueOf(reservation.getId()),
+                "Beauty予約",
+                reservation.getStartTime(),
+                reservation.getEndTime(),
+                customerName,
+                menuNames,
+                staffName,
+                statusText,
+                reservation.getMemo()
+        );
     }
 }

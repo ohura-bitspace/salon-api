@@ -16,10 +16,6 @@ public record AdminReservationResponse(
         LocalDateTime start,
         /** 終了日時 */
         LocalDateTime end,
-        /** 背景色 */
-        String backgroundColor,
-        /** 枠線色 */
-        String borderColor,
         /** 顧客名 */
         String customer,
         /** メニュー名（複数の場合はカンマ区切り） */

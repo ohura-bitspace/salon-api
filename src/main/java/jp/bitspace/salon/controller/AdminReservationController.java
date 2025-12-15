@@ -1,4 +1,4 @@
-package jp.bitspace.salon.controller.admin;
+package jp.bitspace.salon.controller;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import jp.bitspace.salon.dto.request.CreateReservationRequest;
-import jp.bitspace.salon.dto.response.AdminReservationResponse;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.model.ReservationItem;
 import jp.bitspace.salon.service.ReservationService;
@@ -37,9 +36,9 @@ public class AdminReservationController {
     @GetMapping
     // 「引数のsalonId」と「ログイン中のsalonId」が一緒かチェック
     //@PreAuthorize("#salonId == authentication.principal.salonId")
-    public List<AdminReservationResponse> getReservations(@RequestParam(name = "salonId") Long salonId) {
+    public List<Reservation> getReservations(@RequestParam(name = "salonId") Long salonId) {
     	// TODO 1か月単位＋前後マージンとか
-        return reservationService.findAdminBySalonId(salonId);
+        return reservationService.findBySalonId(salonId);
     }
 
     @GetMapping("/{id}")
