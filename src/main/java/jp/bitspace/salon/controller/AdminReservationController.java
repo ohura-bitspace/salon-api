@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import jp.bitspace.salon.controller.dto.CreateReservationRequest;
+import jp.bitspace.salon.dto.CreateReservationRequest;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.model.ReservationItem;
 import jp.bitspace.salon.service.ReservationService;

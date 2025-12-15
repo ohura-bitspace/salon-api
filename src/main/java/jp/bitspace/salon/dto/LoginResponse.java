@@ -1,4 +1,4 @@
-package jp.bitspace.salon.controller.dto;
+package jp.bitspace.salon.dto;
 
 /**
  * 管理側ログイン用レスポンスDTO.

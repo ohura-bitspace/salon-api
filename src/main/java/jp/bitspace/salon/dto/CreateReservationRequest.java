@@ -1,4 +1,4 @@
-package jp.bitspace.salon.controller.dto;
+package jp.bitspace.salon.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
