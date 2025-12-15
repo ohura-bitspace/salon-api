@@ -1,4 +1,4 @@
-package jp.bitspace.salon.controller;
+package jp.bitspace.salon.controller.admin;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -1,4 +1,4 @@
-package jp.bitspace.salon.controller;
+package jp.bitspace.salon.controller.customer;
 
 import java.util.List;
 import java.util.Map;
