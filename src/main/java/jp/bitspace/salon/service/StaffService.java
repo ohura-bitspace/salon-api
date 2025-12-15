@@ -3,7 +3,6 @@ package jp.bitspace.salon.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +12,11 @@ import jp.bitspace.salon.repository.StaffRepository;
 @Service
 public class StaffService {
     private final StaffRepository staffRepository;
-    
-    // クラスのフィールドに追加（またはBean注入）
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
-    public StaffService(StaffRepository staffRepository) {
+    public StaffService(StaffRepository staffRepository, PasswordEncoder passwordEncoder) {
         this.staffRepository = staffRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<Staff> findAll() {
