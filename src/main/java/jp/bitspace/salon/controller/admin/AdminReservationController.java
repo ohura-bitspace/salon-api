@@ -1,10 +1,12 @@
 package jp.bitspace.salon.controller.admin;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,9 +39,12 @@ public class AdminReservationController {
     @GetMapping
     // 「引数のsalonId」と「ログイン中のsalonId」が一緒かチェック
     //@PreAuthorize("#salonId == authentication.principal.salonId")
-    public List<AdminReservationResponse> getReservations(@RequestParam(name = "salonId") Long salonId) {
-    	// TODO 1か月単位＋前後マージンとか
-        return reservationService.findAdminBySalonId(salonId);
+    public List<AdminReservationResponse> getReservations(
+            @RequestParam(name = "salonId") Long salonId,
+            @RequestParam(name = "from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(name = "to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+    ) {
+        return reservationService.findBySalonIdAndDateRange(salonId, from, to);
     }
 
     @GetMapping("/{id}")

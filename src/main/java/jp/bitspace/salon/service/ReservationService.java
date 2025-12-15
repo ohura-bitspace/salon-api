@@ -1,5 +1,6 @@
 package jp.bitspace.salon.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +57,35 @@ public class ReservationService {
      */
     public List<AdminReservationResponse> findAdminBySalonId(Long salonId) {
         List<Reservation> reservations = reservationRepository.findBySalonIdOrderByStartTimeDesc(salonId);
+        return reservations.stream().map(this::toAdminReservationResponse).collect(Collectors.toList());
+    }
+
+    /**
+     * 管理側向け: 日付範囲で予約一覧を取得し、画面用DTOに整形して返却.
+     * <p>
+     * to は「その日付の0:00」を終端とする半開区間 [from, to) として扱います。
+     */
+    public List<AdminReservationResponse> findBySalonIdAndDateRange(Long salonId, LocalDate from, LocalDate to) {
+        if (salonId == null) {
+            throw new IllegalArgumentException("salonId is required");
+        }
+        if (from == null || to == null) {
+            throw new IllegalArgumentException("from/to are required");
+        }
+        if (!from.isBefore(to)) {
+            throw new IllegalArgumentException("from must be before to");
+        }
+
+        LocalDateTime fromDateTime = from.atStartOfDay();
+        LocalDateTime toDateTime = to.atStartOfDay();
+
+        List<Reservation> reservations = reservationRepository
+                .findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeAsc(
+                        salonId,
+                        fromDateTime,
+                        toDateTime
+                );
+
         return reservations.stream().map(this::toAdminReservationResponse).collect(Collectors.toList());
     }
 
