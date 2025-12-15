@@ -50,4 +50,29 @@ public class AdminAuthController {
 
         return ResponseEntity.ok(response);
     }
+    
+// TODO 多店舗設計
+//    -- 1. ユーザーテーブル（人そのもの）
+//    -- 認証情報（メアド、パスワード）はここに集約
+//    CREATE TABLE users (
+//        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+//        name VARCHAR(100) NOT NULL,
+//        email VARCHAR(255) NOT NULL UNIQUE,
+//        password_hash VARCHAR(255) NOT NULL,
+//        created_at DATETIME ...
+//    );
+//
+//    -- 2. スタッフ/所属テーブル（どの店で、何の権限を持つか）
+//    -- ここにはメアドやパスワードを持たせない！
+//    CREATE TABLE staffs (
+//        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+//        user_id BIGINT NOT NULL,   -- 誰が (Users.id)
+//        salon_id BIGINT NOT NULL,  -- どの店で (Salons.id)
+//        role ENUM('OWNER', 'STAFF'), -- どんな役割か
+//        
+//        -- 1人は同じ店に1つしか所属を持てない
+//        UNIQUE KEY uq_user_salon (user_id, salon_id),
+//        FOREIGN KEY (user_id) REFERENCES users(id),
+//        FOREIGN KEY (salon_id) REFERENCES salons(id)
+//    );
 }
