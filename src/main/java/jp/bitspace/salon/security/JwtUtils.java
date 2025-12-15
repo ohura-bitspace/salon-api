@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -63,5 +64,54 @@ public class JwtUtils {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    /**
+     * トークンを検証してClaimsを返します（署名不正/期限切れ/形式不正は例外）。
+     */
+    public Claims validateAndExtractClaims(String token) throws JwtException {
+        return extractClaims(token);
+    }
+
+    public Long extractSalonId(String token) {
+        Claims claims = validateAndExtractClaims(token);
+        Object salonId = claims.get("salonId");
+        if (salonId == null) {
+            return null;
+        }
+        if (salonId instanceof Integer i) {
+            return i.longValue();
+        }
+        if (salonId instanceof Long l) {
+            return l;
+        }
+        return Long.valueOf(String.valueOf(salonId));
+    }
+
+    public String extractUserType(String token) {
+        Claims claims = validateAndExtractClaims(token);
+        Object userType = claims.get("userType");
+        return userType != null ? String.valueOf(userType) : null;
+    }
+
+    public String extractRole(String token) {
+        Claims claims = validateAndExtractClaims(token);
+        Object role = claims.get("role");
+        return role != null ? String.valueOf(role) : null;
+    }
+
+    public String extractEmail(String token) {
+        Claims claims = validateAndExtractClaims(token);
+        Object email = claims.get("email");
+        return email != null ? String.valueOf(email) : null;
+    }
+
+    public Long extractSubjectAsLong(String token) {
+        Claims claims = validateAndExtractClaims(token);
+        String sub = claims.getSubject();
+        if (sub == null || sub.isBlank()) {
+            return null;
+        }
+        return Long.valueOf(sub);
     }
 }

@@ -5,8 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,10 +36,12 @@ public class AdminReservationController {
     public AdminReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
-
+    
+    // TODO お試し中
+    // @PreAuthorize無も試してみる
     @GetMapping
     // 「引数のsalonId」と「ログイン中のsalonId」が一緒かチェック
-    //@PreAuthorize("#salonId == authentication.principal.salonId")
+    @PreAuthorize("hasAuthority('ROLE_STAFF') and #salonId == principal.salonId")
     public List<AdminReservationResponse> getReservations(
             @RequestParam(name = "salonId") Long salonId,
             @RequestParam(name = "from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
