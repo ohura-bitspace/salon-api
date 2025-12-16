@@ -48,7 +48,6 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject(String.valueOf(staffId))
                 .claim("email", email)
-                .claim("salonId", salonId)
                 .claim("role", role)
                 .claim("userType", "STAFF")
                 .setIssuedAt(new Date())
