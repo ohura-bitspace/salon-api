@@ -41,18 +41,19 @@ public class AdminReservationController {
     }
     
     // 管理側の予約取得（期間指定）.
-    @GetMapping
-    public List<AdminReservationResponse> getReservations(
-            HttpServletRequest httpServletRequest,
-            @RequestParam(name = "salonId") Long salonId,
-            @RequestParam(name = "from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(name = "to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
-    ) {
-        // 管理API共通の認可チェック（STAFFトークン + salonId一致）
-        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
-
-        return reservationService.findBySalonIdAndDateRange(salonId, from, to);
-    }
+	@GetMapping
+	public List<AdminReservationResponse> getReservations(
+			HttpServletRequest httpServletRequest,
+			@RequestParam(name = "salonId") Long salonId,
+			@RequestParam(name = "from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+			@RequestParam(name = "to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+		
+		// 管理API共通の認可チェック（STAFFトークン + salonId一致）
+		adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+		// 予約リスト取得
+		List<AdminReservationResponse> responseList = reservationService.findBySalonIdAndDateRange(salonId, from, to);
+		return responseList;
+	}
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getReservation(@PathVariable Long id) {

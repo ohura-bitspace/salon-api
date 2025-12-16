@@ -38,6 +38,7 @@ public class AdminRequestAuthUtil {
      * @return トークン内の salonId（後続処理で使いたい場合のため返す）
      */
     public Long requireStaffAndSalonMatch(HttpServletRequest request, Long requestedSalonId) {
+    	// TODO チェック内容は後日整理する
         
     	// リクエストヘッダからトークン取得
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);

@@ -99,12 +99,6 @@ public class JwtUtils {
         return role != null ? String.valueOf(role) : null;
     }
 
-    public String extractEmail(String token) {
-        Claims claims = validateAndExtractClaims(token);
-        Object email = claims.get("email");
-        return email != null ? String.valueOf(email) : null;
-    }
-
     public Long extractSubjectAsLong(String token) {
         Claims claims = validateAndExtractClaims(token);
         String sub = claims.getSubject();
