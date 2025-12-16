@@ -31,29 +31,34 @@ public class JwtUtils {
     }
 
     // ログイン成功時に呼ぶメソッド
-    public String generateToken(Long customerId, Long salonId) {
-        return Jwts.builder()
-                .setSubject(String.valueOf(customerId))
-                .claim("salonId", salonId)
-                .claim("role", "CUSTOMER")
-                .claim("userType", "CUSTOMER")
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
+	public String generateToken(Long customerId, Long salonId) {
+
+		String tk = Jwts.builder()
+				.setSubject(String.valueOf(customerId))
+				.claim("salonId", salonId)
+				.claim("role", "CUSTOMER")
+				.claim("userType", "CUSTOMER")
+				.setIssuedAt(new Date())
+				.setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+				.signWith(getSigningKey(), SignatureAlgorithm.HS256)
+				.compact();
+		return tk;
+	}
 
     // 管理側ログイン成功時に呼ぶメソッド
     public String generateToken(Long staffId, String email, Long salonId, String role) {
-        return Jwts.builder()
-                .setSubject(String.valueOf(staffId))
-                .claim("email", email)
-                .claim("role", role)
-                .claim("userType", "STAFF")
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
+    	
+    	String tk = Jwts.builder()
+        .setSubject(String.valueOf(staffId))
+        .claim("email", email)
+        .claim("role", role)
+        .claim("userType", "STAFF")
+        .setIssuedAt(new Date())
+        .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+        .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+        .compact();
+    	
+    	return tk;
     }
 
     // リクエストが来た時に呼ぶメソッド
