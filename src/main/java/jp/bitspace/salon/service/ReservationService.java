@@ -72,7 +72,7 @@ public class ReservationService {
         if (from == null || to == null) {
             throw new IllegalArgumentException("from/to are required");
         }
-        if (!from.isBefore(to)) {
+        if (from.isAfter(to)) {
             throw new IllegalArgumentException("from must be before to");
         }
 
