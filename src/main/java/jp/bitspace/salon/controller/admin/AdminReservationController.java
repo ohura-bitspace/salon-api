@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,11 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jp.bitspace.salon.dto.request.CreateReservationRequest;
 import jp.bitspace.salon.dto.response.AdminReservationResponse;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.model.ReservationItem;
+import jp.bitspace.salon.security.AdminRequestAuthUtil;
 import jp.bitspace.salon.service.ReservationService;
 
 /**
@@ -32,21 +33,24 @@ import jp.bitspace.salon.service.ReservationService;
 @RequestMapping("/api/admin/reservations")
 public class AdminReservationController {
     private final ReservationService reservationService;
+    private final AdminRequestAuthUtil adminRequestAuthUtil;
 
-    public AdminReservationController(ReservationService reservationService) {
+    public AdminReservationController(ReservationService reservationService, AdminRequestAuthUtil adminRequestAuthUtil) {
         this.reservationService = reservationService;
+        this.adminRequestAuthUtil = adminRequestAuthUtil;
     }
     
-    // TODO お試し中
-    // @PreAuthorize無も試してみる
+    // 管理側の予約取得（期間指定）.
     @GetMapping
-    // 「引数のsalonId」と「ログイン中のsalonId」が一緒かチェック
-    @PreAuthorize("hasAuthority('ROLE_STAFF') and #salonId == principal.salonId")
     public List<AdminReservationResponse> getReservations(
+            HttpServletRequest httpServletRequest,
             @RequestParam(name = "salonId") Long salonId,
             @RequestParam(name = "from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(name = "to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
+        // 管理API共通の認可チェック（STAFFトークン + salonId一致）
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+
         return reservationService.findBySalonIdAndDateRange(salonId, from, to);
     }
 
