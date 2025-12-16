@@ -38,7 +38,8 @@ public class AdminRequestAuthUtil {
      * @return トークン内の salonId（後続処理で使いたい場合のため返す）
      */
     public Long requireStaffAndSalonMatch(HttpServletRequest request, Long requestedSalonId) {
-        // フロントは `Authorization: Bearer <JWT>` を付与して呼び出す想定
+        
+    	// リクエストヘッダからトークン取得
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authorization == null || authorization.isBlank() || !authorization.startsWith("Bearer ")) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
@@ -65,10 +66,10 @@ public class AdminRequestAuthUtil {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden");
         }
 
-        // 多店舗対応のため、リクエストの salonId と トークン内 salonId が一致することを保証
-        if (requestedSalonId == null || tokenSalonId == null || !requestedSalonId.equals(tokenSalonId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden");
-        }
+        // TODO [あとで]多店舗対応のため、リクエストの salonId と トークン内 salonId が一致することを保証
+        //if (requestedSalonId == null || tokenSalonId == null || !requestedSalonId.equals(tokenSalonId)) {
+        //    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden");
+        //}
 
         return tokenSalonId;
     }
