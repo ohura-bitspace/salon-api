@@ -12,13 +12,18 @@ INSERT INTO salons (id, name, plan_type, is_active) VALUES
 -- ============================================================
 -- パスワードは全て 'password' をBCryptでハッシュ化したものです
 
-INSERT INTO staffs (salon_id, name, email, password_hash, role) VALUES 
--- サロン1 (Carnet) のオーナー
-(1, '山田 太郎', 'owner@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', 'OWNER'),
--- サロン1 (Carnet) のスタッフ
-(1, '鈴木 花子', 'staff@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', 'STAFF'),
--- サロン2 (Mock) のオーナー（データ混在チェック用）
-(2, '田中 次郎', 'owner@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', 'OWNER');
+-- 認証情報（users）を先に投入
+INSERT INTO users (id, name, email, password_hash, is_active) VALUES
+(1, '山田 太郎', 'owner@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true),
+(2, '鈴木 花子', 'staff@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true),
+(3, '田中 次郎', 'owner@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true);
+
+-- 各サロンごとの所属（staffs）を投入
+-- (user_id, salon_id, role)
+INSERT INTO staffs (user_id, salon_id, role) VALUES
+(1, 1, 'OWNER'),
+(2, 1, 'STAFF'),
+(3, 2, 'OWNER');
 
 -- ============================================================
 -- 3. 顧客データの投入
@@ -133,18 +138,18 @@ VALUES
 INSERT INTO reservation_items 
 (reservation_id, menu_id, price_at_booking) 
 VALUES 
--- 予約ID:1 (佐藤さん・初回) -> メニューID:3 (初回クーポン)
-(1, 3, 9800),
+-- 予約ID:1 (佐藤さん・初回) -> メニューID:2 (VIOセット) + 少し上乗せ価格など
+(1, 2, 9800),
 
--- 予約ID:2 (佐藤さん・2回目) -> メニューID:1 (全身) + ID:5 (シェービング)
+-- 予約ID:2 (佐藤さん・2回目) -> メニューID:1 (全身脱毛)
 (2, 1, 22000),
-(2, 5, 1100), -- 複数メニューの登録例
+-- (※ID:5 はサロン2のメニューなので、ここでは使わない or サロン1にID:5を作る)
 
--- 予約ID:3 (Mikeさん) -> メニューID:2 (VIO)
+-- 予約ID:3 (Mikeさん) -> メニューID:2 (VIOセット)
 (3, 2, 8800),
 
--- 予約ID:4 (鈴木一郎さん・キャンセル) -> メニューID:4 (アロマ)
-(4, 4, 6600),
+-- 予約ID:4 (鈴木一郎さん・キャンセル) -> メニューID:2 (VIOセットを安くなど)
+(4, 2, 6600),
 
--- 予約ID:5 (別サロン) -> メニューID:6 (カット)
-(5, 6, 12000);
+-- 予約ID:5 (別サロン ID:2) -> メニューID:3 (サロン2のクーポン)
+(5, 3, 12000);

@@ -9,23 +9,35 @@ CREATE TABLE salons (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) COMMENT='加盟店管理テーブル';
 
--- 2. スタッフ（管理画面用ユーザー）テーブル
--- オーナーや従業員がログインするためのテーブル
-CREATE TABLE staffs (
+-- 2. 認証用ユーザーテーブル（システム全体でのユーザー、同じメールで複数店舗を持てる設計）
+CREATE TABLE users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    salon_id BIGINT NOT NULL COMMENT '所属サロンID',
-    name VARCHAR(100) NOT NULL COMMENT 'スタッフ名',
-    email VARCHAR(255) NOT NULL COMMENT 'ログインID兼メールアドレス',
-    password_hash VARCHAR(255) NOT NULL COMMENT 'BCrypt等でハッシュ化したパスワード',
-    role ENUM('OWNER', 'STAFF') DEFAULT 'STAFF' COMMENT '権限',
+    name VARCHAR(100) NOT NULL COMMENT 'ユーザー名',
+    email VARCHAR(255) NOT NULL COMMENT 'ログインID',
+    password_hash VARCHAR(255) NOT NULL COMMENT 'パスワード',
+    
     is_active BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    -- 制約: 同じサロン内で同じメールアドレスは登録不可（またはシステム全体でユニークでも可）
-    UNIQUE KEY uq_email (email),
+    UNIQUE KEY uq_email (email)
+) COMMENT='管理者ユーザー（認証情報）';
+
+-- 3. スタッフ所属テーブル（旧 staffs の役割を分割）
+CREATE TABLE staffs (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL COMMENT 'ユーザーID',
+    salon_id BIGINT NOT NULL COMMENT '所属サロンID',
+    role ENUM('OWNER', 'STAFF') DEFAULT 'STAFF' COMMENT 'その店での役割',
+    
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    UNIQUE KEY uq_user_salon (user_id, salon_id),
+    
+    FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (salon_id) REFERENCES salons(id)
-) COMMENT='管理画面ログインユーザー';
+) COMMENT='店舗所属・権限';
 
 -- 3. 顧客テーブル
 -- LINEログインを前提とした顧客情報
