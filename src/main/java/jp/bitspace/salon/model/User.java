@@ -1,29 +1,26 @@
 package jp.bitspace.salon.model;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Entity
-@Table(name = "staffs", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "salon_id"}))
-public class Staff {
+@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = {"email"}))
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(nullable = false, length = 100)
+    private String name;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "salon_id", nullable = false)
-    private Salon salon;
+    @Column(nullable = false, length = 255, unique = true)
+    private String email;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role = Role.STAFF;
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
 
     @Column(name = "is_active")
     private Boolean isActive = true;

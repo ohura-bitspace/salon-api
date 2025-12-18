@@ -189,7 +189,10 @@ public class ReservationService {
         if (reservation.getStaffId() != null) {
             Optional<Staff> staffOpt = staffRepository.findById(reservation.getStaffId());
             if (staffOpt.isPresent()) {
-                staffName = staffOpt.get().getName();
+            	Staff staff = staffOpt.get();
+            	if (staff.getUser() != null) {
+                    staffName = staff.getUser().getName();
+                }
             }
         }
 

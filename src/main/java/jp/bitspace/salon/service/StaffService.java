@@ -7,15 +7,19 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jp.bitspace.salon.model.Staff;
+import jp.bitspace.salon.model.User;
 import jp.bitspace.salon.repository.StaffRepository;
+import jp.bitspace.salon.repository.UserRepository;
 
 @Service
 public class StaffService {
     private final StaffRepository staffRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public StaffService(StaffRepository staffRepository, PasswordEncoder passwordEncoder) {
+    public StaffService(StaffRepository staffRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.staffRepository = staffRepository;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -35,30 +39,49 @@ public class StaffService {
         staffRepository.deleteById(id);
     }
 
+    /**
+     * 指定メールのユーザーが所属する最初の Staff を返す（互換メソッド）
+     */
     public Optional<Staff> findByEmail(String email) {
-        return staffRepository.findByEmail(email);
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) return Optional.empty();
+        List<Staff> list = staffRepository.findByUser(userOpt.get());
+        if (list == null || list.isEmpty()) return Optional.empty();
+        return Optional.of(list.get(0));
     }
 
     /**
-     * パスワード照合ロジック.</br>
+     * パスワード照合ロジック.
      * 本番環境ではBCryptPasswordEncoderを使用
      */
-    public boolean verifyPassword(Staff staff, String rawPassword) {
-    	// matches(平文パスワード, ハッシュ化されたパスワード)
-    	boolean matches = passwordEncoder.matches(rawPassword, staff.getPasswordHash());
-    	//System.out.println( rawPassword + ","+ staff.getPasswordHash() + "," + matches);
-        return matches;
+    public boolean verifyPassword(User user, String rawPassword) {
+        return passwordEncoder.matches(rawPassword, user.getPasswordHash());
     }
 
     /**
-     * 管理者ログイン処理
+     * 管理者ログイン処理（新フロー）
+     * 1. User を email で検索
+     * 2. パスワード照合
+     * 3. user の所属店舗一覧を取得し、先頭を返す
      */
     public Staff authenticate(String email, String password) {
-        Optional<Staff> staff = findByEmail(email);
-        if (staff.isPresent() && staff.get().getIsActive() && verifyPassword(staff.get(), password)) {
-            return staff.get();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+
+        if (user.getIsActive() == null || !user.getIsActive()) {
+            throw new IllegalArgumentException("User is inactive");
         }
-        throw new IllegalArgumentException("Invalid credentials");
+
+        if (!verifyPassword(user, password)) {
+            throw new IllegalArgumentException("Invalid credentials");
+        }
+
+        List<Staff> affiliations = staffRepository.findByUser(user);
+        if (affiliations == null || affiliations.isEmpty()) {
+            throw new IllegalArgumentException("No staff affiliation for user");
+        }
+
+        return affiliations.get(0);
     }
 
     /**
