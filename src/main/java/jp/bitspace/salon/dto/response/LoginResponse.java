@@ -13,5 +13,7 @@ public record LoginResponse(
         /** 権限（例: OWNER / STAFF） */
         String role,
         /** 所属サロンID */
-        Long salonId
+        Long salonId,
+        /** 所属サロン名 */
+        String salonName
 ) {}

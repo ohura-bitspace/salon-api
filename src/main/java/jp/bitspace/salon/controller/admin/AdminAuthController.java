@@ -58,7 +58,8 @@ public class AdminAuthController {
                 token,
                 user.getName(),        // user.getName()
                 currentStaff.getRole().name(),
-                currentStaff.getSalon().getId()
+                currentStaff.getSalon().getId(),
+                currentStaff.getSalon().getName()
                 // availableSalons // ← DTOを更新したらここに追加
         );
 
