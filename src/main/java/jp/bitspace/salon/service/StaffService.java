@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jp.bitspace.salon.model.Staff;
 import jp.bitspace.salon.model.User;
@@ -58,13 +59,17 @@ public class StaffService {
         return passwordEncoder.matches(rawPassword, user.getPasswordHash());
     }
 
+    
     /**
-     * 管理者ログイン処理（新フロー）
+     * 管理者ログイン処理
      * 1. User を email で検索
      * 2. パスワード照合
      * 3. user の所属店舗一覧を取得し、先頭を返す
      */
+    @Transactional
     public Staff authenticate(String email, String password) {
+    	
+    	// ユーザ取得
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
 
@@ -80,8 +85,23 @@ public class StaffService {
         if (affiliations == null || affiliations.isEmpty()) {
             throw new IllegalArgumentException("No staff affiliation for user");
         }
+        
+        // 重要: 所属店舗の有効チェックも入れるのがベター
+        // Streamを使って「有効な所属」の先頭を探す
+        // TODO 要多店舗対応
+        Staff activeStaff = affiliations.stream()
+            .filter(s -> s.getIsActive() != null && s.getIsActive())
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("No active staff affiliation found"));
+        
+        // 参考にした部分: 最終ログイン日時を更新する（Userテーブルにカラムがあれば）
+        // user.setLastLoginAt(LocalDateTime.now());
+        // userRepository.save(user); // トランザクション内なのでsaveしなくても更新されるが、明示してもOK
 
-        return affiliations.get(0);
+        // 重要: ここでUserの中身を触ってロードさせておく（おまじない）
+        //activeStaff.getUser().getEmail(); 
+
+        return activeStaff;
     }
 
     /**

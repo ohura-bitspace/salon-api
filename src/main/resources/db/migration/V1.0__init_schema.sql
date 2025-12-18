@@ -30,6 +30,8 @@ CREATE TABLE staffs (
     salon_id BIGINT NOT NULL COMMENT '所属サロンID',
     role ENUM('OWNER', 'STAFF') DEFAULT 'STAFF' COMMENT 'その店での役割',
     
+    is_active BOOLEAN DEFAULT TRUE COMMENT '有効フラグ（この店舗での権限有効化）',
+    
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
