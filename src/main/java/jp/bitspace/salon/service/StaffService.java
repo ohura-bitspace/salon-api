@@ -3,9 +3,11 @@ package jp.bitspace.salon.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import jp.bitspace.salon.model.Staff;
 import jp.bitspace.salon.model.User;
@@ -58,7 +60,6 @@ public class StaffService {
     public boolean verifyPassword(User user, String rawPassword) {
         return passwordEncoder.matches(rawPassword, user.getPasswordHash());
     }
-
     
     /**
      * 管理者ログイン処理
@@ -71,14 +72,14 @@ public class StaffService {
     	
     	// ユーザ取得
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+        		.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "メールアドレスまたはパスワードが違います"));
 
         if (user.getIsActive() == null || !user.getIsActive()) {
             throw new IllegalArgumentException("User is inactive");
         }
 
         if (!verifyPassword(user, password)) {
-            throw new IllegalArgumentException("Invalid credentials");
+        	throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "メールアドレスまたはパスワードが違います");
         }
 
         List<Staff> affiliations = staffRepository.findByUser(user);
