@@ -74,40 +74,56 @@ CREATE TABLE customers (
     UNIQUE KEY uq_salon_line (salon_id, line_user_id)
 ) COMMENT='顧客情報';
 
--- 4. メニューマスタ（クーポン・通常メニュー兼用）
--- 店舗ごとにメニューを定義するテーブル
+-- 4-1. メニューカテゴリ（UI上の「タブ」や「ブロック」に相当）
+CREATE TABLE menu_categories (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    salon_id BIGINT NOT NULL COMMENT '所属サロンID',
+    
+    name VARCHAR(50) NOT NULL COMMENT 'カテゴリ名（例: 脱毛、フェイシャル、回数券）',
+    display_order INT DEFAULT 0 COMMENT '表示順序',
+    
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (salon_id) REFERENCES salons(id)
+) COMMENT='メニューカテゴリマスタ';
+
+-- 4-2. メニューマスタ（クーポン・通常メニュー兼用）
 CREATE TABLE menus (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     salon_id BIGINT NOT NULL COMMENT '所属サロンID',
     
-    title VARCHAR(255) NOT NULL COMMENT 'メニュー名（例: 全身脱毛コース）',
-    description TEXT COMMENT '説明文・補足',
+    -- ★変更点1: ENUMの category を廃止し、カテゴリIDへのリンクに変更
+    -- クーポンなどで「カテゴリ未設定」を許容するため NULL可 にしています
+    menu_category_id BIGINT DEFAULT NULL COMMENT '所属カテゴリID',
     
-    -- イメージ画像がある場合
-    image_url VARCHAR(255) DEFAULT NULL COMMENT 'メニュー画像URL（/uploads/... や https://...）',
+    title VARCHAR(255) NOT NULL COMMENT 'メニュー名',
+    description TEXT COMMENT '説明文',
     
-    -- 価格設定
-    original_price INT NOT NULL DEFAULT 0 COMMENT '定価',
-    discounted_price INT DEFAULT NULL COMMENT '割引価格（クーポン用、NULLなら定価のみ）',
+    image_url VARCHAR(255) DEFAULT NULL,
     
-    -- 予約枠計算用
-    duration_minutes INT NOT NULL DEFAULT 60 COMMENT '所要時間（分）',
+    original_price INT NOT NULL DEFAULT 0,
+    discounted_price INT DEFAULT NULL,
     
-    -- フロントエンドのタブ・フィルタ用分類
-    -- TYPE: COUPON(クーポン), MENU(通常メニュー), OPTION(オプション)
-    item_type ENUM('COUPON', 'MENU', 'OPTION') NOT NULL DEFAULT 'MENU' COMMENT 'メニュー種別',
+    duration_minutes INT NOT NULL DEFAULT 60,
     
-    -- CATEGORY: HAIR_REMOVAL(脱毛), AROMA(アロマ), OTHER(その他)
-    category ENUM('HAIR_REMOVAL', 'AROMA', 'OTHER') DEFAULT 'OTHER' COMMENT 'カテゴリ',
+    -- ★変更点2: item_type は「表示エリアの制御」に使うのでそのまま残します
+    -- COUPON: 画面上部のクーポンエリアに表示
+    -- MENU: 画面下部のカテゴリエリアに表示
+    item_type ENUM('COUPON', 'MENU', 'OPTION') NOT NULL DEFAULT 'MENU',
     
-    tag VARCHAR(50) COMMENT 'バッジ表示用（例: 人気No.1）',
+    tag VARCHAR(50) COMMENT 'バッジ表示用（例: 人気No.1、新規のみ）',
     
-    display_order INT DEFAULT 0 COMMENT '表示順序',
-    is_active BOOLEAN DEFAULT TRUE COMMENT '公開フラグ',
+    display_order INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (salon_id) REFERENCES salons(id)
+    FOREIGN KEY (salon_id) REFERENCES salons(id),
+    
+    -- ★変更点3: 外部キー制約を追加
+    -- カテゴリが削除された際、メニューまで消えると困るので SET NULL にするのが安全です
+    FOREIGN KEY (menu_category_id) REFERENCES menu_categories(id) ON DELETE SET NULL
 ) COMMENT='メニュー・クーポンマスタ';
 
 -- 5. 予約テーブル（ヘッダー情報）
