@@ -1,5 +1,6 @@
 package jp.bitspace.salon.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -35,6 +36,7 @@ public class Menu {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "menu_category_id")
+    @JsonIgnoreProperties({"menus"})
     private MenuCategory menuCategory;
 
     @Column(nullable = false)

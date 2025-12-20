@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MenuDto {
     private Long id;
+    private Long menuCategoryId;
     private String title;
     private String sectionName;
     private String description;

@@ -1,5 +1,6 @@
 package jp.bitspace.salon.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -47,6 +48,7 @@ public class MenuCategory {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "menuCategory", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Menu> menus = new ArrayList<>();
 
     @PrePersist

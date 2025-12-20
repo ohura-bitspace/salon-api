@@ -8,8 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MenuCategoryRepository extends JpaRepository<MenuCategory, Long> {
-    List<MenuCategory> findBySalonIdOrderByDisplayOrderAscIdAsc(Long salonId);
-
     @EntityGraph(attributePaths = "menus")
-    List<MenuCategory> findBySalonId(Long salonId);
+    List<MenuCategory> findBySalonIdOrderByDisplayOrderAscIdAsc(Long salonId);
 }
