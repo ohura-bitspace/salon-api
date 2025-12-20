@@ -94,6 +94,7 @@ public class MenuService {
             .salonId(salonId)
             .menuCategory(menuCategory)
             .title(request.getTitle())
+            .sectionName(request.getSectionName())
             .description(request.getDescription())
             .imageUrl(request.getImageUrl())
             .originalPrice(request.getOriginalPrice())
@@ -119,6 +120,7 @@ public class MenuService {
 
         Menu menu = existingMenu.get();
         menu.setTitle(request.getTitle());
+        menu.setSectionName(request.getSectionName());
         menu.setDescription(request.getDescription());
         menu.setImageUrl(request.getImageUrl());
         menu.setOriginalPrice(request.getOriginalPrice());
@@ -147,6 +149,7 @@ public class MenuService {
         return MenuDto.builder()
             .id(menu.getId())
             .title(menu.getTitle())
+            .sectionName(menu.getSectionName())
             .description(menu.getDescription())
             .imageUrl(menu.getImageUrl())
             .originalPrice(menu.getOriginalPrice())

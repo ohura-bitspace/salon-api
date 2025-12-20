@@ -95,6 +95,7 @@ CREATE TABLE menus (
     menu_category_id BIGINT DEFAULT NULL COMMENT '所属カテゴリID',
     
     title VARCHAR(255) NOT NULL COMMENT 'メニュー名',
+    section_name VARCHAR(100) COMMENT 'カテゴリ内の小分類見出し',
     description TEXT COMMENT '説明文',
     
     image_url VARCHAR(255) DEFAULT NULL,

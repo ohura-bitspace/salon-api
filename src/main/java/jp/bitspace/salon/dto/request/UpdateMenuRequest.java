@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateMenuRequest {
+public class UpdateMenuRequest {
     private String title;
     private String sectionName;
     private String description;

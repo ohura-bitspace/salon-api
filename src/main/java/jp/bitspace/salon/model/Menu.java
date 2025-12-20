@@ -40,6 +40,9 @@ public class Menu {
     @Column(nullable = false)
     private String title;
 
+    @Column(name = "section_name", length = 100)
+    private String sectionName;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
