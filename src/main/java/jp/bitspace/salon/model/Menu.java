@@ -1,6 +1,7 @@
 package jp.bitspace.salon.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -36,7 +37,7 @@ public class Menu {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "menu_category_id")
-    @JsonIgnoreProperties({"menus"})
+    @JsonIgnore
     private MenuCategory menuCategory;
 
     @Column(nullable = false)
@@ -88,5 +89,13 @@ public class Menu {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * menuCategoryId を JSON に含める（LazyInitializationException 回避）
+     */
+    @JsonProperty("menuCategoryId")
+    public Long getMenuCategoryId() {
+        return menuCategory != null ? menuCategory.getId() : null;
     }
 }
