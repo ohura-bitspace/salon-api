@@ -1,7 +1,9 @@
 package jp.bitspace.salon.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,11 +17,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode; // 追加
 import lombok.NoArgsConstructor;
+import lombok.ToString; // 追加
 
 @Data
 @Builder
@@ -35,9 +38,13 @@ public class Menu {
     @Column(name = "salon_id", nullable = false)
     private Long salonId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // ★修正1: EAGERに変更（常にカテゴリ情報を取得）
+    // ★修正2: @JsonIgnore を削除（必要なら残してもOKですが、EAGERなら情報を活用する方が自然です）
+    // ★修正3: Lombokの無限ループ防止（EAGERにするなら必須）
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "menu_category_id")
-    @JsonIgnore
     private MenuCategory menuCategory;
 
     @Column(nullable = false)
@@ -52,12 +59,14 @@ public class Menu {
     @Column(name = "image_url", length = 255)
     private String imageUrl;
 
+    @Builder.Default
     @Column(name = "original_price", nullable = false)
     private Integer originalPrice = 0;
 
     @Column(name = "discounted_price")
     private Integer discountedPrice;
 
+    @Builder.Default
     @Column(name = "duration_minutes", nullable = false)
     private Integer durationMinutes = 60;
 
@@ -68,9 +77,11 @@ public class Menu {
     @Column(length = 50)
     private String tag;
 
+    @Builder.Default
     @Column(name = "display_order")
     private Integer displayOrder = 0;
 
+    @Builder.Default
     @Column(name = "is_active")
     private Boolean isActive = true;
 
@@ -91,11 +102,15 @@ public class Menu {
         updatedAt = LocalDateTime.now();
     }
 
-    /**
-     * menuCategoryId を JSON に含める（LazyInitializationException 回避）
-     */
+    // 便利機能: フロントエンド用に ID と 名前 をフラットに返す
+    
     @JsonProperty("menuCategoryId")
     public Long getMenuCategoryId() {
         return menuCategory != null ? menuCategory.getId() : null;
+    }
+
+    @JsonProperty("categoryName")
+    public String getCategoryName() {
+        return menuCategory != null ? menuCategory.getName() : null;
     }
 }
