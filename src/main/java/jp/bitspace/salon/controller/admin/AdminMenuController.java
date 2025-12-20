@@ -18,7 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jp.bitspace.salon.dto.request.CreateMenuRequest;
 import jp.bitspace.salon.dto.request.UpdateMenuRequest;
-import jp.bitspace.salon.dto.response.MenuDto;
 import jp.bitspace.salon.model.Menu;
 import jp.bitspace.salon.security.AdminRequestAuthUtil;
 import jp.bitspace.salon.service.MenuService;
@@ -33,7 +32,13 @@ public class AdminMenuController {
         this.menuService = menuService;
         this.adminRequestAuthUtil = adminRequestAuthUtil;
     }
-
+    
+    /**
+     * メニュー取得.
+     * @param httpServletRequest request
+     * @param salonId サロンID
+     * @return List<Menu>
+     */
     @GetMapping
     public List<Menu> getMenus(HttpServletRequest httpServletRequest, @RequestParam(name = "salonId") Long salonId) {
         adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
@@ -58,21 +63,25 @@ public class AdminMenuController {
         return ResponseEntity.ok(created);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateMenu(
-        HttpServletRequest httpServletRequest,
-        @PathVariable Long id,
-        @Valid @RequestBody UpdateMenuRequest request
-    ) {
-        // salonIdはMenu側に紐づくため、ここでは簡易に更新実行（必要なら取得して認可に使う）
-        try {
-            Menu updated = menuService.updateMenu(id, request);
-            return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(404).body(Map.of("error", ex.getMessage()));
-        }
-    }
-
+	@PutMapping("/{id}")
+	public ResponseEntity<?> updateMenu(
+			HttpServletRequest httpServletRequest,
+			@PathVariable Long id,
+			@Valid @RequestBody UpdateMenuRequest request) {
+		// salonIdはMenu側に紐づくため、ここでは簡易に更新実行（必要なら取得して認可に使う）
+		try {
+			Menu updated = menuService.updateMenu(id, request);
+			return ResponseEntity.ok(updated);
+		} catch (IllegalArgumentException ex) {
+			return ResponseEntity.status(404).body(Map.of("error", ex.getMessage()));
+		}
+	}
+    
+    /**
+     * メニュー削除
+     * @param id id
+     * @return ResponseEntity
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteMenu(@PathVariable Long id) {
         menuService.deleteById(id);
