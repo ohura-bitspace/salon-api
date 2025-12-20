@@ -92,9 +92,6 @@ CREATE TABLE menu_categories (
 CREATE TABLE menus (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     salon_id BIGINT NOT NULL COMMENT '所属サロンID',
-    
-    -- ★変更点1: ENUMの category を廃止し、カテゴリIDへのリンクに変更
-    -- クーポンなどで「カテゴリ未設定」を許容するため NULL可 にしています
     menu_category_id BIGINT DEFAULT NULL COMMENT '所属カテゴリID',
     
     title VARCHAR(255) NOT NULL COMMENT 'メニュー名',
@@ -107,9 +104,6 @@ CREATE TABLE menus (
     
     duration_minutes INT NOT NULL DEFAULT 60,
     
-    -- ★変更点2: item_type は「表示エリアの制御」に使うのでそのまま残します
-    -- COUPON: 画面上部のクーポンエリアに表示
-    -- MENU: 画面下部のカテゴリエリアに表示
     item_type ENUM('COUPON', 'MENU', 'OPTION') NOT NULL DEFAULT 'MENU',
     
     tag VARCHAR(50) COMMENT 'バッジ表示用（例: 人気No.1、新規のみ）',
@@ -120,9 +114,6 @@ CREATE TABLE menus (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (salon_id) REFERENCES salons(id),
-    
-    -- ★変更点3: 外部キー制約を追加
-    -- カテゴリが削除された際、メニューまで消えると困るので SET NULL にするのが安全です
     FOREIGN KEY (menu_category_id) REFERENCES menu_categories(id) ON DELETE SET NULL
 ) COMMENT='メニュー・クーポンマスタ';
 
