@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jp.bitspace.salon.dto.request.CreateMenuRequest;
 import jp.bitspace.salon.dto.request.UpdateMenuRequest;
+import jp.bitspace.salon.dto.response.SalonMenuResponse;
 import jp.bitspace.salon.model.Menu;
 import jp.bitspace.salon.security.AdminRequestAuthUtil;
 import jp.bitspace.salon.service.MenuService;
@@ -37,12 +38,12 @@ public class AdminMenuController {
      * メニュー取得.
      * @param httpServletRequest request
      * @param salonId サロンID
-     * @return List<Menu>
+     * @return SalonMenuResponse
      */
     @GetMapping
-    public List<Menu> getMenus(HttpServletRequest httpServletRequest, @RequestParam(name = "salonId") Long salonId) {
+    public SalonMenuResponse getMenus(HttpServletRequest httpServletRequest, @RequestParam(name = "salonId") Long salonId) {
         adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
-        return menuService.findBySalonId(salonId);
+        return menuService.getSalonMenusGrouped(salonId);
     }
 
     @GetMapping("/{id}")

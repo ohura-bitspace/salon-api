@@ -38,9 +38,6 @@ public class Menu {
     @Column(name = "salon_id", nullable = false)
     private Long salonId;
 
-    // ★修正1: EAGERに変更（常にカテゴリ情報を取得）
-    // ★修正2: @JsonIgnore を削除（必要なら残してもOKですが、EAGERなら情報を活用する方が自然です）
-    // ★修正3: Lombokの無限ループ防止（EAGERにするなら必須）
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.EAGER)
@@ -115,6 +112,11 @@ public class Menu {
     @JsonProperty("menuSectionId")
     public Long getMenuSectionId() {
         return menuSection != null ? menuSection.getId() : null;
+    }
+
+    @JsonProperty("menuSectionName")
+    public String getMenuSectionName() {
+        return menuSection != null ? menuSection.getName() : null;
     }
 
     @JsonProperty("categoryName")
