@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 public class MenuDto {
     private Long id;
     private Long menuCategoryId;
+    private Long menuSectionId;
     private String title;
-    private String sectionName;
     private String description;
     private String imageUrl;
     private Integer originalPrice;

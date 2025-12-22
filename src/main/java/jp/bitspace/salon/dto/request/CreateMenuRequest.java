@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateMenuRequest {
     private String title;
-    private String sectionName;
+    private Long menuSectionId;
     private String description;
     private String imageUrl;
     private Integer originalPrice;

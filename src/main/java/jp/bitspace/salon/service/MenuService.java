@@ -8,22 +8,30 @@ import jp.bitspace.salon.dto.request.CreateMenuRequest;
 import jp.bitspace.salon.dto.request.UpdateMenuRequest;
 import jp.bitspace.salon.dto.response.CategoryDto;
 import jp.bitspace.salon.dto.response.MenuDto;
+import jp.bitspace.salon.dto.response.SectionDto;
 import jp.bitspace.salon.dto.response.SalonMenuResponse;
 import jp.bitspace.salon.model.Menu;
 import jp.bitspace.salon.model.MenuCategory;
+import jp.bitspace.salon.model.MenuSection;
 import jp.bitspace.salon.model.MenuItemType;
 import jp.bitspace.salon.repository.MenuCategoryRepository;
 import jp.bitspace.salon.repository.MenuRepository;
+import jp.bitspace.salon.repository.MenuSectionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MenuService {
     private final MenuRepository menuRepository;
     private final MenuCategoryRepository menuCategoryRepository;
+    private final MenuSectionRepository menuSectionRepository;
 
-    public MenuService(MenuRepository menuRepository, MenuCategoryRepository menuCategoryRepository) {
+    public MenuService(MenuRepository menuRepository, 
+                       MenuCategoryRepository menuCategoryRepository,
+                       MenuSectionRepository menuSectionRepository) {
         this.menuRepository = menuRepository;
         this.menuCategoryRepository = menuCategoryRepository;
+        this.menuSectionRepository = menuSectionRepository;
     }
 
     public List<Menu> findAll() {
@@ -49,6 +57,7 @@ public class MenuService {
     /**
      * 指定したサロンのメニュー情報を「クーポン」と「カテゴリごとのメニュー」に分けて取得
      */
+    @Transactional(readOnly = true)
     public SalonMenuResponse getSalonMenusGrouped(Long salonId) {
         return buildSalonMenusGrouped(salonId, false);
     }
@@ -56,6 +65,7 @@ public class MenuService {
     /**
      * 顧客表示用（非表示メニューを除外）
      */
+    @Transactional(readOnly = true)
     public SalonMenuResponse getSalonMenusGroupedForCustomer(Long salonId) {
         return buildSalonMenusGrouped(salonId, true);
     }
@@ -73,20 +83,47 @@ public class MenuService {
         List<MenuCategory> categories = menuCategoryRepository.findBySalonIdOrderByDisplayOrderAscIdAsc(salonId);
         List<CategoryDto> categoryDtos = categories.stream()
             .map(category -> {
-                List<MenuDto> menuDtos = category.getMenus().stream()
+                // Direct menus (no section)
+                List<MenuDto> directMenus = category.getMenus().stream()
+                    .filter(menu -> menu.getMenuSection() == null)
                     .filter(menu -> menu.getItemType() != MenuItemType.COUPON)
                     .filter(menu -> !customerOnly || Boolean.TRUE.equals(menu.getIsActive()))
                     .sorted(Comparator.comparing(Menu::getDisplayOrder).thenComparing(Menu::getId))
                     .map(this::convertToMenuDto)
                     .collect(Collectors.toList());
+
+                // Sections
+                List<SectionDto> sectionDtos = category.getSections().stream()
+                    .map(section -> {
+                        List<MenuDto> sectionMenus = section.getMenus().stream()
+                            .filter(menu -> menu.getItemType() != MenuItemType.COUPON)
+                            .filter(menu -> !customerOnly || Boolean.TRUE.equals(menu.getIsActive()))
+                            .sorted(Comparator.comparing(Menu::getDisplayOrder).thenComparing(Menu::getId))
+                            .map(this::convertToMenuDto)
+                            .collect(Collectors.toList());
+                        
+                        return SectionDto.builder()
+                            .id(section.getId())
+                            .name(section.getName())
+                            .displayOrder(section.getDisplayOrder())
+                            .menus(sectionMenus)
+                            .build();
+                    })
+                    .filter(sectionDto -> !customerOnly || (sectionDto.getMenus() != null && !sectionDto.getMenus().isEmpty()))
+                    .sorted(Comparator.comparing(SectionDto::getDisplayOrder, Comparator.nullsLast(Comparator.naturalOrder())))
+                    .collect(Collectors.toList());
+
                 return CategoryDto.builder()
                     .id(category.getId())
                     .name(category.getName())
                     .displayOrder(category.getDisplayOrder())
-                    .menus(menuDtos)
+                    .menus(directMenus)
+                    .sections(sectionDtos)
                     .build();
             })
-            .filter(categoryDto -> !customerOnly || (categoryDto.getMenus() != null && !categoryDto.getMenus().isEmpty()))
+            .filter(categoryDto -> !customerOnly || 
+                ((categoryDto.getMenus() != null && !categoryDto.getMenus().isEmpty()) || 
+                 (categoryDto.getSections() != null && !categoryDto.getSections().isEmpty())))
             .collect(Collectors.toList());
 
         return SalonMenuResponse.builder()
@@ -98,6 +135,7 @@ public class MenuService {
     /**
      * メニューを作成（CreateMenuRequest から）
      */
+    @Transactional
     public Menu createMenu(Long salonId, CreateMenuRequest request) {
         MenuCategory menuCategory = null;
         if (request.getMenuCategoryId() != null) {
@@ -105,11 +143,17 @@ public class MenuService {
                 .orElse(null);
         }
 
+        MenuSection menuSection = null;
+        if (request.getMenuSectionId() != null) {
+            menuSection = menuSectionRepository.findById(request.getMenuSectionId())
+                .orElse(null);
+        }
+
         Menu menu = Menu.builder()
             .salonId(salonId)
             .menuCategory(menuCategory)
+            .menuSection(menuSection)
             .title(request.getTitle())
-            .sectionName(request.getSectionName())
             .description(request.getDescription())
             .imageUrl(request.getImageUrl())
             .originalPrice(request.getOriginalPrice())
@@ -124,39 +168,7 @@ public class MenuService {
         return menuRepository.save(menu);
     }
 
-    /**
-     * メニューを更新（CreateMenuRequest から）
-     */
-    public Menu updateMenu(Long menuId, CreateMenuRequest request) {
-        Optional<Menu> existingMenu = menuRepository.findById(menuId);
-        if (existingMenu.isEmpty()) {
-            throw new IllegalArgumentException("Menu not found with id: " + menuId);
-        }
-
-        Menu menu = existingMenu.get();
-        menu.setTitle(request.getTitle());
-        menu.setSectionName(request.getSectionName());
-        menu.setDescription(request.getDescription());
-        menu.setImageUrl(request.getImageUrl());
-        menu.setOriginalPrice(request.getOriginalPrice());
-        menu.setDiscountedPrice(request.getDiscountedPrice());
-        menu.setDurationMinutes(request.getDurationMinutes());
-        menu.setItemType(MenuItemType.valueOf(request.getItemType()));
-        menu.setTag(request.getTag());
-        menu.setDisplayOrder(request.getDisplayOrder() != null ? request.getDisplayOrder() : 0);
-        menu.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
-
-        if (request.getMenuCategoryId() != null) {
-            MenuCategory menuCategory = menuCategoryRepository.findById(request.getMenuCategoryId())
-                .orElse(null);
-            menu.setMenuCategory(menuCategory);
-        } else {
-            menu.setMenuCategory(null);
-        }
-
-        return menuRepository.save(menu);
-    }
-
+    @Transactional
     public Menu updateMenu(Long menuId, UpdateMenuRequest request) {
         Optional<Menu> existingMenu = menuRepository.findById(menuId);
         if (existingMenu.isEmpty()) {
@@ -165,7 +177,6 @@ public class MenuService {
 
         Menu menu = existingMenu.get();
         menu.setTitle(request.getTitle());
-        menu.setSectionName(request.getSectionName());
         menu.setDescription(request.getDescription());
         menu.setImageUrl(request.getImageUrl());
         menu.setOriginalPrice(request.getOriginalPrice());
@@ -182,6 +193,14 @@ public class MenuService {
             menu.setMenuCategory(menuCategory);
         } else {
             menu.setMenuCategory(null);
+        }
+
+        if (request.getMenuSectionId() != null) {
+            MenuSection menuSection = menuSectionRepository.findById(request.getMenuSectionId())
+                .orElse(null);
+            menu.setMenuSection(menuSection);
+        } else {
+            menu.setMenuSection(null);
         }
 
         return menuRepository.save(menu);
@@ -194,8 +213,8 @@ public class MenuService {
         return MenuDto.builder()
             .id(menu.getId())
             .menuCategoryId(menu.getMenuCategory() != null ? menu.getMenuCategory().getId() : null)
+            .menuSectionId(menu.getMenuSection() != null ? menu.getMenuSection().getId() : null)
             .title(menu.getTitle())
-            .sectionName(menu.getSectionName())
             .description(menu.getDescription())
             .imageUrl(menu.getImageUrl())
             .originalPrice(menu.getOriginalPrice())

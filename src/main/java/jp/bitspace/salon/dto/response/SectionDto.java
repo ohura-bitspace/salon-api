@@ -10,10 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDto {
+public class SectionDto {
     private Long id;
     private String name;
     private Integer displayOrder;
     private List<MenuDto> menus;
-    private List<SectionDto> sections;
 }

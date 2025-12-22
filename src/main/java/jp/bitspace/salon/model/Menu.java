@@ -47,11 +47,14 @@ public class Menu {
     @JoinColumn(name = "menu_category_id")
     private MenuCategory menuCategory;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "menu_section_id")
+    private MenuSection menuSection;
+
     @Column(nullable = false)
     private String title;
-
-    @Column(name = "section_name", length = 100)
-    private String sectionName;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -107,6 +110,11 @@ public class Menu {
     @JsonProperty("menuCategoryId")
     public Long getMenuCategoryId() {
         return menuCategory != null ? menuCategory.getId() : null;
+    }
+
+    @JsonProperty("menuSectionId")
+    public Long getMenuSectionId() {
+        return menuSection != null ? menuSection.getId() : null;
     }
 
     @JsonProperty("categoryName")

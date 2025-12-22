@@ -88,14 +88,25 @@ CREATE TABLE menu_categories (
     FOREIGN KEY (salon_id) REFERENCES salons(id)
 ) COMMENT='メニューカテゴリマスタ';
 
+-- 4-1.5. メニューセクション（カテゴリ内の小分類）
+CREATE TABLE menu_sections (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    menu_category_id BIGINT NOT NULL COMMENT '親カテゴリID',
+    name VARCHAR(100) NOT NULL COMMENT 'セクション名',
+    display_order INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (menu_category_id) REFERENCES menu_categories(id)
+) COMMENT='メニューセクションマスタ';
+
 -- 4-2. メニューマスタ（クーポン・通常メニュー兼用）
 CREATE TABLE menus (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     salon_id BIGINT NOT NULL COMMENT '所属サロンID',
     menu_category_id BIGINT DEFAULT NULL COMMENT '所属カテゴリID',
+    menu_section_id BIGINT DEFAULT NULL COMMENT '所属セクションID',
     
     title VARCHAR(255) NOT NULL COMMENT 'メニュー名',
-    section_name VARCHAR(100) COMMENT 'カテゴリ内の小分類見出し',
     description TEXT COMMENT '説明文',
     
     image_url VARCHAR(255) DEFAULT NULL,
@@ -115,7 +126,8 @@ CREATE TABLE menus (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (salon_id) REFERENCES salons(id),
-    FOREIGN KEY (menu_category_id) REFERENCES menu_categories(id) ON DELETE SET NULL
+    FOREIGN KEY (menu_category_id) REFERENCES menu_categories(id) ON DELETE SET NULL,
+    FOREIGN KEY (menu_section_id) REFERENCES menu_sections(id) ON DELETE SET NULL
 ) COMMENT='メニュー・クーポンマスタ';
 
 -- 5. 予約テーブル（ヘッダー情報）
