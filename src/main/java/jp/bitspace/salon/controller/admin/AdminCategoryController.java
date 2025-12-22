@@ -3,6 +3,7 @@ package jp.bitspace.salon.controller.admin;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +31,7 @@ public class AdminCategoryController {
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<?> createCategory(HttpServletRequest request, @Valid @RequestBody MenuCategoryRequest body) {
         adminRequestAuthUtil.requireStaffAndSalonMatch(request, body.getSalonId());
 
@@ -42,9 +44,10 @@ public class AdminCategoryController {
         return ResponseEntity.ok(menuCategoryRepository.save(category));
     }
 
-	@PutMapping("/{id}")
-	public ResponseEntity<?> updateCategory(HttpServletRequest request, @PathVariable Long id,
-			@Valid @RequestBody MenuCategoryRequest body) {
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity<?> updateCategory(HttpServletRequest request, @PathVariable Long id,
+            @Valid @RequestBody MenuCategoryRequest body) {
 		return menuCategoryRepository.findById(id)
 				.<ResponseEntity<?>> map(category -> {
 					adminRequestAuthUtil.requireStaffAndSalonMatch(request, category.getSalonId());
@@ -57,6 +60,7 @@ public class AdminCategoryController {
 	}
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<?> deleteCategory(HttpServletRequest request, @PathVariable Long id) {
         return menuCategoryRepository.findById(id)
             .<ResponseEntity<?>>map(category -> {

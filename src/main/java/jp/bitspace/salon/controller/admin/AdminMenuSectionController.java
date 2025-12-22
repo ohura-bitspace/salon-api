@@ -3,6 +3,7 @@ package jp.bitspace.salon.controller.admin;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +37,7 @@ public class AdminMenuSectionController {
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<?> createSection(HttpServletRequest request, @Valid @RequestBody MenuSectionRequest body) {
         adminRequestAuthUtil.requireStaffAndSalonMatch(request, body.getSalonId());
 
@@ -54,9 +56,10 @@ public class AdminMenuSectionController {
         return ResponseEntity.ok(menuSectionRepository.save(section));
     }
 
-	@PutMapping("/{id}")
-	public ResponseEntity<?> updateSection(HttpServletRequest request, @PathVariable Long id,
-			@Valid @RequestBody MenuSectionRequest body) {
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity<?> updateSection(HttpServletRequest request, @PathVariable Long id,
+            @Valid @RequestBody MenuSectionRequest body) {
 		return menuSectionRepository.findById(id)
 				.<ResponseEntity<?>> map(section -> {
 					adminRequestAuthUtil.requireStaffAndSalonMatch(request, section.getMenuCategory().getSalonId());
@@ -80,6 +83,7 @@ public class AdminMenuSectionController {
 	}
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<?> deleteSection(HttpServletRequest request, @PathVariable Long id) {
         return menuSectionRepository.findById(id)
             .<ResponseEntity<?>>map(section -> {
