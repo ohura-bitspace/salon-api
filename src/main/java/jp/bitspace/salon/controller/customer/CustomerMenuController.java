@@ -9,7 +9,7 @@ import jp.bitspace.salon.dto.response.SalonMenuResponse;
 import jp.bitspace.salon.service.MenuService;
 
 @RestController
-@RequestMapping({"/api/customer/menus", "/api/menus"})
+@RequestMapping({"/api/customer/menus"})
 public class CustomerMenuController {
     private final MenuService menuService;
 
