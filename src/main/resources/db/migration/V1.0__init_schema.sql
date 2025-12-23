@@ -29,7 +29,8 @@ CREATE TABLE staffs (
     user_id BIGINT NOT NULL COMMENT 'ユーザーID',
     salon_id BIGINT NOT NULL COMMENT '所属サロンID',
     role ENUM('OWNER', 'STAFF') DEFAULT 'STAFF' COMMENT 'その店での役割',
-    
+    -- 予約受付対象かどうか（trueならカレンダーに出る）
+    is_practitioner BOOLEAN DEFAULT TRUE COMMENT '施術者フラグ',
     is_active BOOLEAN DEFAULT TRUE COMMENT '有効フラグ（この店舗での権限有効化）',
     
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

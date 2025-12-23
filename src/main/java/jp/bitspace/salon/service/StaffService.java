@@ -9,8 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import jp.bitspace.salon.dto.request.CreateStaffRequest;
+import jp.bitspace.salon.dto.request.UpdateStaffRequest;
+import jp.bitspace.salon.dto.response.StaffResponse;
+import jp.bitspace.salon.model.Role;
+import jp.bitspace.salon.model.Salon;
 import jp.bitspace.salon.model.Staff;
 import jp.bitspace.salon.model.User;
+import jp.bitspace.salon.repository.SalonRepository;
 import jp.bitspace.salon.repository.StaffRepository;
 import jp.bitspace.salon.repository.UserRepository;
 
@@ -18,11 +24,18 @@ import jp.bitspace.salon.repository.UserRepository;
 public class StaffService {
     private final StaffRepository staffRepository;
     private final UserRepository userRepository;
+    private final SalonRepository salonRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public StaffService(StaffRepository staffRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public StaffService(
+            StaffRepository staffRepository,
+            UserRepository userRepository,
+            SalonRepository salonRepository,
+            PasswordEncoder passwordEncoder
+    ) {
         this.staffRepository = staffRepository;
         this.userRepository = userRepository;
+        this.salonRepository = salonRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -35,6 +48,115 @@ public class StaffService {
     }
 
     public Staff save(Staff staff) {
+        if (staff.getIsPractitioner() == null) {
+            staff.setIsPractitioner(true);
+        }
+        return staffRepository.save(staff);
+    }
+
+    public List<Staff> findBySalonId(Long salonId) {
+        return staffRepository.findBySalonId(salonId);
+    }
+
+    /**
+     * 管理画面用: 所属サロンの全スタッフをレスポンスDTOに整形して返す.
+     */
+    public List<StaffResponse> findStaffResponseBySalonId(Long salonId) {
+        return staffRepository.findBySalonId(salonId)
+                .stream()
+                .map(this::toStaffResponse)
+                .toList();
+    }
+
+    /**
+     * 予約画面用: 施術者フラグがTRUEのスタッフのみ返す.
+     */
+    public List<Staff> findPractitionersBySalonId(Long salonId) {
+        return staffRepository.findBySalonIdAndIsPractitionerTrue(salonId);
+    }
+
+    /**
+     * 予約画面用: 施術者フラグがTRUEのスタッフをレスポンスDTOに整形して返す.
+     */
+    public List<StaffResponse> findPractitionersResponseBySalonId(Long salonId) {
+        return staffRepository.findBySalonIdAndIsPractitionerTrue(salonId)
+                .stream()
+                .map(this::toStaffResponse)
+                .toList();
+    }
+
+    private StaffResponse toStaffResponse(Staff staff) {
+        return StaffResponse.builder()
+                .id(staff.getId())
+                .salonId(staff.getSalon() != null ? staff.getSalon().getId() : null)
+                .salonName(staff.getSalon() != null ? staff.getSalon().getName() : null)
+                .userId(staff.getUser() != null ? staff.getUser().getId() : null)
+                .userName(staff.getUser() != null ? staff.getUser().getName() : null)
+                .role(staff.getRole() != null ? staff.getRole().name() : null)
+                .isActive(staff.getIsActive())
+                .isPractitioner(staff.getIsPractitioner())
+                .build();
+    }
+
+    /**
+     * スタッフ登録（最低限: 既存Userを紐付ける想定）
+     */
+    @Transactional
+    public Staff createStaff(CreateStaffRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("request is required");
+        }
+        if (request.getUserId() == null) {
+            throw new IllegalArgumentException("userId is required");
+        }
+        if (request.getSalonId() == null) {
+            throw new IllegalArgumentException("salonId is required");
+        }
+
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + request.getUserId()));
+        Salon salon = salonRepository.findById(request.getSalonId())
+                .orElseThrow(() -> new IllegalArgumentException("Salon not found: " + request.getSalonId()));
+
+        Staff staff = Staff.builder()
+                .user(user)
+                .salon(salon)
+                .role(request.getRole() != null ? Role.valueOf(request.getRole()) : Role.STAFF)
+                .isActive(request.getIsActive() != null ? request.getIsActive() : true)
+                .isPractitioner(request.getIsPractitioner() != null ? request.getIsPractitioner() : true)
+                .build();
+
+        return staffRepository.save(staff);
+    }
+
+    /**
+     * スタッフ更新
+     */
+    @Transactional
+    public Staff updateStaff(Long staffId, UpdateStaffRequest request) {
+        if (staffId == null) {
+            throw new IllegalArgumentException("staffId is required");
+        }
+        if (request == null) {
+            throw new IllegalArgumentException("request is required");
+        }
+
+        Staff staff = staffRepository.findById(staffId)
+                .orElseThrow(() -> new IllegalArgumentException("Staff not found: " + staffId));
+
+        if (request.getRole() != null) {
+            staff.setRole(Role.valueOf(request.getRole()));
+        }
+        if (request.getIsActive() != null) {
+            staff.setIsActive(request.getIsActive());
+        }
+        if (request.getIsPractitioner() != null) {
+            staff.setIsPractitioner(request.getIsPractitioner());
+        }
+        if (staff.getIsPractitioner() == null) {
+            staff.setIsPractitioner(true);
+        }
+
         return staffRepository.save(staff);
     }
 

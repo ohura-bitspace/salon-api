@@ -17,13 +17,15 @@ INSERT INTO users (id, name, email, password_hash, is_active) VALUES
 (1, '山田 太郎', 'owner@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true),
 (2, '鈴木 花子', 'staff@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true),
 (3, '田中 次郎', 'owner@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true);
+(4, 'YOKO', 'yoko@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true);
 
 -- 各サロンごとの所属（staffs）を投入
 -- (user_id, salon_id, role)
 INSERT INTO staffs (user_id, salon_id, role) VALUES
-(1, 1, 'OWNER'),
-(2, 1, 'STAFF'),
-(3, 2, 'OWNER');
+(1, 1, 'OWNER', true);
+(2, 1, 'STAFF', true);
+(3, 2, 'OWNER', true);
+(4, 2, 'OWNER', true);
 
 -- ============================================================
 -- 3. 顧客データの投入
@@ -69,9 +71,9 @@ VALUES
 (2, 1, 'VIO', 2),
 
 -- サロン2 (salon-up-s)
-(3, 2, 'VIO', 1),
-(4, 2, 'メンズ', 2),
-(5, 3, 'フルコース', 1),
+(3, 2, '脱毛', 1),
+(4, 3, 'アロマリンパマッサージ～心地よい香りでリラックス', 2),
+(5, 3, 'スクラブトリートメント～角質を落として全身美肌', 1),
 (6, 3, 'スタンダード', 2),
 (7, 3, 'ショート', 3);
 
@@ -130,7 +132,7 @@ VALUES
  3000, NULL, 30, 'MENU', NULL, 13, true),
 
 -- ID:9 男性ヒゲ
-(9, 2, 2, 4, '男性ヒゲセット ～毎朝の髭剃りとおさらば～', '男性のお客様限定。毎朝の処理が楽になります。', 
+(9, 2, 2, 3, '男性ヒゲセット ～毎朝の髭剃りとおさらば～', '男性のお客様限定。毎朝の処理が楽になります。', 
  5000, NULL, 45, 'MENU', 'メンズ', 14, true),
 
 
@@ -138,15 +140,15 @@ VALUES
 -- カテゴリID:3 (アロマ) に紐付け
 
 -- ID:10 120分
-(10, 2, 3, 5, 'アロマリンパマッサージ 120分', 'たっぷりと時間をかけて全身の疲れを癒やします。', 
+(10, 2, 3, 4, 'アロマリンパマッサージ 120分', 'たっぷりと時間をかけて全身の疲れを癒やします。', 
  17000, NULL, 120, 'MENU', NULL, 20, true),
 
 -- ID:11 90分
-(11, 2, 3, 6, 'アロマリンパマッサージ 90分', 'スタンダードな90分コースです。', 
+(11, 2, 3, 4, 'アロマリンパマッサージ 90分', 'スタンダードな90分コースです。', 
  13000, NULL, 90, 'MENU', NULL, 21, true),
 
 -- ID:12 60分
-(12, 2, 3, 7, 'アロマリンパマッサージ 60分', 'お試しや時間のあいた時に最適な60分コース。', 
+(12, 2, 3, 4, 'アロマリンパマッサージ 60分', 'お試しや時間のあいた時に最適な60分コース。', 
  11000, NULL, 60, 'MENU', NULL, 22, true);
 
 
