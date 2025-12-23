@@ -16,15 +16,15 @@ INSERT INTO salons (id, name, plan_type, is_active) VALUES
 INSERT INTO users (id, name, email, password_hash, is_active) VALUES
 (1, '山田 太郎', 'owner@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true),
 (2, '鈴木 花子', 'staff@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true),
-(3, '田中 次郎', 'owner@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true);
+(3, '田中 次郎', 'owner@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true),
 (4, 'YOKO', 'yoko@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true);
 
 -- 各サロンごとの所属（staffs）を投入
 -- (user_id, salon_id, role)
-INSERT INTO staffs (user_id, salon_id, role) VALUES
-(1, 1, 'OWNER', true);
-(2, 1, 'STAFF', true);
-(3, 2, 'OWNER', true);
+INSERT INTO staffs (user_id, salon_id, role, is_active) VALUES
+(1, 1, 'OWNER', true),
+(2, 1, 'STAFF', true),
+(3, 2, 'OWNER', true),
 (4, 2, 'OWNER', true);
 
 -- ============================================================
