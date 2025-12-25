@@ -2,6 +2,8 @@ package jp.bitspace.salon.dto.response;
 
 import java.time.LocalDateTime;
 
+import jp.bitspace.salon.model.BookingRoute;
+
 /**
  * 管理側予約情報レスポンスDTO.
  * <p>
@@ -22,6 +24,8 @@ public record AdminReservationResponse(
         String menu,
         /** スタッフ名 */
         String staff,
+        /** 予約経路 */
+        BookingRoute bookingRoute,
         /** ステータス（日本語表示用） */
         String status,
         /** メモ */

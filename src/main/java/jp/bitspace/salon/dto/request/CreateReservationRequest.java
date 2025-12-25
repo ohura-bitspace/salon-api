@@ -6,6 +6,7 @@ import java.util.List;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jp.bitspace.salon.model.BookingRoute;
 
 /**
  * 予約作成リクエスト.
@@ -19,6 +20,8 @@ public record CreateReservationRequest(
 	    Long customerId,
 
 	    Long staffId, // 指名なしならnull
+
+	    BookingRoute bookingRoute,
 
 	    @NotNull
 	    @Future(message = "過去の日時は指定できません")

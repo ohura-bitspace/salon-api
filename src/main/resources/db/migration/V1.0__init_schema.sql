@@ -150,6 +150,9 @@ CREATE TABLE reservations (
     -- 金額（予約時点での確定金額を保存しておく）
     total_price INT NOT NULL DEFAULT 0 COMMENT '合計金額',
     
+    -- 拡張性を持たせるため ENUM
+    booking_route ENUM('HP', 'PHONE', 'LINE', 'STORE', 'OTHER') DEFAULT NULL COMMENT '予約経路',
+    
     -- 管理用
     memo TEXT COMMENT '店舗側メモ（申し送り事項など）',
     

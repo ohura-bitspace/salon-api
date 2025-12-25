@@ -41,6 +41,10 @@ public class Reservation {
     @Column(nullable = false)
     private ReservationStatus status = ReservationStatus.PENDING;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "booking_route", nullable = true)
+    private BookingRoute bookingRoute;
+
     @Column(name = "total_price", nullable = false)
     private Integer totalPrice = 0;
 

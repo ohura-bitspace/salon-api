@@ -140,6 +140,7 @@ public class ReservationService {
         reservation.setSalonId(request.salonId());
         reservation.setCustomerId(request.customerId());
         reservation.setStaffId(request.staffId());
+		reservation.setBookingRoute(request.bookingRoute());
         reservation.setStartTime(request.startTime());
         reservation.setEndTime(endTime);
         reservation.setMemo(request.memo());
@@ -216,6 +217,7 @@ public class ReservationService {
                 customerName,
                 menuNames,
                 staffName,
+            reservation.getBookingRoute(),
                 statusText,
                 reservation.getMemo()
         );
