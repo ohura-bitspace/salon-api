@@ -56,6 +56,7 @@ public class ReservationService {
     /**
      * 管理側向け: 予約一覧を画面用DTOに整形して返却.
      */
+    @Transactional(readOnly = true)
     public List<AdminReservationResponse> findAdminBySalonId(Long salonId) {
         List<Reservation> reservations = reservationRepository.findBySalonIdOrderByStartTimeDesc(salonId);
         return reservations.stream().map(this::toAdminReservationResponse).collect(Collectors.toList());
@@ -66,6 +67,7 @@ public class ReservationService {
      * <p>
      * to は「その日付の0:00」を終端とする半開区間 [from, to) として扱います。
      */
+    @Transactional(readOnly = true)
     public List<AdminReservationResponse> findBySalonIdAndDateRange(Long salonId, LocalDate from, LocalDate to) {
         if (salonId == null) {
             throw new IllegalArgumentException("salonId is required");
@@ -101,7 +103,8 @@ public class ReservationService {
     public Reservation save(Reservation reservation) {
         return reservationRepository.save(reservation);
     }
-
+    
+    @Transactional
     public void deleteById(Long id) {
         reservationItemRepository.deleteByReservationId(id);
         reservationRepository.deleteById(id);
