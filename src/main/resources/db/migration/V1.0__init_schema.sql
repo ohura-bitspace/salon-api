@@ -136,7 +136,7 @@ CREATE TABLE menus (
 CREATE TABLE reservations (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     salon_id BIGINT NOT NULL COMMENT '所属サロンID',
-    customer_id BIGINT NOT NULL COMMENT '予約した顧客',
+    customer_id BIGINT DEFAULT NULL COMMENT '予約した顧客（NULL時は枠確保）',
     staff_id BIGINT DEFAULT NULL COMMENT '担当スタッフ（NULLなら指名なし）',
     
     -- 日時管理
@@ -164,16 +164,16 @@ CREATE TABLE reservations (
     FOREIGN KEY (staff_id) REFERENCES staffs(id)
 ) COMMENT='予約情報';
 
--- 6. 予約明細テーブル（リレーション）
--- 1つの予約の中に「クーポンA」と「オプションB」が含まれる、といった多対多を管理
+-- 6. 予約明細テーブル
+-- メニューが決まっていない状態でも明細枠を作れるよう、menu_id を NULL 許容に変更
 CREATE TABLE reservation_items (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     reservation_id BIGINT NOT NULL COMMENT '親となる予約ID',
-    menu_id BIGINT NOT NULL COMMENT '選択されたメニューID',
+    menu_id BIGINT DEFAULT NULL COMMENT '選択されたメニューID（NULL許容）',
     
     -- 価格スナップショット
-    -- メニューの価格が後で変わっても、予約時の価格を保持するためにここに値をコピーする
-    price_at_booking INT NOT NULL COMMENT '予約時の適用単価',
+    -- メニュー未定の場合は 0 を想定
+    price_at_booking INT NOT NULL DEFAULT 0 COMMENT '予約時の適用単価',
     
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 

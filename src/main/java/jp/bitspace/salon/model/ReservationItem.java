@@ -21,7 +21,7 @@ public class ReservationItem {
     @Column(name = "reservation_id", nullable = false)
     private Long reservationId;
 
-    @Column(name = "menu_id", nullable = false)
+    @Column(name = "menu_id")
     private Long menuId;
 
     @Column(name = "price_at_booking", nullable = false)

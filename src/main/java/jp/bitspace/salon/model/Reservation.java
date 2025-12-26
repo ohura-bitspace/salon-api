@@ -25,7 +25,7 @@ public class Reservation {
     @Column(name = "salon_id", nullable = false)
     private Long salonId;
 
-    @Column(name = "customer_id", nullable = false)
+    @Column(name = "customer_id")
     private Long customerId;
 
     @Column(name = "staff_id")

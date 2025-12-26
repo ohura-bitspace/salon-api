@@ -111,27 +111,27 @@ public class ReservationService {
         if (request.salonId() == null || request.startTime() == null) {
             throw new IllegalArgumentException("salonId/startTime are required");
         }
-        if (request.customerId() == null) {
-            throw new IllegalArgumentException("customerId is required (until JWT auth is implemented)");
-        }
-        if (request.menuIds() == null || request.menuIds().isEmpty()) {
-            throw new IllegalArgumentException("menuIds is required");
-        }
+        // customerId, menuIds の必須チェックを削除（枠確保・メニュー未定を許容）
 
         int totalPrice = 0;
         int totalDurationMinutes = 0;
 
-        for (Long menuId : request.menuIds()) {
-            if (menuId == null) {
-                throw new IllegalArgumentException("menuIds contains null");
+        if (request.menuIds() != null && !request.menuIds().isEmpty()) {
+            for (Long menuId : request.menuIds()) {
+                if (menuId == null) {
+                    continue;
+                }
+                Menu menu = menuRepository.findById(menuId)
+                        .orElseThrow(() -> new IllegalArgumentException("Menu not found: " + menuId));
+                if (!request.salonId().equals(menu.getSalonId())) {
+                    throw new IllegalArgumentException("Menu does not belong to salonId: " + menuId);
+                }
+                totalPrice += determinePrice(menu, null);
+                totalDurationMinutes += menu.getDurationMinutes() != null ? menu.getDurationMinutes() : 0;
             }
-            Menu menu = menuRepository.findById(menuId)
-                    .orElseThrow(() -> new IllegalArgumentException("Menu not found: " + menuId));
-            if (!request.salonId().equals(menu.getSalonId())) {
-                throw new IllegalArgumentException("Menu does not belong to salonId: " + menuId);
-            }
-            totalPrice += determinePrice(menu, null);
-            totalDurationMinutes += menu.getDurationMinutes() != null ? menu.getDurationMinutes() : 0;
+        } else {
+            // メニュー未定の場合はデフォルト60分確保とする（運用に合わせて調整）
+            totalDurationMinutes = 60;
         }
 
         LocalDateTime endTime = request.startTime().plusMinutes(totalDurationMinutes);
@@ -148,15 +148,18 @@ public class ReservationService {
 
         Reservation saved = reservationRepository.save(reservation);
 
-        for (Long menuId : request.menuIds()) {
-            Menu menu = menuRepository.findById(menuId)
-                    .orElseThrow(() -> new IllegalArgumentException("Menu not found: " + menuId));
+        if (request.menuIds() != null && !request.menuIds().isEmpty()) {
+            for (Long menuId : request.menuIds()) {
+                if (menuId == null) continue;
+                Menu menu = menuRepository.findById(menuId)
+                        .orElseThrow(() -> new IllegalArgumentException("Menu not found: " + menuId));
 
-            ReservationItem item = new ReservationItem();
-            item.setReservationId(saved.getId());
-            item.setMenuId(menuId);
-            item.setPriceAtBooking(determinePrice(menu, null));
-            reservationItemRepository.save(item);
+                ReservationItem item = new ReservationItem();
+                item.setReservationId(saved.getId());
+                item.setMenuId(menuId);
+                item.setPriceAtBooking(determinePrice(menu, null));
+                reservationItemRepository.save(item);
+            }
         }
 
         return saved;
@@ -173,7 +176,7 @@ public class ReservationService {
     }
 
     private AdminReservationResponse toAdminReservationResponse(Reservation reservation) {
-        String customerName = "不明";
+        String customerName = "未設定";
         if (reservation.getCustomerId() != null) {
             Optional<Customer> customerOpt = customerRepository.findById(reservation.getCustomerId());
             if (customerOpt.isPresent()) {
@@ -198,8 +201,11 @@ public class ReservationService {
         }
 
         List<ReservationItem> items = reservationItemRepository.findByReservationId(reservation.getId());
-        String menuNames = items.stream()
-                .map(item -> menuRepository.findById(item.getMenuId()).map(Menu::getTitle).orElse("不明"))
+        String menuNames = items.isEmpty() ? "未設定" : items.stream()
+                .map(item -> {
+                    if (item.getMenuId() == null) return "未設定";
+                    return menuRepository.findById(item.getMenuId()).map(Menu::getTitle).orElse("不明");
+                })
                 .collect(Collectors.joining("、"));
 
         String statusText = switch (reservation.getStatus()) {

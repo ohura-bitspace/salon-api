@@ -27,7 +27,6 @@ public record CreateReservationRequest(
 	    @Future(message = "過去の日時は指定できません")
 	    LocalDateTime startTime, // 項目名は startAt が一般的ですが startTime でもOK
 
-	    @NotEmpty(message = "メニューを選択してください")
 	    List<Long> menuIds, // ★ここが重要！ 明細オブジェクトではなく「IDのリスト」にする
 
 	    String memo

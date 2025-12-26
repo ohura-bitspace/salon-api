@@ -17,4 +17,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalDateTime from,
             LocalDateTime to
     );
+
+    List<Reservation> findBySalonIdAndCustomerIdIsNullOrderByStartTimeDesc(Long salonId);
 }
