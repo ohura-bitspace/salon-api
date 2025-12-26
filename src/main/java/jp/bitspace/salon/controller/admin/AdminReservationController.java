@@ -74,6 +74,8 @@ public class AdminReservationController {
         return ResponseEntity.ok(items);
     }
     
+    // TODO 確認する
+    // TODO 新規顧客の処理
     /**
      * 予約作成.
      * @param request 予約リクエスト
