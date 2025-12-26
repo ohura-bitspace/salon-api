@@ -1,8 +1,10 @@
 package jp.bitspace.salon.dto.request;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
+import jp.bitspace.salon.model.BookingRoute;
 import jp.bitspace.salon.model.ReservationStatus;
 
 /**
@@ -13,5 +15,7 @@ public record UpdateReservationRequest(
         @NotNull LocalDateTime startTime,
         @NotNull LocalDateTime endTime,
         @NotNull ReservationStatus status,
+        BookingRoute bookingRoute,
+        List<Long> menuIds,
         String memo
 ) {}

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jp.bitspace.salon.dto.request.CreateReservationRequest;
+import jp.bitspace.salon.dto.request.UpdateReservationRequest;
 import jp.bitspace.salon.dto.response.AdminReservationResponse;
 import jp.bitspace.salon.model.Customer;
 import jp.bitspace.salon.model.Menu;
@@ -104,6 +105,48 @@ public class ReservationService {
     public void deleteById(Long id) {
         reservationItemRepository.deleteByReservationId(id);
         reservationRepository.deleteById(id);
+    }
+
+    @Transactional
+    public Reservation updateWithItems(Long reservationId, UpdateReservationRequest request) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found: " + reservationId));
+
+        // 基本情報の更新
+        reservation.setStaffId(request.staffId());
+        reservation.setStartTime(request.startTime());
+        reservation.setEndTime(request.endTime());
+        reservation.setStatus(request.status());
+        reservation.setBookingRoute(request.bookingRoute());
+        reservation.setMemo(request.memo());
+
+        // メニューが指定されている場合、明細を再作成
+        if (request.menuIds() != null) {
+            // 既存の明細を削除
+            reservationItemRepository.deleteByReservationId(reservationId);
+
+            // 新しい明細を作成し、合計金額を再計算
+            int totalPrice = 0;
+            for (Long menuId : request.menuIds()) {
+                if (menuId == null) continue;
+                Menu menu = menuRepository.findById(menuId)
+                        .orElseThrow(() -> new IllegalArgumentException("Menu not found: " + menuId));
+                if (!reservation.getSalonId().equals(menu.getSalonId())) {
+                    throw new IllegalArgumentException("Menu does not belong to salonId: " + menuId);
+                }
+
+                ReservationItem item = new ReservationItem();
+                item.setReservationId(reservationId);
+                item.setMenuId(menuId);
+                item.setPriceAtBooking(determinePrice(menu, null));
+                reservationItemRepository.save(item);
+
+                totalPrice += determinePrice(menu, null);
+            }
+            reservation.setTotalPrice(totalPrice);
+        }
+
+        return reservationRepository.save(reservation);
     }
 
     @Transactional

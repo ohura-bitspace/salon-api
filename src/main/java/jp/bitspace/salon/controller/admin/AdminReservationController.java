@@ -94,19 +94,12 @@ public class AdminReservationController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateReservation(@PathVariable Long id, @Valid @RequestBody UpdateReservationRequest request) {
-        Optional<Reservation> existingOpt = reservationService.findById(id);
-        if (existingOpt.isEmpty()) {
-            return ResponseEntity.status(404).body(Map.of("error", "Reservation not found"));
+        try {
+            Reservation updated = reservationService.updateWithItems(id, request);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
-        Reservation existing = existingOpt.get();
-
-        existing.setStaffId(request.staffId());
-        existing.setStartTime(request.startTime());
-        existing.setEndTime(request.endTime());
-        existing.setStatus(request.status());
-        existing.setMemo(request.memo());
-
-        return ResponseEntity.ok(reservationService.save(existing));
     }
 
     @DeleteMapping("/{id}")
