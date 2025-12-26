@@ -114,9 +114,10 @@ public class ReservationService {
         // customerId, menuIds の必須チェックを削除（枠確保・メニュー未定を許容）
 
         int totalPrice = 0;
-        int totalDurationMinutes = 0;
+        LocalDateTime endTime;
 
         if (request.menuIds() != null && !request.menuIds().isEmpty()) {
+            int totalDurationMinutes = 0;
             for (Long menuId : request.menuIds()) {
                 if (menuId == null) {
                     continue;
@@ -129,12 +130,15 @@ public class ReservationService {
                 totalPrice += determinePrice(menu, null);
                 totalDurationMinutes += menu.getDurationMinutes() != null ? menu.getDurationMinutes() : 0;
             }
+            endTime = request.startTime().plusMinutes(totalDurationMinutes);
         } else {
-            // メニュー未定の場合はデフォルト60分確保とする（運用に合わせて調整）
-            totalDurationMinutes = 60;
+            // メニュー未定の場合は指定された終了時刻を使用、なければデフォルト60分
+            if (request.endTime() != null) {
+                endTime = request.endTime();
+            } else {
+                endTime = request.startTime().plusMinutes(60);
+            }
         }
-
-        LocalDateTime endTime = request.startTime().plusMinutes(totalDurationMinutes);
 
         Reservation reservation = new Reservation();
         reservation.setSalonId(request.salonId());

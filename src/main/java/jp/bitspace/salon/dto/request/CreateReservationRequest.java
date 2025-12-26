@@ -3,8 +3,6 @@ package jp.bitspace.salon.dto.request;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jp.bitspace.salon.model.BookingRoute;
 
@@ -16,7 +14,7 @@ public record CreateReservationRequest(
 	    Long salonId,
 
 	    // ※JWT認証を入れたら、ここは不要になります（トークンから取るため）。
-	    // 今はまだ認証未実装なので残しておいてOKです。
+	    // 但し、管理側からの予約では必要
 	    Long customerId,
 
 	    Long staffId, // 指名なしならnull
@@ -24,8 +22,10 @@ public record CreateReservationRequest(
 	    BookingRoute bookingRoute,
 
 	    @NotNull
-	    @Future(message = "過去の日時は指定できません")
-	    LocalDateTime startTime, // 項目名は startAt が一般的ですが startTime でもOK
+	    LocalDateTime startTime,
+	    
+	    // 枠だけ予約のケースで使用
+	    LocalDateTime endTime,
 
 	    List<Long> menuIds, // ★ここが重要！ 明細オブジェクトではなく「IDのリスト」にする
 
