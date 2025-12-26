@@ -75,7 +75,6 @@ public class AdminReservationController {
         return ResponseEntity.ok(items);
     }
     
-    // TODO 確認する
     // TODO 新規顧客の処理
     /**
      * 予約作成.
@@ -91,7 +90,13 @@ public class AdminReservationController {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
     }
-
+    
+    /**
+     * 更新処理
+     * @param id id
+     * @param request リクエスト
+     * @return レスポンス
+     */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateReservation(@PathVariable Long id, @Valid @RequestBody UpdateReservationRequest request) {
         try {
@@ -101,7 +106,8 @@ public class AdminReservationController {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
     }
-
+    
+    // TODO 確認
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteReservation(@PathVariable Long id) {
         reservationService.deleteById(id);
