@@ -1,10 +1,12 @@
 package jp.bitspace.salon.service;
 
 import jp.bitspace.salon.model.Customer;
+import jp.bitspace.salon.dto.response.CustomerResponse;
 import jp.bitspace.salon.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerService {
@@ -39,5 +41,35 @@ public class CustomerService {
      */
     public Optional<Customer> loginByDevId(Long id) {
         return customerRepository.findById(id);
+    }
+
+    /**
+     * 顧客リストをレスポンスDTOに変換.
+     * @return 顧客レスポンスリスト
+     */
+    public List<CustomerResponse> findAllAsResponse() {
+        return findAll().stream()
+                .map(customer -> new CustomerResponse(
+                    customer.getId(),
+                    buildCustomerName(customer),
+                    buildCustomerNameKana(customer)
+                ))
+                .collect(Collectors.toList());
+    }
+
+    private String buildCustomerName(Customer customer) {
+        if (customer.getLastName() != null && customer.getFirstName() != null) {
+            return customer.getLastName() + " " + customer.getFirstName();
+        } else if (customer.getLineDisplayName() != null) {
+            return customer.getLineDisplayName();
+        }
+        return "不明";
+    }
+
+    private String buildCustomerNameKana(Customer customer) {
+        if (customer.getLastNameKana() != null && customer.getFirstNameKana() != null) {
+            return customer.getLastNameKana() + " " + customer.getFirstNameKana();
+        }
+        return "";
     }
 }

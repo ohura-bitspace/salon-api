@@ -1,6 +1,5 @@
 package jp.bitspace.salon.controller.admin;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -52,7 +51,14 @@ public class AdminMenuController {
             .<ResponseEntity<?>>map(ResponseEntity::ok)
             .orElseGet(() -> ResponseEntity.status(404).body(Map.of("error", "Menu not found")));
     }
-
+    
+    /**
+     * メニュー作成.
+     * @param httpServletRequest
+     * @param salonId
+     * @param request
+     * @return レスポンス
+     */
     @PostMapping
     public ResponseEntity<?> createMenu(
         HttpServletRequest httpServletRequest,
