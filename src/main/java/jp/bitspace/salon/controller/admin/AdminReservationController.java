@@ -107,7 +107,11 @@ public class AdminReservationController {
         }
     }
     
-    // TODO 確認
+    /**
+     * 予約削除.
+     * @param id id 
+     * @return レスポンス
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteReservation(@PathVariable Long id) {
         reservationService.deleteById(id);
