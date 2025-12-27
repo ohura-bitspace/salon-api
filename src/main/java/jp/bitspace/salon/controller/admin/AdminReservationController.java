@@ -23,7 +23,6 @@ import jp.bitspace.salon.dto.request.CreateReservationRequest;
 import jp.bitspace.salon.dto.request.UpdateReservationRequest;
 import jp.bitspace.salon.dto.response.AdminReservationResponse;
 import jp.bitspace.salon.model.Reservation;
-import jp.bitspace.salon.model.ReservationItem;
 import jp.bitspace.salon.security.AdminRequestAuthUtil;
 import jp.bitspace.salon.service.ReservationService;
 
@@ -65,15 +64,15 @@ public class AdminReservationController {
         return ResponseEntity.status(404).body(Map.of("error", "Reservation not found"));
     }
 
-    @GetMapping("/{id}/items")
-    public ResponseEntity<?> getReservationItems(@PathVariable Long id) {
-        Optional<Reservation> reservation = reservationService.findById(id);
-        if (reservation.isEmpty()) {
-            return ResponseEntity.status(404).body(Map.of("error", "Reservation not found"));
-        }
-        List<ReservationItem> items = reservationService.findItemsByReservationId(id);
-        return ResponseEntity.ok(items);
-    }
+//    @GetMapping("/{id}/items")
+//    public ResponseEntity<?> getReservationItems(@PathVariable Long id) {
+//        Optional<Reservation> reservation = reservationService.findById(id);
+//        if (reservation.isEmpty()) {
+//            return ResponseEntity.status(404).body(Map.of("error", "Reservation not found"));
+//        }
+//        List<ReservationItem> items = reservationService.findItemsByReservationId(id);
+//        return ResponseEntity.ok(items);
+//    }
     
     // TODO 新規顧客の処理
     /**
