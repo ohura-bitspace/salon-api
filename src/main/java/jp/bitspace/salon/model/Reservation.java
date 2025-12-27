@@ -51,6 +51,9 @@ public class Reservation {
     @Column(columnDefinition = "TEXT")
     private String memo;
 
+    @Column(name = "treatment_memo", columnDefinition = "TEXT")
+    private String treatmentMemo;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
