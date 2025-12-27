@@ -4,11 +4,14 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jp.bitspace.salon.dto.response.CustomerResponse;
 import jp.bitspace.salon.model.Salon;
 import jp.bitspace.salon.model.Staff;
+import jp.bitspace.salon.security.AdminRequestAuthUtil;
 import jp.bitspace.salon.service.CustomerService;
 import jp.bitspace.salon.service.SalonService;
 import jp.bitspace.salon.service.StaffService;
@@ -19,11 +22,13 @@ public class DataController {
     private final SalonService salonService;
     private final StaffService staffService;
     private final CustomerService customerService;
+    private final AdminRequestAuthUtil adminRequestAuthUtil;
 
-    public DataController(SalonService salonService, StaffService staffService, CustomerService customerService) {
+    public DataController(SalonService salonService, StaffService staffService, CustomerService customerService, AdminRequestAuthUtil adminRequestAuthUtil) {
         this.salonService = salonService;
         this.staffService = staffService;
         this.customerService = customerService;
+        this.adminRequestAuthUtil = adminRequestAuthUtil;
     }
 
     @GetMapping("/salons")
@@ -38,10 +43,13 @@ public class DataController {
     
     /**
      * 顧客リスト取得.
-     * @return 顧客リスト（最小限の情報のみ）
+     * @return 顧客リスト
      */
     @GetMapping("/customers")
-    public List<CustomerResponse> getAllCustomers() {
-        return customerService.findAllAsResponse();
-    }
+	public List<CustomerResponse> getAllCustomers(
+			HttpServletRequest httpServletRequest,
+			@RequestParam(name = "salonId") Long salonId) {
+		adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+		return customerService.findAllAsResponse(salonId);
+	}
 }

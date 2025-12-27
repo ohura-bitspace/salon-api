@@ -1,19 +1,28 @@
 package jp.bitspace.salon.service;
 
-import jp.bitspace.salon.model.Customer;
-import jp.bitspace.salon.dto.response.CustomerResponse;
-import jp.bitspace.salon.repository.CustomerRepository;
-import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
+import jp.bitspace.salon.dto.response.CustomerResponse;
+import jp.bitspace.salon.model.Customer;
+import jp.bitspace.salon.repository.CustomerRepository;
+import jp.bitspace.salon.repository.ReservationRepository;
 
 @Service
 public class CustomerService {
     private final CustomerRepository customerRepository;
+    private final ReservationRepository reservationRepository;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, ReservationRepository reservationRepository) {
         this.customerRepository = customerRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<Customer> findAll() {
@@ -45,15 +54,31 @@ public class CustomerService {
 
     /**
      * 顧客リストをレスポンスDTOに変換.
+     * @param salonId 
      * @return 顧客レスポンスリスト
      */
-    public List<CustomerResponse> findAllAsResponse() {
-        return findAll().stream()
-                .map(customer -> new CustomerResponse(
-                    customer.getId(),
-                    buildCustomerName(customer),
-                    buildCustomerNameKana(customer)
-                ))
+    public List<CustomerResponse> findAllAsResponse(Long salonId) {
+
+        List<Customer> customers = customerRepository.findActiveBySalonId(salonId);
+
+        Map<Long, LocalDateTime> lastVisitByCustomerId = new HashMap<>();
+        for (ReservationRepository.CustomerLastVisitProjection projection : reservationRepository.findLastVisitBySalonId(salonId)) {
+            lastVisitByCustomerId.put(projection.getCustomerId(), projection.getLastVisit());
+        }
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+
+        return customers.stream()
+                .map(customer -> {
+                    LocalDateTime lastVisit = lastVisitByCustomerId.get(customer.getId());
+                    String lastVisitString = lastVisit == null ? "" : dateFormatter.format(lastVisit.toLocalDate());
+                    return new CustomerResponse(
+                            customer.getId(),
+                            buildCustomerName(customer),
+                            buildCustomerNameKana(customer),
+                            lastVisitString
+                    );
+                })
                 .collect(Collectors.toList());
     }
 
