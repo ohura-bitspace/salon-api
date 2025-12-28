@@ -2,7 +2,6 @@ package jp.bitspace.salon.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,6 +68,7 @@ public class DataController {
             @PathVariable Long customerId,
             @RequestParam(name = "salonId") Long salonId) {
         adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        CustomerDetailResponse detail = customerService.getCustomerDetail(customerId, salonId);
+        return ResponseEntity.ok(detail);
     }
 }

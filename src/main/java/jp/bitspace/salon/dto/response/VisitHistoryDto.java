@@ -16,6 +16,8 @@ public record VisitHistoryDto(
         String staff,
         /** 施術料金（単位: 円） */
         Long price,
+        /** 予約メモ（編集可能） */
+        String memo,
         /** 施術メモ（編集可能） */
         String treatmentMemo
 ) {}

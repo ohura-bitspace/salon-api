@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import jp.bitspace.salon.model.Reservation;
+import jp.bitspace.salon.model.ReservationStatus;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -27,6 +28,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     List<Reservation> findBySalonIdAndCustomerIdIsNullOrderByStartTimeDesc(Long salonId);
+
+        List<Reservation> findBySalonIdAndCustomerIdAndStatusOrderByStartTimeDesc(
+            Long salonId,
+            Long customerId,
+            ReservationStatus status
+        );
 
         @Query("""
                         SELECT r.customerId AS customerId, MAX(r.startTime) AS lastVisit
