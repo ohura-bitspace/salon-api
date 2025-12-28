@@ -282,7 +282,7 @@ public class ReservationService {
         String statusText = switch (reservation.getStatus()) {
             case PENDING -> "仮予約";
             case CONFIRMED -> "確定";
-            case VISITED -> "来店";
+            case VISITED -> "来店済";
             case CANCELED -> "キャンセル";
         };
 
