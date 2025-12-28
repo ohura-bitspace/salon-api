@@ -11,5 +11,6 @@ public record CustomerDetailResponse(
         Long customerId,
         String name,
         String nameKana,
+        String memo,
         List<VisitHistoryDto> visitHistories
 ) {}

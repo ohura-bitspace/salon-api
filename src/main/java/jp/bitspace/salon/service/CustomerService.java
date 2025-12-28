@@ -9,8 +9,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import jp.bitspace.salon.dto.response.CustomerDetailResponse;
@@ -24,8 +24,8 @@ import jp.bitspace.salon.model.ReservationStatus;
 import jp.bitspace.salon.model.Staff;
 import jp.bitspace.salon.repository.CustomerRepository;
 import jp.bitspace.salon.repository.MenuRepository;
-import jp.bitspace.salon.repository.ReservationRepository;
 import jp.bitspace.salon.repository.ReservationItemRepository;
+import jp.bitspace.salon.repository.ReservationRepository;
 import jp.bitspace.salon.repository.StaffRepository;
 
 @Service
@@ -194,6 +194,7 @@ public class CustomerService {
             customer.getId(),
             buildCustomerName(customer),
             buildCustomerNameKana(customer),
+            customer.getAdminMemo(),
             visitHistories
         );
         }
