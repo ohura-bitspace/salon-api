@@ -3,7 +3,6 @@ package jp.bitspace.salon.controller.admin;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -56,12 +55,14 @@ public class AdminReservationController {
 	}
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getReservation(@PathVariable Long id) {
-        Optional<Reservation> reservation = reservationService.findById(id);
-        if (reservation.isPresent()) {
-            return ResponseEntity.ok(reservation.get());
-        }
-        return ResponseEntity.status(404).body(Map.of("error", "Reservation not found"));
+    public ResponseEntity<AdminReservationResponse> getReservation(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long id,
+            @RequestParam(name = "salonId") Long salonId
+    ) {
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+        AdminReservationResponse response = reservationService.getAdminReservationResponse(id, salonId);
+        return ResponseEntity.ok(response);
     }
 
 //    @GetMapping("/{id}/items")

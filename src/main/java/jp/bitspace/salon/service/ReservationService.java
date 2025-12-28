@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import jp.bitspace.salon.dto.request.CreateReservationRequest;
 import jp.bitspace.salon.dto.request.UpdateReservationRequest;
@@ -94,6 +96,25 @@ public class ReservationService {
 
     public Optional<Reservation> findById(Long id) {
         return reservationRepository.findById(id);
+    }
+
+    /**
+     * 管理側向け: 予約IDを指定して1件取得し、画面用DTOに整形して返却.
+     */
+    @Transactional(readOnly = true)
+    public AdminReservationResponse getAdminReservationResponse(Long reservationId, Long salonId) {
+        if (reservationId == null) {
+            throw new IllegalArgumentException("reservationId is required");
+        }
+        if (salonId == null) {
+            throw new IllegalArgumentException("salonId is required");
+        }
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .filter(r -> r.getSalonId() != null && r.getSalonId().equals(salonId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found"));
+
+        return toAdminReservationResponse(reservation);
     }
 
     public List<ReservationItem> findItemsByReservationId(Long reservationId) {
