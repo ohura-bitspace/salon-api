@@ -2,12 +2,16 @@ package jp.bitspace.salon.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jp.bitspace.salon.dto.response.CustomerDetailResponse;
 import jp.bitspace.salon.dto.response.CustomerResponse;
 import jp.bitspace.salon.model.Salon;
 import jp.bitspace.salon.model.Staff;
@@ -52,4 +56,19 @@ public class DataController {
 		adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
 		return customerService.findAllAsResponse(salonId);
 	}
+
+    /**
+     * カルテ詳細取得.
+     * <p>
+     * 顧客IDに紐づくカルテ詳細（基本情報 + 来店履歴など）を返します。
+     * ※中身の実装は後続対応。
+     */
+    @GetMapping("/customers/{customerId}")
+    public ResponseEntity<CustomerDetailResponse> getCustomerDetail(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long customerId,
+            @RequestParam(name = "salonId") Long salonId) {
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
 }
