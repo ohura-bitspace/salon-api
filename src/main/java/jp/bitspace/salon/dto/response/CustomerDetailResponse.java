@@ -12,5 +12,9 @@ public record CustomerDetailResponse(
         String name,
         String nameKana,
         String memo,
+        // TODO phoneNumber
+        // TODO email
+        // TODO birthday
+        
         List<VisitHistoryDto> history
 ) {}
