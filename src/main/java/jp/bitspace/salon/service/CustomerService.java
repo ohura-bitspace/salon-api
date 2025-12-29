@@ -194,6 +194,9 @@ public class CustomerService {
             customer.getId(),
             buildCustomerName(customer),
             buildCustomerNameKana(customer),
+            customer.getPhoneNumber(),
+            customer.getEmail(),
+            customer.getBirthday(),
             customer.getAdminMemo(),
             visitHistories
         );

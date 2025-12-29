@@ -42,6 +42,9 @@ public class Customer {
     @Column(length = 255)
     private String email;
 
+    @Column
+    private java.time.LocalDate birthday;
+
     @Column(name = "admin_memo", columnDefinition = "TEXT")
     private String adminMemo;
 

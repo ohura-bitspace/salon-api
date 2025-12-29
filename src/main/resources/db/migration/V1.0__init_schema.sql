@@ -60,6 +60,7 @@ CREATE TABLE customers (
     first_name_kana VARCHAR(50) COMMENT 'メイ',
     phone_number VARCHAR(20) COMMENT '電話番号',
     email VARCHAR(255) COMMENT 'メールアドレス（任意）',
+    birthday DATE COMMENT '誕生日',
     
     -- 管理用メモ・タグなど
     admin_memo TEXT COMMENT 'スタッフ共有メモ',

@@ -11,10 +11,9 @@ public record CustomerDetailResponse(
         Long customerId,
         String name,
         String nameKana,
+        String phoneNumber,
+        String email,
+        java.time.LocalDate birthday,
         String memo,
-        // TODO phoneNumber
-        // TODO email
-        // TODO birthday
-        
         List<VisitHistoryDto> history
 ) {}
