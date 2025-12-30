@@ -183,3 +183,33 @@ CREATE TABLE reservation_items (
     FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE CASCADE,
     FOREIGN KEY (menu_id) REFERENCES menus(id)
 ) COMMENT='予約明細';
+
+-- 7. 決済テーブル
+-- 実際の売上（キャッシュフロー）を管理
+CREATE TABLE payments (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    salon_id BIGINT NOT NULL COMMENT '所属サロンID',
+    reservation_id BIGINT DEFAULT NULL COMMENT '関連する予約ID（NULLなら予約外売上）',
+    customer_id BIGINT DEFAULT NULL COMMENT '顧客ID',
+
+    amount INT NOT NULL COMMENT '決済金額',
+
+    -- 決済方法の管理
+    payment_method ENUM('CASH', 'CREDIT_CARD', 'QR_PAY', 'BANK_TRANSFER', 'OTHER') NOT NULL COMMENT '決済方法',
+
+    -- データの出所（Square同期か手動か）
+    payment_source ENUM('SQUARE', 'MANUAL') DEFAULT 'MANUAL' COMMENT 'データソース',
+
+    -- Square連携時の外部ID（二重取り込み防止用）
+    external_transaction_id VARCHAR(255) DEFAULT NULL COMMENT 'Square等の外部決済ID',
+
+    payment_at DATETIME NOT NULL COMMENT '決済日時',
+    memo TEXT COMMENT '会計に関するメモ',
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (salon_id) REFERENCES salons(id),
+    FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE SET NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+) COMMENT='決済・売上詳細データ';
