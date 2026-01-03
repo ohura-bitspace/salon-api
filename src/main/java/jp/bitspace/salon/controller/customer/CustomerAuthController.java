@@ -4,8 +4,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,6 +47,7 @@ public class CustomerAuthController {
      * 指定の customerId を検索し、JWT を発行して返します。
      */
     @PostMapping("/dev-login")
+    @org.springframework.context.annotation.Profile("dev")
     public ResponseEntity<CustomerAuthResponse> devLogin(@RequestBody CustomerDevLoginRequest request) {
         Customer customer = customerService.findByIdAndSalonIdOrThrow(request.getCustomerId(), request.getSalonId());
         String token = jwtUtils.generateToken(customer.getId(), customer.getSalonId());
