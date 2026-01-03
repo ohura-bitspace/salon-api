@@ -16,12 +16,13 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtUtils {
 
-	// application.properties の "app.jwt.secret" を読み込む
-    @Value("${app.jwt.secret}")
-    private String secretKey; // 変数名をキャメルケースに変更するのが一般的
+	// 顧客・管理 共通で利用する秘密鍵。
+    // 優先: jwt.secret -> 互換: app.jwt.secret -> 最終フォールバック（開発用）
+    @Value("${jwt.secret:${app.jwt.secret:MySuperSecretKeyForSalonAppMustBeVeryLongAndSecureEnoughToWork==}}")
+    private String secretKey;
 
-    // application.properties の "app.jwt.expiration-ms" を読み込む
-    @Value("${app.jwt.expiration-ms}")
+    // 優先: jwt.expiration-ms -> 互換: app.jwt.expiration-ms -> 7日
+    @Value("${jwt.expiration-ms:${app.jwt.expiration-ms:604800000}}")
     private long expirationMs;
 
     private Key getSigningKey() {
@@ -30,13 +31,15 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // ログイン成功時に呼ぶメソッド
+    /**
+     * 顧客向けJWTを発行します.
+     */
 	public String generateToken(Long customerId, Long salonId) {
 
 		String tk = Jwts.builder()
 				.setSubject(String.valueOf(customerId))
 				.claim("salonId", salonId)
-				.claim("role", "CUSTOMER")
+                .claim("role", "ROLE_CUSTOMER")
 				.claim("userType", "CUSTOMER")
 				.setIssuedAt(new Date())
 				.setExpiration(new Date(System.currentTimeMillis() + expirationMs))
@@ -75,6 +78,35 @@ public class JwtUtils {
      */
     public Claims validateAndExtractClaims(String token) throws JwtException {
         return extractClaims(token);
+    }
+
+    /**
+     * トークンが有効かどうかを返します.
+     */
+    public boolean validateToken(String token) {
+        try {
+            validateAndExtractClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    /**
+     * 顧客用トークンから customerId を取り出します.
+     * <p>
+     * 顧客用ではない場合は null を返します。
+     */
+    public Long getCustomerIdFromToken(String token) {
+        Claims claims = validateAndExtractClaims(token);
+        Object userType = claims.get("userType");
+        Object role = claims.get("role");
+
+        boolean isCustomer = "CUSTOMER".equals(String.valueOf(userType)) || "ROLE_CUSTOMER".equals(String.valueOf(role));
+        if (!isCustomer) {
+            return null;
+        }
+        return extractSubjectAsLong(token);
     }
 
     public Long extractSalonId(String token) {

@@ -58,6 +58,41 @@ public class CustomerService {
         return customerRepository.findById(id);
     }
 
+    /**
+     * 顧客IDとサロンIDが一致する顧客を取得します.
+     */
+    public Customer findByIdAndSalonIdOrThrow(Long customerId, Long salonId) {
+        if (customerId == null || salonId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "customerId and salonId are required");
+        }
+
+        return customerRepository.findById(customerId)
+                .filter(c -> c.getSalonId() != null && c.getSalonId().equals(salonId))
+                .filter(c -> c.getIsDeleted() == null || !c.getIsDeleted())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
+    }
+
+    /**
+     * LINEコールバック（スタブ）用に固定顧客を取得または作成します.
+     */
+    public Customer getOrCreateStubCustomer(Long salonId) {
+        if (salonId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "salonId is required");
+        }
+
+        Optional<Customer> existing = customerRepository.findById(1L)
+                .filter(c -> c.getSalonId() != null && c.getSalonId().equals(salonId));
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+        Customer customer = new Customer();
+        customer.setSalonId(salonId);
+        customer.setLineDisplayName("LINEユーザー(スタブ)");
+        customer.setLineUserId("stub");
+        return customerRepository.save(customer);
+    }
+
     public Customer save(Customer customer) {
         return customerRepository.save(customer);
     }
