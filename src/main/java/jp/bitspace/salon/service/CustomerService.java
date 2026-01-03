@@ -106,6 +106,40 @@ public class CustomerService {
     }
 
     /**
+     * LINEプロフィールから顧客を作成または更新します.
+     */
+    public Customer createOrUpdateByLineProfile(Long salonId, String lineUserId, String displayName, String pictureUrl, String email) {
+        if (salonId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "salonId is required");
+        }
+        if (lineUserId == null || lineUserId.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "lineUserId is required");
+        }
+
+        Optional<Customer> existing = customerRepository.findByLineUserIdAndSalonId(lineUserId, salonId);
+        Customer customer;
+        if (existing.isPresent()) {
+            customer = existing.get();
+        } else {
+            customer = new Customer();
+            customer.setSalonId(salonId);
+            customer.setLineUserId(lineUserId);
+        }
+
+        if (displayName != null) {
+            customer.setLineDisplayName(displayName);
+        }
+        if (pictureUrl != null) {
+            customer.setLinePictureUrl(pictureUrl);
+        }
+        if (email != null && !email.isBlank()) {
+            customer.setEmail(email);
+        }
+
+        return customerRepository.save(customer);
+    }
+
+    /**
      * 開発用: IDを指定してログイン（LINE連携スキップ）
      */
     public Optional<Customer> loginByDevId(Long id) {

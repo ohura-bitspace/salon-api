@@ -1,21 +1,31 @@
 package jp.bitspace.salon.controller.customer;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpSession;
 import jp.bitspace.salon.dto.request.CustomerDevLoginRequest;
 import jp.bitspace.salon.dto.request.LineCallbackRequest;
 import jp.bitspace.salon.dto.response.CustomerAuthResponse;
 import jp.bitspace.salon.dto.response.CustomerDto;
+import jp.bitspace.salon.dto.response.CustomerLineLoginResponse;
 import jp.bitspace.salon.model.Customer;
 import jp.bitspace.salon.security.CustomerPrincipal;
 import jp.bitspace.salon.security.JwtUtils;
 import jp.bitspace.salon.service.CustomerService;
+import jp.bitspace.salon.service.LineApiClient;
+import jp.bitspace.salon.service.LineStateService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -25,6 +35,11 @@ public class CustomerAuthController {
 	
 	private final CustomerService customerService;
     private final JwtUtils jwtUtils;
+    private final LineStateService lineStateService;
+    private final LineApiClient lineApiClient;
+
+    @Value("${line.login.channel-id:}")
+    private String lineChannelId;
 
     /**
      * 開発用ログイン（デバッグ用途）.
@@ -39,16 +54,71 @@ public class CustomerAuthController {
     }
 
     /**
+     * LINE Login（Web）認証開始.
+     * <p>
+     * state/nonce を生成し、セッションに保存して authorize URL を返します。
+     */
+    @GetMapping("/line/authorize")
+    public ResponseEntity<Map<String, String>> authorize(
+            HttpSession session,
+            @RequestParam Long salonId,
+            @RequestParam(name = "redirect") String redirectUri) {
+
+        LineStateService.CreatedState created = lineStateService.createAndStore(session, salonId, redirectUri);
+
+        // LINE authorize URL
+        String authUrl = "https://access.line.me/oauth2/v2.1/authorize"
+                + "?response_type=code"
+                + "&client_id=" + url(lineChannelId)
+                + "&redirect_uri=" + url(created.redirectUri())
+                + "&state=" + url(created.state())
+                + "&scope=" + url("profile openid email")
+                + "&nonce=" + url(created.nonce());
+
+        return ResponseEntity.ok(Map.of("authUrl", authUrl));
+    }
+
+    /**
      * LINE認証コールバック（スタブ）.
      * <p>
      * TODO: code/state でLINEトークン交換・検証を実装する。
      */
     @PostMapping("/line/callback")
-    public ResponseEntity<CustomerAuthResponse> lineCallback(@RequestBody LineCallbackRequest request) {
-        // TODO: 本来は request.getCode()/getState() を使って LINE 側の検証を行う
-        Customer customer = customerService.getOrCreateStubCustomer(request.getSalonId());
-        String token = jwtUtils.generateToken(customer.getId(), customer.getSalonId());
-        return ResponseEntity.ok(new CustomerAuthResponse(token, toDto(customer)));
+    public ResponseEntity<CustomerLineLoginResponse> lineCallback(HttpSession session, @RequestBody LineCallbackRequest request) {
+        // 1) state 検証（使い捨て）
+        LineStateService.StateEntry entry = lineStateService.validateAndConsume(session, request.getState(), request.getSalonId());
+
+        // 2) トークン交換
+        LineApiClient.TokenResponse tokenResponse = lineApiClient.exchangeToken(request.getCode(), entry.redirectUri());
+
+        // 3) id_token 最低限検証（iss/aud/exp/nonce）
+        LineApiClient.IdTokenClaims claims = lineApiClient.decodeAndValidateIdToken(tokenResponse.idToken(), entry.nonce());
+
+        // 4) プロフィール取得
+        LineApiClient.ProfileResponse profile = lineApiClient.fetchProfile(tokenResponse.accessToken());
+
+        // 5) 顧客作成/更新
+        Customer customer = customerService.createOrUpdateByLineProfile(
+                entry.salonId(),
+                profile.userId(),
+                profile.displayName(),
+                profile.pictureUrl(),
+                claims.email()
+        );
+
+        // 6) JWT 発行
+        String jwt = jwtUtils.generateToken(customer.getId(), customer.getSalonId());
+        String name = (customer.getLastName() != null && customer.getFirstName() != null)
+                ? customer.getLastName() + " " + customer.getFirstName()
+                : customer.getLineDisplayName();
+
+        return ResponseEntity.ok(new CustomerLineLoginResponse(
+                jwt,
+                customer.getId(),
+                name,
+                customer.getEmail(),
+                customer.getPhoneNumber()
+        ));
     }
 
     /**
@@ -72,6 +142,10 @@ public class CustomerAuthController {
                 customer.getEmail(),
                 customer.getPhoneNumber()
         );
+    }
+
+    private String url(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
 }
