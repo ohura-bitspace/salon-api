@@ -6,7 +6,7 @@ import java.time.LocalDate;
  * カルテ画面で表示する来店履歴DTO.
  */
 public record VisitHistoryDto(
-        /** 来店履歴のID（予約IDやレシートIDでも可） */
+        /** 来店履歴のID（予約ID） */
         Long visitId,
         /** 来店日 (YYYY-MM-DD) */
         LocalDate date,

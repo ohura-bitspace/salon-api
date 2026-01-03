@@ -5,11 +5,14 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jp.bitspace.salon.dto.request.UpdateTreatmentMemoRequest;
 import jp.bitspace.salon.dto.response.CustomerDetailResponse;
 import jp.bitspace.salon.dto.response.CustomerResponse;
 import jp.bitspace.salon.model.Salon;
@@ -70,5 +73,21 @@ public class DataController {
         adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
         CustomerDetailResponse detail = customerService.getCustomerDetail(customerId, salonId);
         return ResponseEntity.ok(detail);
+    }
+
+    /**
+     * 来店履歴の施術メモを更新.
+     * <p>
+     * 予約に紐づく施術メモ（treatmentMemo）のみを更新します。
+     */
+    @PutMapping("/visit-histories/{visitId}/treatment-memo")
+    public ResponseEntity<Void> updateTreatmentMemo(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long visitId,
+            @RequestParam(name = "salonId") Long salonId,
+            @RequestBody UpdateTreatmentMemoRequest request) {
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+        customerService.updateTreatmentMemo(visitId, request.treatmentMemo());
+        return ResponseEntity.noContent().build();
     }
 }

@@ -201,4 +201,17 @@ public class CustomerService {
             visitHistories
         );
         }
+
+    /**
+     * 来店履歴の施術メモを更新.
+     * @param reservationId 予約ID
+     * @param treatmentMemo 施術メモ
+     * @return 更新後の予約
+     */
+    public Reservation updateTreatmentMemo(Long reservationId, String treatmentMemo) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found"));
+        reservation.setTreatmentMemo(treatmentMemo);
+        return reservationRepository.save(reservation);
+    }
 }
