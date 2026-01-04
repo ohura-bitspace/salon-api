@@ -34,9 +34,9 @@ public class SecurityConfig {
             // CSRF保護を無効化（REST APIでは通常無効にします）
             .csrf(csrf -> csrf.disable())
             // CORS（WebConfig の設定を使用）
-            .cors(cors -> {})
-            // ステートレス
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .cors(cors -> cors.configure(http))
+            // TODO 理解していない.ステートレス
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             // 認可ルール
             .authorizeHttpRequests(auth -> auth
                 // /me はトークン確認用のため認証必須

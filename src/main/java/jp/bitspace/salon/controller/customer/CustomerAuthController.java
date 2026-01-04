@@ -71,10 +71,12 @@ public class CustomerAuthController {
         String authUrl = "https://access.line.me/oauth2/v2.1/authorize"
                 + "?response_type=code"
                 + "&client_id=" + url(lineChannelId)
-                + "&redirect_uri=" + url(created.redirectUri())
+                + "&redirect_uri=" + url("https://kandace-icicled-unadmissibly.ngrok-free.dev/auth/callback")
                 + "&state=" + url(created.state())
                 + "&scope=" + url("profile openid email")
                 + "&nonce=" + url(created.nonce());
+        
+        System.out.println("redirectUri:" + redirectUri);
 
         return ResponseEntity.ok(Map.of("authUrl", authUrl));
     }
@@ -84,43 +86,47 @@ public class CustomerAuthController {
      * <p>
      * TODO: code/state でLINEトークン交換・検証を実装する。
      */
-    @PostMapping("/line/callback")
-    public ResponseEntity<CustomerLineLoginResponse> lineCallback(HttpSession session, @RequestBody LineCallbackRequest request) {
-        // 1) state 検証（使い捨て）
-        LineStateService.StateEntry entry = lineStateService.validateAndConsume(session, request.getState(), request.getSalonId());
+	@PostMapping("/line/callback")
+	public ResponseEntity<CustomerLineLoginResponse> lineCallback(HttpSession session,
+			@RequestBody LineCallbackRequest request) {
+		
+		// 1) state 検証（使い捨て）
+		LineStateService.StateEntry entry = lineStateService.validateAndConsume(session, request.getState(),
+				request.getSalonId());
 
-        // 2) トークン交換
-        LineApiClient.TokenResponse tokenResponse = lineApiClient.exchangeToken(request.getCode(), entry.redirectUri());
+		// 2) トークン交換
+		LineApiClient.TokenResponse tokenResponse = lineApiClient.exchangeToken(request.getCode(), entry.redirectUri());
 
-        // 3) id_token 最低限検証（iss/aud/exp/nonce）
-        LineApiClient.IdTokenClaims claims = lineApiClient.decodeAndValidateIdToken(tokenResponse.idToken(), entry.nonce());
+		// 3) id_token 最低限検証（iss/aud/exp/nonce）
+		LineApiClient.IdTokenClaims claims = lineApiClient.decodeAndValidateIdToken(tokenResponse.idToken(),
+				entry.nonce());
+		System.out.println("claims:" + claims);
+		// 4) プロフィール取得
+		LineApiClient.ProfileResponse profile = lineApiClient.fetchProfile(tokenResponse.accessToken());
+		System.out.println("profile:" + profile);
+		
 
-        // 4) プロフィール取得
-        LineApiClient.ProfileResponse profile = lineApiClient.fetchProfile(tokenResponse.accessToken());
+		// 5) 顧客作成/更新
+		Customer customer = customerService.createOrUpdateByLineProfile(
+				entry.salonId(),
+				profile.userId(),
+				profile.displayName(),
+				profile.pictureUrl(),
+				claims.email());
 
-        // 5) 顧客作成/更新
-        Customer customer = customerService.createOrUpdateByLineProfile(
-                entry.salonId(),
-                profile.userId(),
-                profile.displayName(),
-                profile.pictureUrl(),
-                claims.email()
-        );
+		// 6) JWT 発行
+		String jwt = jwtUtils.generateToken(customer.getId(), customer.getSalonId());
+		String name = (customer.getLastName() != null && customer.getFirstName() != null)
+				? customer.getLastName() + " " + customer.getFirstName()
+				: customer.getLineDisplayName();
 
-        // 6) JWT 発行
-        String jwt = jwtUtils.generateToken(customer.getId(), customer.getSalonId());
-        String name = (customer.getLastName() != null && customer.getFirstName() != null)
-                ? customer.getLastName() + " " + customer.getFirstName()
-                : customer.getLineDisplayName();
-
-        return ResponseEntity.ok(new CustomerLineLoginResponse(
-                jwt,
-                customer.getId(),
-                name,
-                customer.getEmail(),
-                customer.getPhoneNumber()
-        ));
-    }
+		return ResponseEntity.ok(new CustomerLineLoginResponse(
+				jwt,
+				customer.getId(),
+				name,
+				customer.getEmail(),
+				customer.getPhoneNumber()));
+	}
 
     /**
      * 自分の情報取得（トークン確認用）.
