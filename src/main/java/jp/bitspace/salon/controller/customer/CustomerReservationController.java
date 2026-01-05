@@ -3,6 +3,7 @@ package jp.bitspace.salon.controller.customer;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,17 +12,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.Valid;
 import jp.bitspace.salon.dto.request.CreateReservationRequest;
 import jp.bitspace.salon.dto.response.VisitHistoryDto;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.security.CustomerPrincipal;
-import jp.bitspace.salon.service.ReservationService;
 import jp.bitspace.salon.service.CustomerService;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import jp.bitspace.salon.service.ReservationService;
 
 /**
  * 管理側予約テーブルコントローラ.
@@ -75,6 +74,7 @@ public class CustomerReservationController {
     public List<VisitHistoryDto> getHistory(
             @AuthenticationPrincipal CustomerPrincipal principal,
             @RequestParam(name = "salonId") Long salonId) {
+    	System.out.println("@history:" + "salonId=" + salonId);
 
         if (principal == null) {
             // セキュリティ設定上ここには来ない想定だが、念のため
