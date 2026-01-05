@@ -71,7 +71,6 @@ public class CustomerReservationController {
     public List<VisitHistoryDto> getHistory(
             @AuthenticationPrincipal CustomerPrincipal principal,
             @RequestParam(name = "salonId") Long salonId) {
-    	System.out.println("@history:" + "salonId=" + salonId);
 
         if (principal == null) {
             // セキュリティ設定上ここには来ない想定だが、念のため
@@ -80,7 +79,13 @@ public class CustomerReservationController {
         if (principal.getSalonId() != null && !principal.getSalonId().equals(salonId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden");
         }
-        return customerService.getVisitHistory(principal.getCustomerId(), salonId);
+        
+        List<VisitHistoryDto> visitHistoryList = customerService.getVisitHistory(principal.getCustomerId(), salonId);
+        for (VisitHistoryDto visitHistoryDto : visitHistoryList) {
+        	System.out.println("visitHistoryDto=" + visitHistoryDto);
+		}
+        
+        return visitHistoryList;
     }
     
     // TODO 予約削除

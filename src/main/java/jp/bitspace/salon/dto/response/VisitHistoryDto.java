@@ -2,6 +2,8 @@ package jp.bitspace.salon.dto.response;
 
 import java.time.LocalDate;
 
+import jp.bitspace.salon.model.ReservationStatus;
+
 /**
  * カルテ画面で表示する来店履歴DTO.
  */
@@ -16,6 +18,8 @@ public record VisitHistoryDto(
         String staff,
         /** 施術料金（単位: 円） */
         Long price,
+        /** 予約ステータス */
+        ReservationStatus status,
         /** 予約メモ（編集可能） */
         String memo,
         /** 施術メモ（編集可能） */

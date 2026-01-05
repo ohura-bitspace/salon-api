@@ -253,6 +253,7 @@ public class CustomerService {
                     menuTitle,
                     staffName,
                     price,
+                    ReservationStatus.VISITED,
                             memo,
                     treatmentMemo
                 );
@@ -344,6 +345,7 @@ public class CustomerService {
                     menuTitle,
                     staffName,
                     price,
+                    ReservationStatus.VISITED,
                     null,
                     null
                 );
