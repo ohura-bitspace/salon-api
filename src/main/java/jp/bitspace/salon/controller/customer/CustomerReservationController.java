@@ -61,9 +61,6 @@ public class CustomerReservationController {
         }
     }
     
-    // TODO 予約削除
-    // TODO [後回し]予約更新
-    
     /**
      * 予約履歴一覧（来店済み）.
      * <p>
@@ -85,4 +82,7 @@ public class CustomerReservationController {
         }
         return customerService.getVisitHistory(principal.getCustomerId(), salonId);
     }
+    
+    // TODO 予約削除
+    // TODO [後回し]予約更新
 }
