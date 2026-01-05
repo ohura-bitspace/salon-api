@@ -55,4 +55,6 @@ public class CustomerReservationController {
     
     // TODO 予約削除
     // TODO [後回し]予約更新
+    
+    // TODO 予約履歴一覧 @GetMapping("/history")
 }
