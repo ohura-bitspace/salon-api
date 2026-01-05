@@ -1,5 +1,6 @@
 package jp.bitspace.salon.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -192,85 +193,86 @@ public class CustomerService {
         return "";
     }
 
-        /**
-         * カルテ詳細取得.
-         * <p>
-         * 顧客基本情報 + 来店履歴（予約のVISITED）を返す。
-         */
-        public CustomerDetailResponse getCustomerDetail(Long customerId, Long salonId) {
-        if (customerId == null) {
-            throw new IllegalArgumentException("customerId is required");
-        }
-        if (salonId == null) {
-            throw new IllegalArgumentException("salonId is required");
-        }
+	/**
+	 * カルテ詳細取得.
+	 * <p>
+	 * 顧客基本情報 + 来店履歴（予約のVISITED）を返す。
+	 */
+	public CustomerDetailResponse getCustomerDetail(Long customerId, Long salonId) {
+		if (customerId == null) {
+			throw new IllegalArgumentException("customerId is required");
+		}
+		if (salonId == null) {
+			throw new IllegalArgumentException("salonId is required");
+		}
 
-        Customer customer = customerRepository.findById(customerId)
-            .filter(c -> c.getSalonId() != null && c.getSalonId().equals(salonId))
-            .filter(c -> c.getIsDeleted() == null || !c.getIsDeleted())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
+		Customer customer = customerRepository.findById(customerId)
+				.filter(c -> c.getSalonId() != null && c.getSalonId().equals(salonId))
+				.filter(c -> c.getIsDeleted() == null || !c.getIsDeleted())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
 
-        List<Reservation> reservations = reservationRepository
-            .findBySalonIdAndCustomerIdAndStatusOrderByStartTimeDesc(salonId, customerId, ReservationStatus.VISITED);
+		List<Reservation> reservations = reservationRepository
+				.findBySalonIdAndCustomerIdAndStatusOrderByStartTimeDesc(salonId, customerId,
+						ReservationStatus.VISITED);
 
-        Set<Long> staffIds = reservations.stream()
-            .map(Reservation::getStaffId)
-            .filter(id -> id != null)
-            .collect(Collectors.toSet());
-        Map<Long, Staff> staffById = staffRepository.findAllById(staffIds).stream()
-            .collect(Collectors.toMap(Staff::getId, s -> s));
+		Set<Long> staffIds = reservations.stream()
+				.map(Reservation::getStaffId)
+				.filter(id -> id != null)
+				.collect(Collectors.toSet());
+		Map<Long, Staff> staffById = staffRepository.findAllById(staffIds).stream()
+				.collect(Collectors.toMap(Staff::getId, s -> s));
 
-        List<VisitHistoryDto> visitHistories = reservations.stream()
-            .map(reservation -> {
-                List<ReservationItem> items = reservationItemRepository.findByReservationId(reservation.getId());
-                Set<Long> menuIds = items.stream()
-                    .map(ReservationItem::getMenuId)
-                    .filter(id -> id != null)
-                    .collect(Collectors.toSet());
+		List<VisitHistoryDto> visitHistories = reservations.stream()
+				.map(reservation -> {
+					List<ReservationItem> items = reservationItemRepository.findByReservationId(reservation.getId());
+					Set<Long> menuIds = items.stream()
+							.map(ReservationItem::getMenuId)
+							.filter(id -> id != null)
+							.collect(Collectors.toSet());
 
-                Map<Long, Menu> menuById = menuRepository.findAllById(menuIds).stream()
-                    .collect(Collectors.toMap(Menu::getId, m -> m));
+					Map<Long, Menu> menuById = menuRepository.findAllById(menuIds).stream()
+							.collect(Collectors.toMap(Menu::getId, m -> m));
 
-                String menuTitle = items.stream()
-                    .map(ReservationItem::getMenuId)
-                    .filter(id -> id != null)
-                    .map(menuById::get)
-                    .filter(m -> m != null && m.getTitle() != null)
-                    .map(Menu::getTitle)
-                    .distinct()
-                    .collect(Collectors.joining("、"));
+					String menuTitle = items.stream()
+							.map(ReservationItem::getMenuId)
+							.filter(id -> id != null)
+							.map(menuById::get)
+							.filter(m -> m != null && m.getTitle() != null)
+							.map(Menu::getTitle)
+							.distinct()
+							.collect(Collectors.joining("、"));
 
-                Staff staff = reservation.getStaffId() == null ? null : staffById.get(reservation.getStaffId());
-                String staffName = staff != null && staff.getUser() != null ? staff.getUser().getName() : "";
+					Staff staff = reservation.getStaffId() == null ? null : staffById.get(reservation.getStaffId());
+					String staffName = staff != null && staff.getUser() != null ? staff.getUser().getName() : "";
 
-                    Long price = reservation.getTotalPrice() == null ? null : reservation.getTotalPrice().longValue();
-                    String memo = reservation.getMemo() != null ? reservation.getMemo() : "";
-                    String treatmentMemo = reservation.getTreatmentMemo() != null ? reservation.getTreatmentMemo() : "";
+					Long price = reservation.getTotalPrice() == null ? null : reservation.getTotalPrice().longValue();
+					String memo = reservation.getMemo() != null ? reservation.getMemo() : "";
+					String treatmentMemo = reservation.getTreatmentMemo() != null ? reservation.getTreatmentMemo() : "";
+					// 予約ステータス
+					ReservationStatus status = reservation.getStatus();
 
-                return new VisitHistoryDto(
-                    reservation.getId(),
-                    reservation.getStartTime() != null ? reservation.getStartTime().toLocalDate() : null,
-                    menuTitle,
-                    staffName,
-                    price,
-                    ReservationStatus.VISITED,
-                            memo,
-                    treatmentMemo
-                );
-            })
-            .toList();
+					return new VisitHistoryDto(
+							reservation.getId(),
+							reservation.getStartTime() != null ? reservation.getStartTime().toLocalDate() : null,
+							menuTitle,
+							staffName,
+							price,
+							status,
+							memo,
+							treatmentMemo);
+				})
+				.toList();
 
-        return new CustomerDetailResponse(
-            customer.getId(),
-            buildCustomerName(customer),
-            buildCustomerNameKana(customer),
-            customer.getPhoneNumber(),
-            customer.getEmail(),
-            customer.getBirthday(),
-            customer.getAdminMemo(),
-            visitHistories
-        );
-        }
+		return new CustomerDetailResponse(
+				customer.getId(),
+				buildCustomerName(customer),
+				buildCustomerNameKana(customer),
+				customer.getPhoneNumber(),
+				customer.getEmail(),
+				customer.getBirthday(),
+				customer.getAdminMemo(),
+				visitHistories);
+	}
 
     /**
      * 来店履歴の施術メモを更新.
@@ -285,71 +287,79 @@ public class CustomerService {
         return reservationRepository.save(reservation);
     }
 
-        /**
-         * 顧客向け：予約履歴（来店済み）一覧.
-         * <p>
-         * memo / treatmentMemo は現時点では返さないため null を設定します。
-         */
-        public List<VisitHistoryDto> getVisitHistory(Long customerId, Long salonId) {
-        if (customerId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "customerId is required");
-        }
-        if (salonId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "salonId is required");
-        }
+	/**
+	 * 顧客向け：予約履歴（来店済み）一覧.
+	 * <p>
+	 * memo / treatmentMemo は現時点では返さないため null を設定します。
+	 */
+	public List<VisitHistoryDto> getVisitHistory(Long customerId, Long salonId) {
+		if (customerId == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "customerId is required");
+		}
+		if (salonId == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "salonId is required");
+		}
 
-        // サロン整合性 + 削除フラグ確認
-        customerRepository.findById(customerId)
-            .filter(c -> c.getSalonId() != null && c.getSalonId().equals(salonId))
-            .filter(c -> c.getIsDeleted() == null || !c.getIsDeleted())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
+		// サロン整合性 + 削除フラグ確認
+		customerRepository.findById(customerId)
+				.filter(c -> c.getSalonId() != null && c.getSalonId().equals(salonId))
+				.filter(c -> c.getIsDeleted() == null || !c.getIsDeleted())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
 
         List<Reservation> reservations = reservationRepository
-            .findBySalonIdAndCustomerIdAndStatusOrderByStartTimeDesc(salonId, customerId, ReservationStatus.VISITED);
-
-        Set<Long> staffIds = reservations.stream()
-            .map(Reservation::getStaffId)
-            .filter(id -> id != null)
-            .collect(Collectors.toSet());
-        Map<Long, Staff> staffById = staffRepository.findAllById(staffIds).stream()
-            .collect(Collectors.toMap(Staff::getId, s -> s));
-
-        return reservations.stream()
-            .map(reservation -> {
-                List<ReservationItem> items = reservationItemRepository.findByReservationId(reservation.getId());
-                Set<Long> menuIds = items.stream()
-                    .map(ReservationItem::getMenuId)
-                    .filter(id -> id != null)
-                    .collect(Collectors.toSet());
-
-                Map<Long, Menu> menuById = menuRepository.findAllById(menuIds).stream()
-                    .collect(Collectors.toMap(Menu::getId, m -> m));
-
-                String menuTitle = items.stream()
-                    .map(ReservationItem::getMenuId)
-                    .filter(id -> id != null)
-                    .map(menuById::get)
-                    .filter(m -> m != null && m.getTitle() != null)
-                    .map(Menu::getTitle)
-                    .distinct()
-                    .collect(Collectors.joining("、"));
-
-                Staff staff = reservation.getStaffId() == null ? null : staffById.get(reservation.getStaffId());
-                String staffName = staff != null && staff.getUser() != null ? staff.getUser().getName() : "";
-
-                Long price = reservation.getTotalPrice() == null ? null : reservation.getTotalPrice().longValue();
-
-                return new VisitHistoryDto(
-                    reservation.getId(),
-                    reservation.getStartTime() != null ? reservation.getStartTime().toLocalDate() : null,
-                    menuTitle,
-                    staffName,
-                    price,
-                    ReservationStatus.VISITED,
-                    null,
-                    null
+                .findBySalonIdAndCustomerIdAndStatusInOrderByStartTimeDesc(
+                        salonId,
+                        customerId,
+                        List.of(ReservationStatus.VISITED, ReservationStatus.CONFIRMED)
                 );
-            })
-            .toList();
-        }
+
+		Set<Long> staffIds = reservations.stream()
+				.map(Reservation::getStaffId)
+				.filter(id -> id != null)
+				.collect(Collectors.toSet());
+        Map<Long, Staff> staffById = staffRepository.findAllById(staffIds).stream()
+                .collect(Collectors.toMap(Staff::getId, s -> s));
+
+        // 来店済み/確定予約を VisitHistoryDto にマッピング（メモ類は返さない）
+        List<VisitHistoryDto> visitHistoryList = reservations.stream()
+				.map(reservation -> {
+                    List<ReservationItem> items = reservationItemRepository.findByReservationId(reservation.getId());
+                    Set<Long> menuIds = items.stream()
+                            .map(ReservationItem::getMenuId)
+                            .filter(id -> id != null)
+                            .collect(Collectors.toSet());
+
+                    Map<Long, Menu> menuById = menuRepository.findAllById(menuIds).stream()
+                            .collect(Collectors.toMap(Menu::getId, m -> m));
+
+                    String menuTitle = items.stream()
+                            .map(ReservationItem::getMenuId)
+                            .filter(id -> id != null)
+                            .map(menuById::get)
+                            .filter(m -> m != null && m.getTitle() != null)
+                            .map(Menu::getTitle)
+                            .distinct()
+                            .collect(Collectors.joining("、"));
+
+                    Staff staff = reservation.getStaffId() == null ? null : staffById.get(reservation.getStaffId());
+                    String staffName = staff != null && staff.getUser() != null ? staff.getUser().getName() : "";
+
+                    Long price = reservation.getTotalPrice() == null ? null : reservation.getTotalPrice().longValue();
+                    LocalDate visitDate = reservation.getStartTime() != null ? reservation.getStartTime().toLocalDate() : null;
+                    ReservationStatus status = reservation.getStatus(); // VISITED / CONFIRMED
+
+                    return new VisitHistoryDto(
+                            reservation.getId(),
+                            visitDate,
+                            menuTitle,
+                            staffName,
+                            price,
+                            status,
+                            null,
+                            null);
+                })
+                .toList();
+
+        return visitHistoryList;
+	}
 }

@@ -35,6 +35,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             ReservationStatus status
         );
 
+        List<Reservation> findBySalonIdAndCustomerIdAndStatusInOrderByStartTimeDesc(
+            Long salonId,
+            Long customerId,
+            List<ReservationStatus> statuses
+        );
+
         @Query("""
                         SELECT r.customerId AS customerId, MAX(r.startTime) AS lastVisit
                         FROM Reservation r
