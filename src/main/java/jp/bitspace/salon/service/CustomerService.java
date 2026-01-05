@@ -283,4 +283,71 @@ public class CustomerService {
         reservation.setTreatmentMemo(treatmentMemo);
         return reservationRepository.save(reservation);
     }
+
+        /**
+         * 顧客向け：予約履歴（来店済み）一覧.
+         * <p>
+         * memo / treatmentMemo は現時点では返さないため null を設定します。
+         */
+        public List<VisitHistoryDto> getVisitHistory(Long customerId, Long salonId) {
+        if (customerId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "customerId is required");
+        }
+        if (salonId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "salonId is required");
+        }
+
+        // サロン整合性 + 削除フラグ確認
+        customerRepository.findById(customerId)
+            .filter(c -> c.getSalonId() != null && c.getSalonId().equals(salonId))
+            .filter(c -> c.getIsDeleted() == null || !c.getIsDeleted())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
+
+        List<Reservation> reservations = reservationRepository
+            .findBySalonIdAndCustomerIdAndStatusOrderByStartTimeDesc(salonId, customerId, ReservationStatus.VISITED);
+
+        Set<Long> staffIds = reservations.stream()
+            .map(Reservation::getStaffId)
+            .filter(id -> id != null)
+            .collect(Collectors.toSet());
+        Map<Long, Staff> staffById = staffRepository.findAllById(staffIds).stream()
+            .collect(Collectors.toMap(Staff::getId, s -> s));
+
+        return reservations.stream()
+            .map(reservation -> {
+                List<ReservationItem> items = reservationItemRepository.findByReservationId(reservation.getId());
+                Set<Long> menuIds = items.stream()
+                    .map(ReservationItem::getMenuId)
+                    .filter(id -> id != null)
+                    .collect(Collectors.toSet());
+
+                Map<Long, Menu> menuById = menuRepository.findAllById(menuIds).stream()
+                    .collect(Collectors.toMap(Menu::getId, m -> m));
+
+                String menuTitle = items.stream()
+                    .map(ReservationItem::getMenuId)
+                    .filter(id -> id != null)
+                    .map(menuById::get)
+                    .filter(m -> m != null && m.getTitle() != null)
+                    .map(Menu::getTitle)
+                    .distinct()
+                    .collect(Collectors.joining("、"));
+
+                Staff staff = reservation.getStaffId() == null ? null : staffById.get(reservation.getStaffId());
+                String staffName = staff != null && staff.getUser() != null ? staff.getUser().getName() : "";
+
+                Long price = reservation.getTotalPrice() == null ? null : reservation.getTotalPrice().longValue();
+
+                return new VisitHistoryDto(
+                    reservation.getId(),
+                    reservation.getStartTime() != null ? reservation.getStartTime().toLocalDate() : null,
+                    menuTitle,
+                    staffName,
+                    price,
+                    null,
+                    null
+                );
+            })
+            .toList();
+        }
 }
