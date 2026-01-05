@@ -66,6 +66,8 @@ public class CustomerAuthController {
             HttpSession session,
             @RequestParam Long salonId,
             @RequestParam(name = "redirect") String redirectUri) {
+    	
+    	// TODO 2/1以降に本番環境を実装
 
         LineStateService.CreatedState created = lineStateService.createAndStore(session, salonId, redirectUri);
 
