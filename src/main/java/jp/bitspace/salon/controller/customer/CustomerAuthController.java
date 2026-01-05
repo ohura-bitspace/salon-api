@@ -33,6 +33,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomerAuthController {
 	
+	// TODO 全体的にセキュリティ面が抜けているので、2月以降にチェック
+	
 	private final CustomerService customerService;
     private final JwtUtils jwtUtils;
     private final LineStateService lineStateService;
