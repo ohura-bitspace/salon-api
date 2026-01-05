@@ -6,7 +6,9 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +39,7 @@ public class CustomerReservationController {
         this.customerService = customerService;
     }
 	
-    // TODO 修正
+    // TODO 修正. 26/1/6 対応
     @GetMapping
     // 「引数のsalonId」と「ログイン中のsalonId」が一緒かチェック
     //@PreAuthorize("#salonId == authentication.principal.salonId")
@@ -88,6 +90,37 @@ public class CustomerReservationController {
         return visitHistoryList;
     }
     
-    // TODO 予約削除
+    /**
+     * 予約キャンセル.
+     * <p>
+     * 顧客が自分の予約をキャンセルします。
+     * ステータスを CANCELED に変更します。
+     * 
+     * @param reservationId 予約ID
+     * @param salonId サロンID（バリデーション用）
+     * @param principal ログイン中の顧客情報
+     * @return キャンセル成功メッセージ
+     */
+    @DeleteMapping("/{reservationId}")
+    public ResponseEntity<Map<String, Object>> cancelReservation(
+            @PathVariable Long reservationId,
+            @RequestParam(name = "salonId") Long salonId,
+            @AuthenticationPrincipal CustomerPrincipal principal) {
+
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+        if (principal.getSalonId() != null && !principal.getSalonId().equals(salonId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden");
+        }
+
+        reservationService.cancelReservation(reservationId, principal.getCustomerId(), salonId);
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "キャンセルしました"
+        ));
+    }
+    
     // TODO [後回し]予約更新
 }

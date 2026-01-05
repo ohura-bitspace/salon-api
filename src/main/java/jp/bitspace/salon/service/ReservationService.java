@@ -299,4 +299,53 @@ public class ReservationService {
                 reservation.getMemo()
         );
     }
+
+    /**
+     * 顧客向け：予約キャンセル.
+     * <p>
+     * 予約のステータスを CANCELED に変更します。
+     * すでに VISITED や CANCELED の場合は例外をスローします。
+     * 
+     * @param reservationId 予約ID
+     * @param customerId ログイン中の顧客ID
+     * @param salonId サロンID（バリデーション用）
+     * @throws ResponseStatusException 予約が存在しない、権限がない、または不正な状態の場合
+     */
+    @Transactional
+    public void cancelReservation(Long reservationId, Long customerId, Long salonId) {
+        if (reservationId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "reservationId is required");
+        }
+        if (customerId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "customerId is required");
+        }
+        if (salonId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "salonId is required");
+        }
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found"));
+
+        // サロンIDの整合性確認
+        if (!salonId.equals(reservation.getSalonId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid salon");
+        }
+
+        // 顧客IDの整合性確認（他人の予約をキャンセルできないようにする）
+        if (!customerId.equals(reservation.getCustomerId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your reservation");
+        }
+
+        // ステータスチェック（来店済みやキャンセル済みはキャンセル不可）
+        if (reservation.getStatus() == jp.bitspace.salon.model.ReservationStatus.VISITED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot cancel visited reservation");
+        }
+        if (reservation.getStatus() == jp.bitspace.salon.model.ReservationStatus.CANCELED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Already canceled");
+        }
+
+        // ステータスをCANCELEDに更新
+        reservation.setStatus(jp.bitspace.salon.model.ReservationStatus.CANCELED);
+        reservationRepository.save(reservation);
+    }
 }
