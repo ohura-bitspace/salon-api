@@ -29,6 +29,7 @@ public class CustomerReservationController {
         this.reservationService = reservationService;
     }
 	
+    // TODO 修正
     @GetMapping
     // 「引数のsalonId」と「ログイン中のsalonId」が一緒かチェック
     //@PreAuthorize("#salonId == authentication.principal.salonId")
@@ -52,6 +53,6 @@ public class CustomerReservationController {
         }
     }
     
-    // TODO 予約更新
     // TODO 予約削除
+    // TODO [後回し]予約更新
 }

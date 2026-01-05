@@ -49,6 +49,8 @@ public class CustomerAuthController {
     @PostMapping("/dev-login")
     @org.springframework.context.annotation.Profile("dev")
     public ResponseEntity<CustomerAuthResponse> devLogin(@RequestBody CustomerDevLoginRequest request) {
+    	
+    	System.out.println("開発ログイン:" + request);
         Customer customer = customerService.findByIdAndSalonIdOrThrow(request.getCustomerId(), request.getSalonId());
         String token = jwtUtils.generateToken(customer.getId(), customer.getSalonId());
         return ResponseEntity.ok(new CustomerAuthResponse(token, toDto(customer)));
