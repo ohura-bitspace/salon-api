@@ -56,7 +56,8 @@ public class CustomerAuthController {
         String token = jwtUtils.generateToken(customer.getId(), customer.getSalonId());
         return ResponseEntity.ok(new CustomerAuthResponse(token, toDto(customer)));
     }
-
+    
+    // TODO ngrokライクになっているので、修正する
     /**
      * LINE Login（Web）認証開始（ステートレス）.
      * <p>
