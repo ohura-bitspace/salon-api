@@ -160,5 +160,25 @@ public class CustomerAuthController {
     private String url(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
-
+    
+    // TODO LINE認証メモ
+    //自分でイチからURLを作る必要はなく、LINE公式のURLに飛ばすだけです。
+    //ユーザーをLINEのログイン画面へリダイレクトさせる。
+    //URL例: https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=...
+    //ログイン後、URLにくっついて戻ってくる code（認可コード） を受け取る。
+    //その code を、自作のJava API（/api/auth/lineなど）へポイッと送る。
+    
+    //フロントから届いた code を受け取る。
+    //https://api.line.me/oauth2/v2.1/token を RestTemplate や WebClient で叩き、本物のアクセストークンとIDトークンに引き換える。
+    //IDトークン（JWT形式）を解析して、ユーザーの line_user_id や名前を取得する。
+    //DBの customers テーブルと照合し、必要なら新規登録して、bitSpace独自のJWTをフロントに返す。
+    
+    //3. フロントで流用できる「楽なやつ」：LIFF
+    //もし、LINEのトーク画面内でアプリを開く（ブラウザへ遷移させない）形にするなら、LIFF (LINE Front-end Framework) というSDKが使えます。
+    //メリット: liff.login() を呼ぶだけでログイン処理が走り、フロント側で簡単にアクセストークンが取得できます。
+    //bitSpaceでの活用: 27歳のオーナー様 のお客様がLINE公式アカウントから「予約」を押した際、LIFFを使えば一瞬で自動ログインが完了し、ユーザー体験が最高に良くなります。
+    
+    // TODO おすすめ
+    //フロント: LINE公式のログインURLにリンクを貼る（またはLIFF SDKを入れる）。
+    //サーバー: RestTemplate を使って、大浦様が書かれたURLに code を送信する処理を1つ書く。
 }
