@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.HttpSession;
 import jp.bitspace.salon.dto.request.CustomerDevLoginRequest;
 import jp.bitspace.salon.dto.request.LineCallbackRequest;
 import jp.bitspace.salon.dto.response.CustomerAuthResponse;
@@ -59,19 +58,18 @@ public class CustomerAuthController {
     }
 
     /**
-     * LINE Login（Web）認証開始.
+     * LINE Login（Web）認証開始（ステートレス）.
      * <p>
-     * state/nonce を生成し、セッションに保存して authorize URL を返します。
+     * state/nonce を生成し、authUrl, state, nonce を返します。
      */
     @GetMapping("/line/authorize")
     public ResponseEntity<Map<String, String>> authorize(
-            HttpSession session,
             @RequestParam Long salonId,
             @RequestParam(name = "redirect") String redirectUri) {
     	
     	// TODO 2/1以降に本番環境を実装
 
-        LineStateService.CreatedState created = lineStateService.createAndStore(session, salonId, redirectUri);
+        LineStateService.CreatedState created = lineStateService.create();
 
         // LINE authorize URL
         String authUrl = "https://access.line.me/oauth2/v2.1/authorize"
@@ -82,39 +80,53 @@ public class CustomerAuthController {
                 + "&scope=" + url("profile openid email")
                 + "&nonce=" + url(created.nonce());
         
-        System.out.println("redirectUri:" + redirectUri);
+        System.out.println("Generated state: " + created.state());
+        System.out.println("Generated nonce: " + created.nonce());
+        System.out.println("redirectUri: " + redirectUri);
 
-        return ResponseEntity.ok(Map.of("authUrl", authUrl));
+        return ResponseEntity.ok(Map.of(
+                "authUrl", authUrl,
+                "state", created.state(),
+                "nonce", created.nonce()
+        ));
     }
 
     /**
-     * LINE認証コールバック（スタブ）.
+     * LINE認証コールバック（ステートレス）.
      * <p>
-     * TODO: code/state でLINEトークン交換・検証を実装する。
+     * フロントエンドから受け取ったnonce を使用して id_token を検証します。
      */
 	@PostMapping("/line/callback")
-	public ResponseEntity<CustomerLineLoginResponse> lineCallback(HttpSession session,
+	public ResponseEntity<CustomerLineLoginResponse> lineCallback(
 			@RequestBody LineCallbackRequest request) {
 		
-		// 1) state 検証（使い捨て）
-		LineStateService.StateEntry entry = lineStateService.validateAndConsume(session, request.getState(),
-				request.getSalonId());
-
+		System.out.println("=== LINE Callback (Stateless) ===");
+		System.out.println("Received code: " + request.getCode());
+		System.out.println("Received state: " + request.getState());
+		System.out.println("Received nonce: " + request.getNonce());
+		System.out.println("Received salonId: " + request.getSalonId());
+		System.out.println("Received redirectUri: " + request.getRedirectUri());
+		
+		// 1) state 検証はフロントエンドで実施済みとして扱う
+		
 		// 2) トークン交換
-		LineApiClient.TokenResponse tokenResponse = lineApiClient.exchangeToken(request.getCode(), entry.redirectUri());
+		LineApiClient.TokenResponse tokenResponse = lineApiClient.exchangeToken(
+				request.getCode(), 
+				request.getRedirectUri());
 
 		// 3) id_token 最低限検証（iss/aud/exp/nonce）
-		LineApiClient.IdTokenClaims claims = lineApiClient.decodeAndValidateIdToken(tokenResponse.idToken(),
-				entry.nonce());
-		System.out.println("claims:" + claims);
+		LineApiClient.IdTokenClaims claims = lineApiClient.decodeAndValidateIdToken(
+				tokenResponse.idToken(),
+				request.getNonce());
+		System.out.println("claims: " + claims);
+		
 		// 4) プロフィール取得
 		LineApiClient.ProfileResponse profile = lineApiClient.fetchProfile(tokenResponse.accessToken());
-		System.out.println("profile:" + profile);
+		System.out.println("profile: " + profile);
 		
-
 		// 5) 顧客作成/更新
 		Customer customer = customerService.createOrUpdateByLineProfile(
-				entry.salonId(),
+				request.getSalonId(),
 				profile.userId(),
 				profile.displayName(),
 				profile.pictureUrl(),

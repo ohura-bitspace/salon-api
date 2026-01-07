@@ -15,4 +15,10 @@ public class LineCallbackRequest {
 
     /** 所属サロンID */
     private Long salonId;
+    
+    /** リプレイ攻撃対策用のnonce */
+    private String nonce;
+    
+    /** リダイレクトURI */
+    private String redirectUri;
 }

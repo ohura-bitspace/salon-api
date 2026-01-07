@@ -17,9 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * LINE Login の state/nonce 管理（セッション保存）.
- * <p>
- * 本番は Redis 等の共有ストア推奨。
+ * LINE Login の state/nonce 管理.
  */
 @Service
 public class LineStateService {
@@ -32,6 +30,15 @@ public class LineStateService {
     // redirect の許可リスト（オリジン単位）
     @Value("${line.login.allowed-redirect-origins:http://localhost:5173}")
     private String allowedRedirectOrigins;
+
+    /**
+     * ステートレスでstate/nonceを生成（セッション不使用）.
+     */
+    public CreatedState create() {
+        String state = randomUrlSafeString(32);
+        String nonce = randomUrlSafeString(32);
+        return new CreatedState(state, nonce, null);
+    }
 
     public CreatedState createAndStore(HttpSession session, Long salonId, String redirectUri) {
         if (session == null) {
