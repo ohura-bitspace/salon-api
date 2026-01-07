@@ -388,6 +388,9 @@ public class CustomerService {
 				fromDateTime,
 				toDateTime
 		);
+		
+		// TODO 前後に30分の準備マージンを付加する
+		
 
 		return reservationList;
 	}
