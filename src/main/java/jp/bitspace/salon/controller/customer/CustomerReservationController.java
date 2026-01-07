@@ -1,5 +1,6 @@
 package jp.bitspace.salon.controller.customer;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -39,13 +40,20 @@ public class CustomerReservationController {
         this.customerService = customerService;
     }
 	
-    // TODO 修正. 26/1/6 対応
     @GetMapping
     // 「引数のsalonId」と「ログイン中のsalonId」が一緒かチェック
     //@PreAuthorize("#salonId == authentication.principal.salonId")
     public List<Reservation> getReservations(@RequestParam(name = "salonId") Long salonId) {
-    	// TODO 1か月単位＋前後マージンとか
-        return reservationService.findBySalonId(salonId);
+    	// TODO 認証チェック（後回し）
+    	
+    	// 現在日-1日から、60日後で取得する
+    	LocalDate from = LocalDate.now().minusDays(1);
+    	LocalDate to = LocalDate.now().plusDays(60);
+    	
+    	// TODO 余計な情報が入っているので時間帯だけにしぼる
+    	List<Reservation> retList = customerService.findReservationsBySalonIdAndDateRange(salonId, from, to);
+    	System.out.println("retList.size:" + retList);
+        return retList;
     }
     
     /**
@@ -55,6 +63,8 @@ public class CustomerReservationController {
      */
     @PostMapping
     public ResponseEntity<?> createReservation(@Valid @RequestBody CreateReservationRequest request) {
+    	// TODO 認証チェック（後回し）
+    	
         try {
             Reservation created = reservationService.createWithItems(request);
             return ResponseEntity.ok(created);

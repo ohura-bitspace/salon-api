@@ -362,4 +362,33 @@ public class CustomerService {
 
         return visitHistoryList;
 	}
+
+	/**
+	 * 顧客向け：予約一覧（指定の日付範囲内）.
+	 * <p>
+	 * from～to の日付範囲内の予約を取得します。
+	 */
+	public List<Reservation> findReservationsBySalonIdAndDateRange(Long salonId, LocalDate from, LocalDate to) {
+		if (salonId == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "salonId is required");
+		}
+		if (from == null || to == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "from/to are required");
+		}
+		if (from.isAfter(to)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "from must be before to");
+		}
+
+		LocalDateTime fromDateTime = from.atStartOfDay();
+		LocalDateTime toDateTime = to.atStartOfDay();
+		
+		List<Reservation> reservationList = reservationRepository
+		.findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeAsc(
+				salonId,
+				fromDateTime,
+				toDateTime
+		);
+
+		return reservationList;
+	}
 }
