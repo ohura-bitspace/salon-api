@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import jp.bitspace.salon.dto.response.CustomerDetailResponse;
 import jp.bitspace.salon.dto.response.CustomerResponse;
+import jp.bitspace.salon.dto.response.ReservationTimeSlotDto;
 import jp.bitspace.salon.dto.response.VisitHistoryDto;
 import jp.bitspace.salon.model.Customer;
 import jp.bitspace.salon.model.Menu;
@@ -363,12 +364,14 @@ public class CustomerService {
         return visitHistoryList;
 	}
 
+
 	/**
-	 * 顧客向け：予約一覧（指定の日付範囲内）.
+	 * 顧客向け：予約時間帯一覧（開始時刻と終了時刻のみ）.
 	 * <p>
-	 * from～to の日付範囲内の予約を取得します。
+	 * from～to の日付範囲内の予約から、startTime と endTime のみを抽出して返します。
 	 */
-	public List<Reservation> findReservationsBySalonIdAndDateRange(Long salonId, LocalDate from, LocalDate to) {
+	public List<ReservationTimeSlotDto> findReservationTimeSlotsBySalonIdAndDateRange(Long salonId, LocalDate from, LocalDate to) {
+		
 		if (salonId == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "salonId is required");
 		}
@@ -382,7 +385,7 @@ public class CustomerService {
 		LocalDateTime fromDateTime = from.atStartOfDay();
 		LocalDateTime toDateTime = to.atStartOfDay();
 		
-		List<Reservation> reservationList = reservationRepository
+		List<Reservation> reservations = reservationRepository
 		.findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeAsc(
 				salonId,
 				fromDateTime,
@@ -391,7 +394,11 @@ public class CustomerService {
 		
 		// TODO 前後に30分の準備マージンを付加する
 		
-
-		return reservationList;
+		return reservations.stream()
+				.map(r -> new ReservationTimeSlotDto(
+						r.getStartTime(),
+						r.getEndTime()
+				))
+				.toList();
 	}
 }

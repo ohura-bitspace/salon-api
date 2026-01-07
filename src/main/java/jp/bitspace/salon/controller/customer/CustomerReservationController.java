@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.Valid;
 import jp.bitspace.salon.dto.request.CreateReservationRequest;
+import jp.bitspace.salon.dto.response.ReservationTimeSlotDto;
 import jp.bitspace.salon.dto.response.VisitHistoryDto;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.security.CustomerPrincipal;
@@ -43,17 +44,14 @@ public class CustomerReservationController {
     @GetMapping
     // 「引数のsalonId」と「ログイン中のsalonId」が一緒かチェック
     //@PreAuthorize("#salonId == authentication.principal.salonId")
-    public List<Reservation> getReservations(@RequestParam(name = "salonId") Long salonId) {
+    public List<ReservationTimeSlotDto> getReservations(@RequestParam(name = "salonId") Long salonId) {
     	// TODO 認証チェック（後回し）
     	
     	// 現在日-1日から、60日後で取得する
     	LocalDate from = LocalDate.now().minusDays(1);
     	LocalDate to = LocalDate.now().plusDays(60);
     	
-    	// TODO 余計な情報が入っているので時間帯だけにしぼる
-    	List<Reservation> retList = customerService.findReservationsBySalonIdAndDateRange(salonId, from, to);
-    	System.out.println("retList.size:" + retList);
-        return retList;
+        return customerService.findReservationTimeSlotsBySalonIdAndDateRange(salonId, from, to);
     }
     
     /**
