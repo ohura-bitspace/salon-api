@@ -3,15 +3,16 @@ package jp.bitspace.salon.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jp.bitspace.salon.dto.request.UpdateAdminMemoRequest;
 import jp.bitspace.salon.dto.request.UpdateTreatmentMemoRequest;
 import jp.bitspace.salon.dto.response.CustomerDetailResponse;
 import jp.bitspace.salon.dto.response.CustomerResponse;
@@ -88,6 +89,22 @@ public class DataController {
             @RequestBody UpdateTreatmentMemoRequest request) {
         adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
         customerService.updateTreatmentMemo(visitId, request.treatmentMemo());
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 顧客の管理メモを更新.
+     * <p>
+     * 顧客に紐づく管理メモ（adminMemo）のみを更新します。
+     */
+    @PutMapping("/customers/{customerId}/admin-memo")
+    public ResponseEntity<Void> updateAdminMemo(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long customerId,
+            @RequestParam(name = "salonId") Long salonId,
+            @RequestBody UpdateAdminMemoRequest request) {
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+        customerService.updateAdminMemo(customerId, salonId, request.adminMemo());
         return ResponseEntity.noContent().build();
     }
 }

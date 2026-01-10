@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import jp.bitspace.salon.dto.response.CustomerDetailResponse;
@@ -284,11 +285,26 @@ public class CustomerService {
      * @param treatmentMemo 施術メモ
      * @return 更新後の予約
      */
+    @Transactional
     public Reservation updateTreatmentMemo(Long reservationId, String treatmentMemo) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found"));
         reservation.setTreatmentMemo(treatmentMemo);
         return reservationRepository.save(reservation);
+    }
+
+    /**
+     * 顧客の管理メモを更新.
+     * @param customerId 顧客ID
+     * @param salonId サロンID
+     * @param adminMemo 管理メモ
+     * @return 更新後の顧客
+     */
+    @Transactional
+    public Customer updateAdminMemo(Long customerId, Long salonId, String adminMemo) {
+        Customer customer = findByIdAndSalonIdOrThrow(customerId, salonId);
+        customer.setAdminMemo(adminMemo);
+        return customerRepository.save(customer);
     }
 
 	/**
