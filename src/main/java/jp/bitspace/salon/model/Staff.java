@@ -23,6 +23,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * スタッフエンティティ.
+ * <p>
+ * ユーザーとサロンの関連を表し、サロンにおけるスタッフの役割や権限を管理します。
+ * 1つのUserは複数のStaffレコードを持つことができ（複数店舗勤務）、
+ * user_id と salon_id の組み合わせは一意制約により重複できません。
+ * </p>
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -30,44 +38,64 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "staffs", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "salon_id"}))
 public class Staff {
+    /** スタッフID（主キー）. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** 所属ユーザー（外部キー）. */
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    /** 所属サロン（外部キー）. */
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "salon_id", nullable = false)
     private Salon salon;
 
+    /** 役割（OWNER=オーナー、MANAGER=マネージャー、STAFF=スタッフ）. */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
     private Role role = Role.STAFF;
 
+    /** 施術者フラグ（true=施術可能、false=受付等）. */
     @JsonProperty("isPractitioner")
     @Builder.Default
     @Column(name = "is_practitioner")
     private Boolean isPractitioner = true;
 
+    /** アクティブフラグ（false=退職・無効化）. */
     @Column(name = "is_active")
     @Builder.Default
     private Boolean isActive = true;
 
+    /** 作成日時. */
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    /** 更新日時. */
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    /**
+     * エンティティ作成時の初期化処理.
+     * <p>
+     * 作成日時と更新日時を現在時刻で初期化します。
+     * </p>
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * エンティティ更新時の処理.
+     * <p>
+     * 更新日時を現在時刻で更新します。
+     * </p>
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
