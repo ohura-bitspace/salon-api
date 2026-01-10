@@ -1,0 +1,52 @@
+# ビルド出力
+target/
+build/
+*.jar
+*.war
+*.ear
+
+# Maven
+.m2/
+mvnw.cmd
+
+# IDE・エディタ
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+*.iws
+*.ipr
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# ソース管理
+.github/
+
+# ログ・一時ファイル
+logs/
+*.log
+tmp/
+*.tmp
+
+# OS
+Thumbs.db
+desktop.ini
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# その他
+README.md
+HELP.md
+docs/
+.env
+.env.example
+node_modules/
