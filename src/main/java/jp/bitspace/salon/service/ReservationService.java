@@ -85,10 +85,11 @@ public class ReservationService {
         LocalDateTime toDateTime = to.atStartOfDay();
 
         List<Reservation> reservations = reservationRepository
-                .findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeAsc(
+                .findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanAndStatusNotOrderByStartTimeAsc(
                         salonId,
                         fromDateTime,
-                        toDateTime
+                        toDateTime,
+                        jp.bitspace.salon.model.ReservationStatus.CANCELED
                 );
 
         return reservations.stream().map(this::toAdminReservationResponse).collect(Collectors.toList());

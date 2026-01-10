@@ -27,6 +27,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalDateTime to
     );
 
+    List<Reservation> findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanAndStatusNotOrderByStartTimeAsc(
+            Long salonId,
+            LocalDateTime from,
+            LocalDateTime to,
+            ReservationStatus excludedStatus
+    );
+
     List<Reservation> findBySalonIdAndCustomerIdIsNullOrderByStartTimeDesc(Long salonId);
 
         List<Reservation> findBySalonIdAndCustomerIdAndStatusOrderByStartTimeDesc(

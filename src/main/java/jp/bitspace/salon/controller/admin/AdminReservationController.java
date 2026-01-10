@@ -46,6 +46,7 @@ public class AdminReservationController {
 			@RequestParam(name = "salonId") Long salonId,
 			@RequestParam(name = "from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
 			@RequestParam(name = "to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+		// ステータスが「キャンセル」は対象外としている
 		
 		// 管理API共通の認可チェック（STAFFトークン + salonId一致）
 		adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
