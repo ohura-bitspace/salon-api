@@ -22,10 +22,10 @@ INSERT INTO users (id, name, email, password_hash, is_active, is_system_admin) V
 -- 各サロンごとの所属（staffs）を投入
 -- (user_id, salon_id, role)
 INSERT INTO staffs (user_id, salon_id, role, is_active) VALUES
-(1, 1, 'OWNER', true),
+(1, 1, 'ADMIN', true),
 (2, 1, 'STAFF', true),
-(3, 2, 'OWNER', true),
-(4, 2, 'OWNER', true);
+(3, 2, 'ADMIN', true),
+(4, 2, 'ADMIN', true);
 
 -- ============================================================
 -- 3. 顧客データの投入

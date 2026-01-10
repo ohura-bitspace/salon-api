@@ -10,7 +10,7 @@ public record LoginResponse(
         String token,
         /** スタッフ名 */
         String name,
-        /** 権限（例: OWNER / STAFF） */
+        /** 権限（例: ADMIN / STAFF） */
         String role,
         /** 所属サロンID */
         Long salonId,

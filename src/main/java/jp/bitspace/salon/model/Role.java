@@ -1,6 +1,8 @@
 package jp.bitspace.salon.model;
 
 public enum Role {
-    OWNER,
-    STAFF
+    /** 管理者（全権）. */
+	ADMIN,
+	/** スタッフ. */
+	STAFF
 }

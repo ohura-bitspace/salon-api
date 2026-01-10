@@ -53,7 +53,7 @@ public class Staff {
     @JoinColumn(name = "salon_id", nullable = false)
     private Salon salon;
 
-    /** 役割（OWNER=オーナー、MANAGER=マネージャー、STAFF=スタッフ）. */
+    /** 役割（ADMIN=管理者、STAFF=スタッフ）. */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
