@@ -24,6 +24,10 @@ import jp.bitspace.salon.security.AdminRequestAuthUtil;
 public class AdminCategoryController {
     private final MenuCategoryRepository menuCategoryRepository;
     private final AdminRequestAuthUtil adminRequestAuthUtil;
+    
+    // [実装メモ]トークン認証方式は、本当はシンプルに
+    // コントローラの引数として、@RequestHeaderで取得したかったが、一旦、HttpServletRequestで取得する方式としたので、
+    // とりあえずこの方式で進む
 
     public AdminCategoryController(MenuCategoryRepository menuCategoryRepository, AdminRequestAuthUtil adminRequestAuthUtil) {
         this.menuCategoryRepository = menuCategoryRepository;
