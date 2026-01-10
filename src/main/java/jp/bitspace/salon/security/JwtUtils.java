@@ -49,13 +49,15 @@ public class JwtUtils {
 	}
 
     // 管理側ログイン成功時に呼ぶメソッド
-    public String generateToken(Long staffId, String email, Long salonId, String role) {
+    public String generateToken(Long staffId, String email, Long salonId, String role, Boolean isSystemAdmin) {
     	
     	String tk = Jwts.builder()
         .setSubject(String.valueOf(staffId))
         .claim("email", email)
         .claim("role", role)
+        .claim("salonId", salonId)
         .claim("userType", "STAFF")
+        .claim("isSystemAdmin", isSystemAdmin != null && isSystemAdmin)
         .setIssuedAt(new Date())
         .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
         .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -134,6 +136,21 @@ public class JwtUtils {
         Claims claims = validateAndExtractClaims(token);
         Object role = claims.get("role");
         return role != null ? String.valueOf(role) : null;
+    }
+
+    /**
+     * トークンからシステム管理者フラグを抽出します.
+     */
+    public Boolean extractIsSystemAdmin(String token) {
+        Claims claims = validateAndExtractClaims(token);
+        Object isSystemAdmin = claims.get("isSystemAdmin");
+        if (isSystemAdmin == null) {
+            return false;
+        }
+        if (isSystemAdmin instanceof Boolean b) {
+            return b;
+        }
+        return Boolean.parseBoolean(String.valueOf(isSystemAdmin));
     }
 
     public Long extractSubjectAsLong(String token) {

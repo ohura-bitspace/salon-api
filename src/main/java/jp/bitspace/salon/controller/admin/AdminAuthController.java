@@ -50,7 +50,8 @@ public class AdminAuthController {
                 user.getId(),          // User IDを入れるのが一般的だが、実装に合わせて調整
                 user.getEmail(),       // user.getEmail()
                 currentStaff.getSalon().getId(),
-                currentStaff.getRole().name()
+                currentStaff.getRole().name(),
+                user.getIsSystemAdmin() // システム管理者フラグ
         );
 
         // 3. TODO 【多店舗対応】もし「他の店舗」も持っているならリスト化する
@@ -64,7 +65,8 @@ public class AdminAuthController {
                 user.getName(),        // user.getName()
                 currentStaff.getRole().name(),
                 currentStaff.getSalon().getId(),
-                currentStaff.getSalon().getName()
+                currentStaff.getSalon().getName(),
+                user.getIsSystemAdmin() // システム管理者フラグ
                 // availableSalons // ← DTOを更新したらここに追加
         );
 

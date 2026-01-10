@@ -15,5 +15,7 @@ public record LoginResponse(
         /** 所属サロンID */
         Long salonId,
         /** 所属サロン名 */
-        String salonName
+        String salonName,
+        /** システム管理者フラグ（全店舗アクセス可能） */
+        Boolean isSystemAdmin
 ) {}

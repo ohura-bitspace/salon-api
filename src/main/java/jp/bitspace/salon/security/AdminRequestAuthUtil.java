@@ -55,9 +55,11 @@ public class AdminRequestAuthUtil {
         // 署名不正・期限切れ等は JwtUtils 側で例外になる想定
         String userType;
         Long tokenSalonId;
+        Boolean isSystemAdmin;
         try {
             userType = jwtUtils.extractUserType(token);
             tokenSalonId = jwtUtils.extractSalonId(token);
+            isSystemAdmin = jwtUtils.extractIsSystemAdmin(token);
         } catch (Exception ex) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
@@ -65,6 +67,11 @@ public class AdminRequestAuthUtil {
         // 管理APIは STAFF トークンのみ許可
         if (!"STAFF".equals(userType)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden");
+        }
+
+        // システム管理者の場合はsalonIdチェックをスキップ
+        if (isSystemAdmin != null && isSystemAdmin) {
+            return tokenSalonId; // システム管理者は全店舗アクセス可能
         }
 
         // TODO [あとで]多店舗対応のため、リクエストの salonId と トークン内 salonId が一致することを保証
