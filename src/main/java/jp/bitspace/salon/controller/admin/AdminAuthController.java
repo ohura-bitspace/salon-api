@@ -19,8 +19,13 @@ import jp.bitspace.salon.service.StaffService;
 @RestController
 @RequestMapping("/api/admin/auth")
 public class AdminAuthController {
+	
+	/** スタッフサービス. */
     private final StaffService staffService;
+    /** JwtUtils. */
     private final JwtUtils jwtUtils;
+    
+    // TODO expiration-msが切れた場合の処理を検討
 
     public AdminAuthController(StaffService staffService, JwtUtils jwtUtils) {
         this.staffService = staffService;
