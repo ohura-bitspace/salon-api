@@ -17,15 +17,19 @@ INSERT INTO users (id, name, email, password_hash, is_active, is_system_admin) V
 (1, '山田 太郎', 'owner@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, false),
 (2, '鈴木 花子', 'staff@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, false),
 (3, '田中 次郎', 'owner@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, false),
-(4, 'YOKO', 'yoko@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, false);
+(4, 'YOKO', 'yoko@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, false),
+(5, 'システム管理者', 'admin@system.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, true);
 
 -- 各サロンごとの所属（staffs）を投入
 -- (user_id, salon_id, role)
+-- システム管理者（user_id=5）は全店舗アクセス可能なため、staffsへの登録は任意
+-- ここでは便宜上サロン1に所属として登録
 INSERT INTO staffs (user_id, salon_id, role, is_active) VALUES
 (1, 1, 'ADMIN', true),
 (2, 1, 'STAFF', true),
 (3, 2, 'ADMIN', true),
-(4, 2, 'ADMIN', true);
+(4, 2, 'ADMIN', true),
+(5, 1, 'ADMIN', true);
 
 -- ============================================================
 -- 3. 顧客データの投入
