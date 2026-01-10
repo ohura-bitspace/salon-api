@@ -30,6 +30,9 @@ import jp.bitspace.salon.repository.ReservationItemRepository;
 import jp.bitspace.salon.repository.ReservationRepository;
 import jp.bitspace.salon.repository.StaffRepository;
 
+/**
+ * 顧客サービスクラス.
+ */
 @Service
 public class CustomerService {
     private final CustomerRepository customerRepository;
