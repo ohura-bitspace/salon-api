@@ -37,6 +37,10 @@ public class User {
     @Column(name = "is_active")
     private Boolean isActive = true;
 
+    /** システム管理者フラグ（true=全店舗アクセス可能）. */
+    @Column(name = "is_system_admin")
+    private Boolean isSystemAdmin = false;
+
     /** 作成日時. */
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

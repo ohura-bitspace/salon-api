@@ -13,11 +13,11 @@ INSERT INTO salons (id, name, plan_type, is_active) VALUES
 -- パスワードは全て 'password' をBCryptでハッシュ化したものです
 
 -- 認証情報（users）を先に投入
-INSERT INTO users (id, name, email, password_hash, is_active) VALUES
-(1, '山田 太郎', 'owner@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true),
-(2, '鈴木 花子', 'staff@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true),
-(3, '田中 次郎', 'owner@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true),
-(4, 'YOKO', 'yoko@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true);
+INSERT INTO users (id, name, email, password_hash, is_active, is_system_admin) VALUES
+(1, '山田 太郎', 'owner@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, false),
+(2, '鈴木 花子', 'staff@carnet.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, false),
+(3, '田中 次郎', 'owner@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, false),
+(4, 'YOKO', 'yoko@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, false);
 
 -- 各サロンごとの所属（staffs）を投入
 -- (user_id, salon_id, role)

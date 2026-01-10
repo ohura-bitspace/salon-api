@@ -16,7 +16,8 @@ CREATE TABLE users (
     email VARCHAR(255) NOT NULL COMMENT 'ログインID',
     password_hash VARCHAR(255) NOT NULL COMMENT 'パスワード',
     
-    is_active BOOLEAN DEFAULT TRUE,
+    is_active BOOLEAN DEFAULT TRUE COMMENT '有効フラグ',
+    is_system_admin BOOLEAN DEFAULT FALSE COMMENT 'システム管理者フラグ（全店舗アクセス可能）',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
