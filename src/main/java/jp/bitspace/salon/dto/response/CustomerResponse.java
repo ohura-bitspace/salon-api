@@ -11,4 +11,5 @@ public record CustomerResponse(
     String nameKana,
     /** 直近来店日. */
     String lastVisit
+    // TODO LINE表示名も
 ) {}

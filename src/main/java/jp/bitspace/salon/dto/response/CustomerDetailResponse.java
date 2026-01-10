@@ -8,6 +8,7 @@ import java.util.List;
  * ※中身の組み立ては今後の実装で追加します。
  */
 public record CustomerDetailResponse(
+		// TODO LINE表示名も
         Long customerId,
         String name,
         String nameKana,
