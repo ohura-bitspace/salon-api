@@ -91,6 +91,7 @@ public class StaffService {
                 .salonId(staff.getSalon() != null ? staff.getSalon().getId() : null)
                 .salonName(staff.getSalon() != null ? staff.getSalon().getName() : null)
                 .userId(staff.getUser() != null ? staff.getUser().getId() : null)
+                .email(staff.getUser() != null ? staff.getUser().getEmail() : null)
                 .userName(staff.getUser() != null ? staff.getUser().getName() : null)
                 .role(staff.getRole() != null ? staff.getRole().name() : null)
                 .isActive(staff.getIsActive())

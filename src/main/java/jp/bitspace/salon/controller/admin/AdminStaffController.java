@@ -58,6 +58,8 @@ public class AdminStaffController {
             @RequestParam(name = "salonId") Long salonId
     ) {
         adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
-        return staffService.findStaffResponseById(id, salonId);
+        StaffResponse staffRespons = staffService.findStaffResponseById(id, salonId);
+        System.out.println(staffRespons);
+        return staffRespons;
     }
 }
