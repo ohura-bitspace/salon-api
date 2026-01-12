@@ -99,6 +99,22 @@ public class StaffService {
     }
 
     /**
+     * スタッフ詳細取得（編集画面で使用）
+     * salonId との一致をチェックしてからレスポンスを返す
+     */
+    public StaffResponse findStaffResponseById(Long staffId, Long salonId) {
+        Staff staff = staffRepository.findById(staffId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Staff not found: " + staffId));
+
+        // salonIdのチェック
+        if (staff.getSalon() == null || !staff.getSalon().getId().equals(salonId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Staff does not belong to the specified salon");
+        }
+
+        return toStaffResponse(staff);
+    }
+
+    /**
      * スタッフ登録（最低限: 既存Userを紐付ける想定）
      */
     @Transactional
@@ -130,7 +146,7 @@ public class StaffService {
     }
 
     /**
-     * スタッフ更新
+     * スタッフ更新（パスワード変更にも対応）
      */
     @Transactional
     public Staff updateStaff(Long staffId, UpdateStaffRequest request) {
@@ -155,6 +171,15 @@ public class StaffService {
         }
         if (staff.getIsPractitioner() == null) {
             staff.setIsPractitioner(true);
+        }
+
+        // パスワード更新（設定されている場合のみ）
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            User user = staff.getUser();
+            if (user != null) {
+                user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+                userRepository.save(user);
+            }
         }
 
         return staffRepository.save(staff);

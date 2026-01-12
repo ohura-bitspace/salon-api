@@ -17,4 +17,9 @@ public class UpdateStaffRequest {
 
     @JsonProperty("isPractitioner")
     private Boolean isPractitioner;
+
+    /**
+     * パスワード変更用（設定されている場合のみ更新）
+     */
+    private String password;
 }
