@@ -174,13 +174,27 @@ public class StaffService {
             staff.setIsPractitioner(true);
         }
 
-        // パスワード更新（設定されている場合のみ）
-        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
-            User user = staff.getUser();
-            if (user != null) {
-                user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-                userRepository.save(user);
+        User user = staff.getUser();
+        boolean userUpdated = false;
+        if (user != null) {
+            if (request.getUserName() != null) {
+                user.setName(request.getUserName());
+                userUpdated = true;
             }
+            if (request.getEmail() != null) {
+                user.setEmail(request.getEmail());
+                userUpdated = true;
+            }
+        }
+
+        // パスワード更新（設定されている場合のみ）
+        if (user != null && request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+            userUpdated = true;
+        }
+
+        if (userUpdated) {
+            userRepository.save(user);
         }
 
         return staffRepository.save(staff);

@@ -2,13 +2,19 @@ package jp.bitspace.salon.controller.admin;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jp.bitspace.salon.dto.request.UpdateStaffRequest;
 import jp.bitspace.salon.dto.response.StaffResponse;
 import jp.bitspace.salon.security.AdminRequestAuthUtil;
 import jp.bitspace.salon.service.StaffService;
@@ -61,5 +67,44 @@ public class AdminStaffController {
         StaffResponse staffRespons = staffService.findStaffResponseById(id, salonId);
         System.out.println(staffRespons);
         return staffRespons;
+    }
+
+    /**
+     * スタッフ更新
+     */
+    @PutMapping("/{id}")
+    public StaffResponse updateStaff(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long id,
+            @RequestParam(name = "salonId", required = false) Long salonId,
+            @RequestBody UpdateStaffRequest request
+    ) {
+        Long resolvedSalonId = resolveSalonId(id, salonId);
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, resolvedSalonId);
+        staffService.updateStaff(id, request);
+        return staffService.findStaffResponseById(id, resolvedSalonId);
+    }
+
+    /**
+     * スタッフ削除
+     */
+    @DeleteMapping("/{id}")
+    public void deleteStaff(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long id,
+            @RequestParam(name = "salonId", required = false) Long salonId
+    ) {
+        Long resolvedSalonId = resolveSalonId(id, salonId);
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, resolvedSalonId);
+        staffService.deleteById(id);
+    }
+
+    private Long resolveSalonId(Long staffId, Long requestedSalonId) {
+        if (requestedSalonId != null) {
+            return requestedSalonId;
+        }
+        return staffService.findById(staffId)
+                .map(staff -> staff.getSalon() != null ? staff.getSalon().getId() : null)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Staff not found: " + staffId));
     }
 }

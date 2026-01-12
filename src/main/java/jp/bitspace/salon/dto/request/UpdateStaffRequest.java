@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateStaffRequest {
+    private String userName;
+    private String email;
     private String role;
     private Boolean isActive;
 
