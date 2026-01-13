@@ -123,15 +123,38 @@ public class StaffService {
         if (request == null) {
             throw new IllegalArgumentException("request is required");
         }
-        if (request.getUserId() == null) {
-            throw new IllegalArgumentException("userId is required");
-        }
         if (request.getSalonId() == null) {
             throw new IllegalArgumentException("salonId is required");
         }
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + request.getUserId()));
+        // Userの準備（既存ユーザー紐付け or 新規作成）
+        User user;
+        if (request.getUserId() != null) {
+            user = userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found: " + request.getUserId()));
+        } else {
+            if (request.getUserName() == null || request.getUserName().isBlank()) {
+                throw new IllegalArgumentException("userName is required when userId is not provided");
+            }
+            if (request.getEmail() == null || request.getEmail().isBlank()) {
+                throw new IllegalArgumentException("email is required when userId is not provided");
+            }
+            if (request.getPassword() == null || request.getPassword().isBlank()) {
+                throw new IllegalArgumentException("password is required when userId is not provided");
+            }
+
+            userRepository.findByEmail(request.getEmail()).ifPresent(u -> {
+                throw new IllegalArgumentException("Email already exists: " + request.getEmail());
+            });
+
+            user = new User();
+            user.setName(request.getUserName());
+            user.setEmail(request.getEmail());
+            user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+            user.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
+            userRepository.save(user);
+        }
+
         Salon salon = salonRepository.findById(request.getSalonId())
                 .orElseThrow(() -> new IllegalArgumentException("Salon not found: " + request.getSalonId()));
 

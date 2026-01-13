@@ -14,6 +14,9 @@ import lombok.NoArgsConstructor;
 public class CreateStaffRequest {
     private Long userId;
     private Long salonId;
+    private String userName;
+    private String email;
+    private String password;
     private String role;
     private Boolean isActive;
 

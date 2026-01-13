@@ -2,20 +2,23 @@ package jp.bitspace.salon.controller.admin;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jp.bitspace.salon.dto.request.CreateStaffRequest;
 import jp.bitspace.salon.dto.request.UpdateStaffRequest;
 import jp.bitspace.salon.dto.response.StaffResponse;
+import jp.bitspace.salon.model.Staff;
 import jp.bitspace.salon.security.AdminRequestAuthUtil;
 import jp.bitspace.salon.service.StaffService;
 
@@ -68,6 +71,21 @@ public class AdminStaffController {
         System.out.println(staffRespons);
         return staffRespons;
     }
+
+    /**
+     * スタッフ作成
+     */
+    @PostMapping
+	public StaffResponse createStaff(
+			HttpServletRequest httpServletRequest,
+			@RequestParam(name = "salonId") Long salonId,
+			@RequestBody CreateStaffRequest request) {
+		adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+		request.setSalonId(salonId);
+		Staff newStaff = staffService.createStaff(request);
+		StaffResponse response = staffService.findStaffResponseById(newStaff.getId(), salonId);
+		return response;
+	}
 
     /**
      * スタッフ更新
