@@ -8,3 +8,6 @@ docker build -t salon-api:0.0.1 .
 
 # イメージをビルドしてコンテナを起動
 docker-compose up --build
+
+# コンテナと「ボリューム（データ保持領域）」を削除
+docker-compose down -v
