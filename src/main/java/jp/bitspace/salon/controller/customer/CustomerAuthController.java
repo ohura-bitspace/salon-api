@@ -41,6 +41,9 @@ public class CustomerAuthController {
 
     @Value("${line.login.channel-id:}")
     private String lineChannelId;
+    
+    @Value("${line.login.redirect-uri}")
+    private String configuredRedirectUri; // KAGOYAのIPやドメインを .env から取得
 
     /**
      * 開発用ログイン（デバッグ用途）.
@@ -57,7 +60,7 @@ public class CustomerAuthController {
         return ResponseEntity.ok(new CustomerAuthResponse(token, toDto(customer)));
     }
     
-    // TODO ngrokライクになっているので、修正する
+    // TODO 修正する
     /**
      * LINE Login（Web）認証開始（ステートレス）.
      * <p>
@@ -76,7 +79,7 @@ public class CustomerAuthController {
         String authUrl = "https://access.line.me/oauth2/v2.1/authorize"
                 + "?response_type=code"
                 + "&client_id=" + url(lineChannelId)
-                + "&redirect_uri=" + url("https://kandace-icicled-unadmissibly.ngrok-free.dev/auth/callback")
+                + "&redirect_uri=" + url("http://133.18.122.222/auth/callback")
                 + "&state=" + url(created.state())
                 + "&scope=" + url("profile openid email")
                 + "&nonce=" + url(created.nonce());
