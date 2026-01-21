@@ -42,8 +42,8 @@ public class CustomerAuthController {
     @Value("${line.login.channel-id:}")
     private String lineChannelId;
     
-    @Value("${line.login.redirect-uri}")
-    private String configuredRedirectUri; // KAGOYAのIPやドメインを .env から取得
+    //@Value("${line.login.redirect-uri}")
+    //private String configuredRedirectUri; // KAGOYAのIPやドメインを .env から取得
 
     /**
      * 開発用ログイン（デバッグ用途）.
