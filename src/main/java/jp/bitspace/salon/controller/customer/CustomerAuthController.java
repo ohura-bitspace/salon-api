@@ -60,7 +60,6 @@ public class CustomerAuthController {
         return ResponseEntity.ok(new CustomerAuthResponse(token, toDto(customer)));
     }
     
-    // TODO 修正する
     /**
      * LINE Login（Web）認証開始（ステートレス）.
      * <p>
@@ -70,10 +69,12 @@ public class CustomerAuthController {
     public ResponseEntity<Map<String, String>> authorize(
             @RequestParam Long salonId,
             @RequestParam(name = "redirect") String redirectUri) {
-    	
-    	// TODO 2/1以降に本番環境を実装
 
         LineStateService.CreatedState created = lineStateService.create();
+        
+        // state に salonId を連結して LINE へ渡す
+        // 例: "random_state_string:1"
+        String stateWithSalonId = created.state() + ":" + salonId;
 
         // LINE authorize URL
         String authUrl = "https://access.line.me/oauth2/v2.1/authorize"
@@ -90,7 +91,7 @@ public class CustomerAuthController {
 
         return ResponseEntity.ok(Map.of(
                 "authUrl", authUrl,
-                "state", created.state(),
+                "state", stateWithSalonId,
                 "nonce", created.nonce()
         ));
     }
