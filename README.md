@@ -11,3 +11,8 @@ docker-compose up --build
 
 # コンテナと「ボリューム（データ保持領域）」を削除
 docker-compose down -v
+
+# バックエンド（Java）イメージの保存
+docker save -o salon-api.tar salon-api:latest
+# フロントエンド（React）イメージの保存
+docker save -o salon-frontend.tar salon-frontend:latest
