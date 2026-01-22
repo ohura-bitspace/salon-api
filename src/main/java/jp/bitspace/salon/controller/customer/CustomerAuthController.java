@@ -143,12 +143,13 @@ public class CustomerAuthController {
 				? customer.getLastName() + " " + customer.getFirstName()
 				: customer.getLineDisplayName();
 
-		return ResponseEntity.ok(new CustomerLineLoginResponse(
-				jwt,
-				customer.getId(),
-				name,
-				customer.getEmail(),
-				customer.getPhoneNumber()));
+        return ResponseEntity.ok(new CustomerLineLoginResponse(
+            jwt,
+            customer.getId(),
+            customer.getSalonId(),
+            name,
+            customer.getEmail(),
+            customer.getPhoneNumber()));
 	}
 
     /**

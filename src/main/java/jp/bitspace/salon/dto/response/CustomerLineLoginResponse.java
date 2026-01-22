@@ -10,6 +10,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class CustomerLineLoginResponse {
     private String token;
+    private Long salonId;
     private Long customerId;
     private String name;
     private String email;
