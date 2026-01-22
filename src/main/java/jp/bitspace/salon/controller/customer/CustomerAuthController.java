@@ -145,8 +145,8 @@ public class CustomerAuthController {
 
         return ResponseEntity.ok(new CustomerLineLoginResponse(
             jwt,
-            customer.getId(),
             customer.getSalonId(),
+            customer.getId(),
             name,
             customer.getEmail(),
             customer.getPhoneNumber()));
