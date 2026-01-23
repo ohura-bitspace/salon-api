@@ -18,6 +18,7 @@ import jp.bitspace.salon.model.Customer;
 import jp.bitspace.salon.model.Menu;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.model.ReservationItem;
+import jp.bitspace.salon.model.ReservationStatus;
 import jp.bitspace.salon.model.Staff;
 import jp.bitspace.salon.repository.CustomerRepository;
 import jp.bitspace.salon.repository.MenuRepository;
@@ -217,6 +218,7 @@ public class ReservationService {
         reservation.setEndTime(endTime);
         reservation.setMemo(request.memo());
         reservation.setTotalPrice(totalPrice);
+        reservation.setStatus(ReservationStatus.CONFIRMED);// 確定
 
         Reservation saved = reservationRepository.save(reservation);
 
