@@ -41,12 +41,19 @@ public class CustomerReservationController {
         this.customerService = customerService;
     }
 	
+    /**
+     * 予約可能時間帯取得.
+     * @param principal ログイン中の顧客情報
+     * @return 予約可能時間帯リスト
+     */
     @GetMapping
-    // 「引数のsalonId」と「ログイン中のsalonId」が一緒かチェック
-    //@PreAuthorize("#salonId == authentication.principal.salonId")
-    public List<ReservationTimeSlotDto> getReservations(@RequestParam(name = "salonId") Long salonId) {
-    	// TODO 認証チェック（後回し）
+    public List<ReservationTimeSlotDto> getReservations(
+            @AuthenticationPrincipal CustomerPrincipal principal) {
+    	if (principal == null) {
+    		throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+    	}
     	
+    	Long salonId = principal.getSalonId();
     	// 現在日-1日から、60日後で取得する
     	LocalDate from = LocalDate.now().minusDays(1);
     	LocalDate to = LocalDate.now().plusDays(60);
@@ -57,11 +64,16 @@ public class CustomerReservationController {
     /**
      * 予約作成.
      * @param request 予約リクエスト
+     * @param principal ログイン中の顧客情報
      * @return レスポンス
      */
     @PostMapping
-    public ResponseEntity<?> createReservation(@Valid @RequestBody CreateReservationRequest request) {
-    	// TODO 認証チェック（後回し）
+    public ResponseEntity<?> createReservation(
+            @Valid @RequestBody CreateReservationRequest request,
+            @AuthenticationPrincipal CustomerPrincipal principal) {
+    	if (principal == null) {
+    		throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+    	}
     	
         try {
             Reservation created = reservationService.createWithItems(request);

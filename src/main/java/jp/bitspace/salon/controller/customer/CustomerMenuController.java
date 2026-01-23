@@ -27,7 +27,6 @@ public class CustomerMenuController {
     public SalonMenuResponse getMenus(@AuthenticationPrincipal CustomerPrincipal principal) {
 
         Long salonId = principal.getSalonId();
-    	System.out.println("menus, salonId=" + salonId);
         return menuService.getSalonMenusGroupedForCustomer(salonId);
     }
 }
