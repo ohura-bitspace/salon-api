@@ -57,7 +57,12 @@ public class CustomerReservationController {
     	LocalDate from = LocalDate.now().minusDays(1);
     	LocalDate to = LocalDate.now().plusDays(60);
     	
-        return customerService.findReservationTimeSlotsBySalonIdAndDateRange(salonId, from, to);
+    	List<ReservationTimeSlotDto> slList = customerService.findReservationTimeSlotsBySalonIdAndDateRange(salonId, from, to);
+    	for (ReservationTimeSlotDto reservationTimeSlotDto : slList) {
+			System.out.println(reservationTimeSlotDto);
+		}
+    	
+        return slList;
     }
     
     /**
