@@ -91,18 +91,15 @@ public class CustomerReservationController {
      */
     @GetMapping("/history")
     public List<VisitHistoryDto> getHistory(
-            @AuthenticationPrincipal CustomerPrincipal principal,
-            @RequestParam(name = "salonId") Long salonId) {
+            @AuthenticationPrincipal CustomerPrincipal principal) {
+    	System.out.println("history:" + principal);
 
         if (principal == null) {
             // セキュリティ設定上ここには来ない想定だが、念のため
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
-        if (principal.getSalonId() != null && !principal.getSalonId().equals(salonId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden");
-        }
         
-        List<VisitHistoryDto> visitHistoryList = customerService.getVisitHistory(principal.getCustomerId(), salonId);
+        List<VisitHistoryDto> visitHistoryList = customerService.getVisitHistory(principal.getCustomerId(), principal.getSalonId());
         for (VisitHistoryDto visitHistoryDto : visitHistoryList) {
         	System.out.println("visitHistoryDto=" + visitHistoryDto);
 		}
