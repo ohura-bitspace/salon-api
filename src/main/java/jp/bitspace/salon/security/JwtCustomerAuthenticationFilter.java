@@ -57,7 +57,8 @@ public class JwtCustomerAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = header.substring("Bearer ".length());
-
+        
+        // トークン検証（期限など）
         if (!jwtUtils.validateToken(token)) {
             filterChain.doFilter(request, response);
             return;
