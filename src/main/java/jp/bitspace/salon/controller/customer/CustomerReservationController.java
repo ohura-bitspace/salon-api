@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -114,24 +113,19 @@ public class CustomerReservationController {
      * ステータスを CANCELED に変更します。
      * 
      * @param reservationId 予約ID
-     * @param salonId サロンID（バリデーション用）
      * @param principal ログイン中の顧客情報
      * @return キャンセル成功メッセージ
      */
     @DeleteMapping("/{reservationId}")
     public ResponseEntity<Map<String, Object>> cancelReservation(
             @PathVariable Long reservationId,
-            @RequestParam(name = "salonId") Long salonId,
             @AuthenticationPrincipal CustomerPrincipal principal) {
 
         if (principal == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
-        if (principal.getSalonId() != null && !principal.getSalonId().equals(salonId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Forbidden");
-        }
 
-        reservationService.cancelReservation(reservationId, principal.getCustomerId(), salonId);
+        reservationService.cancelReservation(reservationId, principal.getCustomerId(), principal.getSalonId());
 
         return ResponseEntity.ok(Map.of(
                 "success", true,
