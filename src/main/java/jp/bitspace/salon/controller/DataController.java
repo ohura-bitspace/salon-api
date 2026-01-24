@@ -3,6 +3,7 @@ package jp.bitspace.salon.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -77,6 +78,24 @@ public class DataController {
         Customer created = customerService.createCustomer(request);
         CustomerResponse response = customerService.toCustomerResponse(created);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 顧客削除.
+     * <p>
+     * 顧客を物理削除します。
+     * @param customerId 顧客ID
+     * @param salonId サロンID
+     * @return 削除成功（204 No Content）
+     */
+    @DeleteMapping("/customers/{customerId}")
+    public ResponseEntity<Void> deleteCustomer(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long customerId,
+            @RequestParam(name = "salonId") Long salonId) {
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+        customerService.deleteCustomer(customerId, salonId);
+        return ResponseEntity.noContent().build();
     }
 
     /**

@@ -113,6 +113,17 @@ public class CustomerService {
     }
 
     /**
+     * 顧客削除（物理削除）.
+     * @param customerId 顧客ID
+     * @param salonId サロンID
+     */
+    @Transactional
+    public void deleteCustomer(Long customerId, Long salonId) {
+        Customer customer = findByIdAndSalonIdOrThrow(customerId, salonId);
+        customerRepository.deleteById(customer.getId());
+    }
+
+    /**
      * 顧客作成（管理者による手動作成）.
      * @param request 顧客作成リクエスト
      * @return 作成された顧客
