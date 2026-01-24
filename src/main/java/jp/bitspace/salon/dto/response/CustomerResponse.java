@@ -7,9 +7,9 @@ package jp.bitspace.salon.dto.response;
  */
 public record CustomerResponse(
     Long id,
-    String name,
-    String nameKana,
     /** 直近来店日. */
-    String lastVisit
-    // TODO LINE表示名も
+    String lastVisit,
+    String lineDisplayName,
+    String lastName,
+    String firstName
 ) {}

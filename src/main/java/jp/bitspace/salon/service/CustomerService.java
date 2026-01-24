@@ -146,9 +146,10 @@ public class CustomerService {
     public CustomerResponse toCustomerResponse(Customer customer) {
         return new CustomerResponse(
                 customer.getId(),
-                buildCustomerName(customer),
-                buildCustomerNameKana(customer),
-                "" // 作成直後は来店履歴なし
+                "", // 作成直後は来店履歴なし
+                customer.getLineDisplayName(),
+                customer.getLastName(),
+                customer.getFirstName()
         );
     }
 
@@ -215,9 +216,10 @@ public class CustomerService {
                     String lastVisitString = lastVisit == null ? "" : dateFormatter.format(lastVisit.toLocalDate());
                     return new CustomerResponse(
                             customer.getId(),
-                            buildCustomerName(customer),
-                            buildCustomerNameKana(customer),
-                            lastVisitString
+                            lastVisitString,
+                            customer.getLineDisplayName(),
+                            customer.getLastName(),
+                            customer.getFirstName()
                     );
                 })
                 .collect(Collectors.toList());
@@ -311,7 +313,8 @@ public class CustomerService {
                             treatmentMemo);
 				})
 				.toList();
-
+		
+		// TODO 見直し
 		return new CustomerDetailResponse(
 				customer.getId(),
 				buildCustomerName(customer),
