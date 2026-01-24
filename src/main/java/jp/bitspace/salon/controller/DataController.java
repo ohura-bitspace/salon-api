@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,10 +13,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jp.bitspace.salon.dto.request.CreateCustomerRequest;
 import jp.bitspace.salon.dto.request.UpdateAdminMemoRequest;
 import jp.bitspace.salon.dto.request.UpdateTreatmentMemoRequest;
 import jp.bitspace.salon.dto.response.CustomerDetailResponse;
 import jp.bitspace.salon.dto.response.CustomerResponse;
+import jp.bitspace.salon.model.Customer;
 import jp.bitspace.salon.model.Salon;
 import jp.bitspace.salon.model.Staff;
 import jp.bitspace.salon.security.AdminRequestAuthUtil;
@@ -59,6 +63,21 @@ public class DataController {
 		adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
 		return customerService.findAllAsResponse(salonId);
 	}
+
+    /**
+     * 顧客作成（管理者による手動作成）.
+     * @param request 顧客作成リクエスト
+     * @return 作成された顧客レスポンス
+     */
+    @PostMapping("/customers")
+    public ResponseEntity<CustomerResponse> createCustomer(
+            HttpServletRequest httpServletRequest,
+            @Valid @RequestBody CreateCustomerRequest request) {
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, request.salonId());
+        Customer created = customerService.createCustomer(request);
+        CustomerResponse response = customerService.toCustomerResponse(created);
+        return ResponseEntity.ok(response);
+    }
 
     /**
      * カルテ詳細取得.

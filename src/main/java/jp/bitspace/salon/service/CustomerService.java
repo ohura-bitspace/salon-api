@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import jp.bitspace.salon.dto.request.CreateCustomerRequest;
 import jp.bitspace.salon.dto.response.CustomerDetailResponse;
 import jp.bitspace.salon.dto.response.CustomerResponse;
 import jp.bitspace.salon.dto.response.ReservationTimeSlotDto;
@@ -109,6 +110,46 @@ public class CustomerService {
 
     public Optional<Customer> findByLineUserIdAndSalonId(String lineUserId, Long salonId) {
         return customerRepository.findByLineUserIdAndSalonId(lineUserId, salonId);
+    }
+
+    /**
+     * 顧客作成（管理者による手動作成）.
+     * @param request 顧客作成リクエスト
+     * @return 作成された顧客
+     */
+    @Transactional
+    public Customer createCustomer(CreateCustomerRequest request) {
+        if (request.salonId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "salonId is required");
+        }
+
+        Customer customer = new Customer();
+        customer.setSalonId(request.salonId());
+        customer.setLastName(request.lastName());
+        customer.setFirstName(request.firstName());
+        customer.setLastNameKana(request.lastNameKana());
+        customer.setFirstNameKana(request.firstNameKana());
+        customer.setPhoneNumber(request.phoneNumber());
+        customer.setEmail(request.email());
+        customer.setBirthday(request.birthday());
+        customer.setAdminMemo(request.adminMemo());
+        customer.setIsDeleted(false);
+
+        return customerRepository.save(customer);
+    }
+
+    /**
+     * 顧客をCustomerResponseに変換します.
+     * @param customer 顧客エンティティ
+     * @return 顧客レスポンス
+     */
+    public CustomerResponse toCustomerResponse(Customer customer) {
+        return new CustomerResponse(
+                customer.getId(),
+                buildCustomerName(customer),
+                buildCustomerNameKana(customer),
+                "" // 作成直後は来店履歴なし
+        );
     }
 
     /**
