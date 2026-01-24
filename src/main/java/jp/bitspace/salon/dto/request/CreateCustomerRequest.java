@@ -19,6 +19,8 @@ public record CreateCustomerRequest(
         String lastNameKana,
 
         String firstNameKana,
+        
+        String lineDisplayName,
 
         String phoneNumber,
 
