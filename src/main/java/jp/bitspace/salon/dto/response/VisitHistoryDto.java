@@ -1,6 +1,7 @@
 package jp.bitspace.salon.dto.response;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jp.bitspace.salon.model.ReservationStatus;
 
@@ -12,6 +13,8 @@ public record VisitHistoryDto(
         Long visitId,
         /** 来店日 (YYYY-MM-DD) */
         LocalDate date,
+        /** 来店日時 */
+        LocalDateTime dateTime,
         /** 施術メニュー名 */
         String menu,
         /** 担当スタッフ名 */

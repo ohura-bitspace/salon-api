@@ -250,21 +250,24 @@ public class CustomerService {
 					Staff staff = reservation.getStaffId() == null ? null : staffById.get(reservation.getStaffId());
 					String staffName = staff != null && staff.getUser() != null ? staff.getUser().getName() : "";
 
-					Long price = reservation.getTotalPrice() == null ? null : reservation.getTotalPrice().longValue();
-					String memo = reservation.getMemo() != null ? reservation.getMemo() : "";
-					String treatmentMemo = reservation.getTreatmentMemo() != null ? reservation.getTreatmentMemo() : "";
-					// 予約ステータス
-					ReservationStatus status = reservation.getStatus();
+                        Long price = reservation.getTotalPrice() == null ? null : reservation.getTotalPrice().longValue();
+                        LocalDate visitDate = reservation.getStartTime() != null ? reservation.getStartTime().toLocalDate() : null;
+                        LocalDateTime visitDateTime = reservation.getStartTime();
+                        String memo = reservation.getMemo() != null ? reservation.getMemo() : "";
+                        String treatmentMemo = reservation.getTreatmentMemo() != null ? reservation.getTreatmentMemo() : "";
+                        // 予約ステータス
+                        ReservationStatus status = reservation.getStatus();
 
-					return new VisitHistoryDto(
-							reservation.getId(),
-							reservation.getStartTime() != null ? reservation.getStartTime().toLocalDate() : null,
-							menuTitle,
-							staffName,
-							price,
-							status,
-							memo,
-							treatmentMemo);
+                        return new VisitHistoryDto(
+                            reservation.getId(),
+                            visitDate,
+                            visitDateTime,
+                            menuTitle,
+                            staffName,
+                            price,
+                            status,
+                            memo,
+                            treatmentMemo);
 				})
 				.toList();
 
@@ -364,13 +367,15 @@ public class CustomerService {
                     Staff staff = reservation.getStaffId() == null ? null : staffById.get(reservation.getStaffId());
                     String staffName = staff != null && staff.getUser() != null ? staff.getUser().getName() : "";
 
-                    Long price = reservation.getTotalPrice() == null ? null : reservation.getTotalPrice().longValue();
-                    LocalDate visitDate = reservation.getStartTime() != null ? reservation.getStartTime().toLocalDate() : null;
-                    ReservationStatus status = reservation.getStatus(); // VISITED / CONFIRMED
+                        Long price = reservation.getTotalPrice() == null ? null : reservation.getTotalPrice().longValue();
+                        LocalDate visitDate = reservation.getStartTime() != null ? reservation.getStartTime().toLocalDate() : null;
+                        LocalDateTime visitDateTime = reservation.getStartTime();
+                        ReservationStatus status = reservation.getStatus(); // VISITED / CONFIRMED
 
-                    return new VisitHistoryDto(
+                        return new VisitHistoryDto(
                             reservation.getId(),
                             visitDate,
+                            visitDateTime,
                             menuTitle,
                             staffName,
                             price,
