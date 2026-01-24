@@ -20,10 +20,12 @@ import jakarta.validation.Valid;
 import jp.bitspace.salon.dto.request.CreateReservationRequest;
 import jp.bitspace.salon.dto.response.ReservationTimeSlotDto;
 import jp.bitspace.salon.dto.response.VisitHistoryDto;
+import jp.bitspace.salon.dto.response.StaffResponse;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.security.CustomerPrincipal;
 import jp.bitspace.salon.service.CustomerService;
 import jp.bitspace.salon.service.ReservationService;
+import jp.bitspace.salon.service.StaffService;
 
 /**
  * 管理側予約テーブルコントローラ.
@@ -34,10 +36,12 @@ public class CustomerReservationController {
 	
     private final ReservationService reservationService;
     private final CustomerService customerService;
+    private final StaffService staffService;
 
-    public CustomerReservationController(ReservationService reservationService, CustomerService customerService) {
+    public CustomerReservationController(ReservationService reservationService, CustomerService customerService, StaffService staffService) {
         this.reservationService = reservationService;
         this.customerService = customerService;
+        this.staffService = staffService;
     }
 	
     /**
@@ -109,6 +113,21 @@ public class CustomerReservationController {
 		}
         
         return visitHistoryList;
+    }
+
+    /**
+     * 施術者一覧（予約画面用）.
+     */
+    @GetMapping("/practitioners")
+    public List<StaffResponse> getPractitioners(
+            @AuthenticationPrincipal CustomerPrincipal principal) {
+
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+        }
+
+        Long salonId = principal.getSalonId();
+        return staffService.findPractitionersResponseBySalonId(salonId);
     }
     
     /**
