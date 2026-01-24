@@ -19,8 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 import jp.bitspace.salon.dto.request.CreateReservationRequest;
 import jp.bitspace.salon.dto.response.ReservationTimeSlotDto;
-import jp.bitspace.salon.dto.response.VisitHistoryDto;
 import jp.bitspace.salon.dto.response.StaffResponse;
+import jp.bitspace.salon.dto.response.VisitHistoryDto;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.security.CustomerPrincipal;
 import jp.bitspace.salon.service.CustomerService;
@@ -114,7 +114,8 @@ public class CustomerReservationController {
         
         return visitHistoryList;
     }
-
+    
+    // TODO 余計な情報は送らないようにする
     /**
      * 施術者一覧（予約画面用）.
      */
