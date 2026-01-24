@@ -27,7 +27,6 @@ INSERT INTO staffs (user_id, salon_id, role, is_practitioner, is_active) VALUES
 (1, 1, 'ADMIN', true, true),
 (2, 2, 'ADMIN', false, true),
 (3, 2, 'ADMIN', true, true),
-(4, 2, 'ADMIN', false, true);
 
 -- ============================================================
 -- 3. 顧客データの投入
