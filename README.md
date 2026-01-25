@@ -16,3 +16,6 @@ docker-compose down -v
 docker save -o salon-api.tar salon-api:latest
 # フロントエンド（React）イメージの保存
 docker save -o salon-frontend.tar salon-frontend:latest
+
+# メモリ監視
+docker stats
