@@ -60,9 +60,10 @@ public class StaffService {
 
     /**
      * 管理画面用: 所属サロンの全スタッフをレスポンスDTOに整形して返す.
+     * システム管理者は除外されます。
      */
     public List<StaffResponse> findStaffResponseBySalonId(Long salonId) {
-        return staffRepository.findBySalonId(salonId)
+        return staffRepository.findBySalonIdExcludingSystemAdmin(salonId)
                 .stream()
                 .map(this::toStaffResponse)
                 .toList();

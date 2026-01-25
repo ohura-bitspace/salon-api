@@ -36,7 +36,7 @@ INSERT INTO users (id, name, email, password_hash, is_active, is_system_admin) V
 INSERT INTO staffs (user_id, salon_id, role, is_practitioner, is_active) VALUES
 (1, 1, 'ADMIN', true, true),
 (2, 2, 'ADMIN', false, true),
-(3, 2, 'ADMIN', true, true);
+(3, 2, 'ADMIN', true, true),
 (4, 2, 'ADMIN', false, true);
 
 -- ============================================================
