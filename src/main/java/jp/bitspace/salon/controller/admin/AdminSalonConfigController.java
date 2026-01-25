@@ -37,7 +37,7 @@ public class AdminSalonConfigController {
     @GetMapping
     public SalonConfigResponse getSalonConfig(HttpServletRequest request, @RequestParam(name = "salonId") Long salonId) {
     	// 管理API共通の認可チェック（STAFFトークン + salonId一致）
-    			adminRequestAuthUtil.requireStaffAndSalonMatch(request, salonId);
+    	adminRequestAuthUtil.requireStaffAndSalonMatch(request, salonId);
         SalonConfig config = salonConfigService.findBySalonId(salonId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, 
@@ -52,11 +52,10 @@ public class AdminSalonConfigController {
      */
     @PutMapping
     public SalonConfigResponse updateSalonConfig(
-            HttpServletRequest request,
+    		HttpServletRequest request, @RequestParam(name = "salonId") Long salonId,
             @RequestBody UpdateSalonConfigRequest updateRequest) {
         // 認証とサロンID取得
-        Long salonId = adminRequestAuthUtil.getSalonIdFromRequest(request);
-
+    	adminRequestAuthUtil.requireStaffAndSalonMatch(request, salonId);
         // 更新または新規作成
         SalonConfig updated = salonConfigService.updateOrCreate(
                 salonId,
