@@ -9,6 +9,23 @@ CREATE TABLE salons (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) COMMENT='加盟店管理テーブル';
 
+-- 1-1. サロン設定テーブル
+-- 営業時間や予約枠の単位など、店舗ごとの運用設定を保持
+CREATE TABLE salon_configs (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'サロン設定ID',
+    salon_id BIGINT NOT NULL COMMENT 'サロンID',
+    opening_time TIME NOT NULL DEFAULT '09:00:00' COMMENT '開店時刻',
+    closing_time TIME NOT NULL DEFAULT '21:00:00' COMMENT '閉店時刻',
+    regular_holidays CHAR(7) NOT NULL DEFAULT '0000000' COMMENT '曜日フラグ(0=営業,1=休み。月曜始まり)',
+    slot_interval INT NOT NULL DEFAULT 30 COMMENT '予約枠の単位(分)',
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uq_salon_config (salon_id),
+    FOREIGN KEY (salon_id) REFERENCES salons(id)
+) COMMENT='サロン営業時間・予約設定';
+
 -- 2. 認証用ユーザーテーブル（システム全体でのユーザー、同じメールで複数店舗を持てる設計）
 CREATE TABLE users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
