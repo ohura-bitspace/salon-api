@@ -8,6 +8,10 @@ package jp.bitspace.salon.dto.response;
 public record LoginResponse(
         /** 認証用JWTトークン */
         String token,
+        /** ユーザID */
+        Long userId,
+        /** スタッフID */
+        Long staffId,
         /** スタッフ名 */
         String name,
         /** 権限（例: ADMIN / STAFF） */

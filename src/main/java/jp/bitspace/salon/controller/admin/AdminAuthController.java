@@ -62,6 +62,8 @@ public class AdminAuthController {
         // 名前も User から取得
         LoginResponse response = new LoginResponse(
                 token,
+                user.getId(),          // ユーザID
+                currentStaff.getId(),  // スタッフID
                 user.getName(),        // user.getName()
                 currentStaff.getRole().name(),
                 currentStaff.getSalon().getId(),
