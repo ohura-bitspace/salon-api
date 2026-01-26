@@ -80,7 +80,8 @@ public class CustomerAuthController {
         String authUrl = "https://access.line.me/oauth2/v2.1/authorize"
                 + "?response_type=code"
                 + "&client_id=" + url(lineChannelId)
-                + "&redirect_uri=" + url("http://133.18.122.222/auth/callback")
+                //+ "&redirect_uri=" + url("http://133.18.122.222/auth/callback")
+                + "&redirect_uri=" + url("https://salon.bitspace.jp/auth/callback")
                 + "&state=" + url(created.state())
                 + "&scope=" + url("profile openid email")
                 + "&nonce=" + url(created.nonce());
