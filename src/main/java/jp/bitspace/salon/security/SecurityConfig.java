@@ -32,8 +32,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-        	// プロキシからの情報を元に、セキュアな通信として扱う
-        	.requiresChannel(channel -> channel.anyRequest().requiresSecure())
             // CSRF保護を無効化（REST APIでは通常無効にします）
             .csrf(csrf -> csrf.disable())
             // CORS（WebConfig の設定を使用）
