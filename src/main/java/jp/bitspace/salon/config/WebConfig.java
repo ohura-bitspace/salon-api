@@ -13,11 +13,13 @@ public class WebConfig {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost", "http://localhost:5173", "http://localhost:5174") 
-                .allowedOriginPatterns("*") // ← 面倒なら開発中はこれでもOK（Spring Bootのバージョンによる）
+                .allowedOrigins("http://localhost", 
+                				"http://localhost:5173", 
+                				"http://localhost:5174",
+                				"https://salon.bitspace.jp") 
+                .allowedOriginPatterns("http://localhost:*") // 許可するオリジンを指定
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-				.allowedOriginPatterns("http://localhost:*") // 許可するオリジンを指定
-				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                // 全てのヘッダーを許可
 				.allowedHeaders("*")
 				.allowCredentials(true);
 			}
