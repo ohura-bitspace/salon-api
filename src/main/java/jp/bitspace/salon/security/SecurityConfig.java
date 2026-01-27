@@ -32,12 +32,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+        	// プロキシからの情報を元に、セキュアな通信として扱う
+        	.requiresChannel(channel -> channel.anyRequest().requiresSecure())
             // CSRF保護を無効化（REST APIでは通常無効にします）
             .csrf(csrf -> csrf.disable())
             // CORS（WebConfig の設定を使用）
             .cors(Customizer.withDefaults())
-            // TODO 理解していない.ステートレス
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+            // JWTなので、STATELESS
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             // 認可ルール
             .authorizeHttpRequests(auth -> auth
                 // /me はトークン確認用のため認証必須
