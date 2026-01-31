@@ -12,6 +12,8 @@ import jp.bitspace.salon.model.ReservationStatus;
  */
 public record UpdateReservationRequest(
         Long staffId,
+        /** カスタマID. */
+	    Long customerId,
         @NotNull LocalDateTime startTime,
         @NotNull LocalDateTime endTime,
         @NotNull ReservationStatus status,
