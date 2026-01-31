@@ -140,6 +140,7 @@ public class ReservationService {
 
         // 基本情報の更新
         reservation.setStaffId(request.staffId());
+        reservation.setCustomerId(request.customerId());
         reservation.setStartTime(request.startTime());
         reservation.setEndTime(request.endTime());
         reservation.setStatus(request.status());
