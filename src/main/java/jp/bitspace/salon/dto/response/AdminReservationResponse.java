@@ -1,6 +1,7 @@
 package jp.bitspace.salon.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jp.bitspace.salon.model.BookingRoute;
 
@@ -22,6 +23,8 @@ public record AdminReservationResponse(
 		String customer,
 		/** カスタマID. */
 		Long customerId,
+		/** メニューID一覧 */
+		List<Long> menuIds,
 		/** メニュー名（複数の場合はカンマ区切り） */
 		String menu,
 		/** スタッフ名 */

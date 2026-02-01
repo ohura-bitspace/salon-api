@@ -277,11 +277,16 @@ public class ReservationService {
 
         List<ReservationItem> items = reservationItemRepository.findByReservationId(reservation.getId());
         String menuNames = items.isEmpty() ? "未設定" : items.stream()
-                .map(item -> {
-                    if (item.getMenuId() == null) return "未設定";
-                    return menuRepository.findById(item.getMenuId()).map(Menu::getTitle).orElse("不明");
-                })
-                .collect(Collectors.joining("、"));
+            .map(item -> {
+                if (item.getMenuId() == null) return "未設定";
+                return menuRepository.findById(item.getMenuId()).map(Menu::getTitle).orElse("不明");
+            })
+            .collect(Collectors.joining("、"));
+
+        List<Long> menuIds = items.stream()
+            .map(ReservationItem::getMenuId)
+            .filter(id -> id != null)
+            .collect(Collectors.toList());
 
         String statusText = switch (reservation.getStatus()) {
             case PENDING -> "仮予約";
@@ -297,6 +302,7 @@ public class ReservationService {
             reservation.getEndTime(),
             customerName,
             reservation.getCustomerId(),
+            menuIds,
             menuNames,
             staffName,
             reservation.getBookingRoute(),
