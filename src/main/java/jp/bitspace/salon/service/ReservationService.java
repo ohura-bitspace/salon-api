@@ -251,7 +251,7 @@ public class ReservationService {
     }
 
     private AdminReservationResponse toAdminReservationResponse(Reservation reservation) {
-        String customerName = "未設定";
+        String customerName = "";
         if (reservation.getCustomerId() != null) {
             Optional<Customer> customerOpt = customerRepository.findById(reservation.getCustomerId());
             if (customerOpt.isPresent()) {
