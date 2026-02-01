@@ -18,5 +18,10 @@ public record CustomerDetailResponse(
         String memo,
         List<VisitHistoryDto> history,
         /** 来店回数. */
-        int visitCount
+        int visitCount,
+        // 以下、顧客パーソナル情報で使用する
+        String lastName,
+        String firstName,
+        String lastNameKana,
+        String firstNameKana
 ) {}

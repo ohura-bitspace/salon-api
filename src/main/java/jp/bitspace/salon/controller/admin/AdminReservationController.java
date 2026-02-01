@@ -63,7 +63,7 @@ public class AdminReservationController {
     ) {
         adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
         AdminReservationResponse response = reservationService.getAdminReservationResponse(id, salonId);
-        System.out.println("予約情報：" + response);
+        //System.out.println("予約情報：" + response);
         return ResponseEntity.ok(response);
     }
     
