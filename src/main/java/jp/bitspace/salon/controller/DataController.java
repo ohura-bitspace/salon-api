@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jp.bitspace.salon.dto.request.CreateCustomerRequest;
 import jp.bitspace.salon.dto.request.UpdateAdminMemoRequest;
+import jp.bitspace.salon.dto.request.UpdateCustomerPersonalInfoRequest;
 import jp.bitspace.salon.dto.request.UpdateTreatmentMemoRequest;
 import jp.bitspace.salon.dto.response.CustomerDetailResponse;
 import jp.bitspace.salon.dto.response.CustomerResponse;
@@ -143,6 +144,26 @@ public class DataController {
             @RequestBody UpdateAdminMemoRequest request) {
         adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
         customerService.updateAdminMemo(customerId, salonId, request.adminMemo());
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 顧客個人情報を更新.
+     * <p>
+     * lastName, firstName, lastNameKana, firstNameKana, phoneNumber, email, birthday を更新します。
+     * @param customerId 顧客ID
+     * @param salonId サロンID
+     * @param request 顧客個人情報更新リクエスト
+     * @return 204 No Content
+     */
+    @PutMapping("/customers/{customerId}/personal-info")
+    public ResponseEntity<Void> updateCustomerPersonalInfo(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long customerId,
+            @RequestParam(name = "salonId") Long salonId,
+            @RequestBody UpdateCustomerPersonalInfoRequest request) {
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+        customerService.updateCustomerPersonalInfo(customerId, salonId, request);
         return ResponseEntity.noContent().build();
     }
 }

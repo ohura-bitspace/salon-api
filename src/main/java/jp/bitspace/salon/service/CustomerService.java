@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import jp.bitspace.salon.dto.request.CreateCustomerRequest;
+import jp.bitspace.salon.dto.request.UpdateCustomerPersonalInfoRequest;
 import jp.bitspace.salon.dto.response.CustomerDetailResponse;
 import jp.bitspace.salon.dto.response.CustomerResponse;
 import jp.bitspace.salon.dto.response.ReservationTimeSlotDto;
@@ -363,6 +364,44 @@ public class CustomerService {
     public Customer updateAdminMemo(Long customerId, Long salonId, String adminMemo) {
         Customer customer = findByIdAndSalonIdOrThrow(customerId, salonId);
         customer.setAdminMemo(adminMemo);
+        return customerRepository.save(customer);
+    }
+
+    /**
+     * 顧客個人情報を更新.
+     * <p>
+     * lastName, firstName, lastNameKana, firstNameKana, phoneNumber, email, birthday を更新します。
+     * @param customerId 顧客ID
+     * @param salonId サロンID
+     * @param request 顧客個人情報更新リクエスト
+     * @return 更新後の顧客
+     */
+    @Transactional
+    public Customer updateCustomerPersonalInfo(Long customerId, Long salonId, UpdateCustomerPersonalInfoRequest request) {
+        Customer customer = findByIdAndSalonIdOrThrow(customerId, salonId);
+        
+        if (request.lastName() != null) {
+            customer.setLastName(request.lastName());
+        }
+        if (request.firstName() != null) {
+            customer.setFirstName(request.firstName());
+        }
+        if (request.lastNameKana() != null) {
+            customer.setLastNameKana(request.lastNameKana());
+        }
+        if (request.firstNameKana() != null) {
+            customer.setFirstNameKana(request.firstNameKana());
+        }
+        if (request.phoneNumber() != null) {
+            customer.setPhoneNumber(request.phoneNumber());
+        }
+        if (request.email() != null) {
+            customer.setEmail(request.email());
+        }
+        if (request.birthday() != null) {
+            customer.setBirthday(request.birthday());
+        }
+        
         return customerRepository.save(customer);
     }
 
