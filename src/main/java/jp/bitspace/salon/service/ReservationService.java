@@ -291,16 +291,17 @@ public class ReservationService {
         };
 
         return new AdminReservationResponse(
-                String.valueOf(reservation.getId()),
-                "Beauty予約",
-                reservation.getStartTime(),
-                reservation.getEndTime(),
-                customerName,
-                menuNames,
-                staffName,
+            String.valueOf(reservation.getId()),
+            "Beauty予約",
+            reservation.getStartTime(),
+            reservation.getEndTime(),
+            customerName,
+            reservation.getCustomerId(),
+            menuNames,
+            staffName,
             reservation.getBookingRoute(),
-                statusText,
-                reservation.getMemo()
+            statusText,
+            reservation.getMemo()
         );
     }
 

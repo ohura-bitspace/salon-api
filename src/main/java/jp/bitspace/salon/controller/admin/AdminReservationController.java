@@ -63,20 +63,10 @@ public class AdminReservationController {
     ) {
         adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
         AdminReservationResponse response = reservationService.getAdminReservationResponse(id, salonId);
+        System.out.println("予約情報：" + response);
         return ResponseEntity.ok(response);
     }
-
-//    @GetMapping("/{id}/items")
-//    public ResponseEntity<?> getReservationItems(@PathVariable Long id) {
-//        Optional<Reservation> reservation = reservationService.findById(id);
-//        if (reservation.isEmpty()) {
-//            return ResponseEntity.status(404).body(Map.of("error", "Reservation not found"));
-//        }
-//        List<ReservationItem> items = reservationService.findItemsByReservationId(id);
-//        return ResponseEntity.ok(items);
-//    }
     
-    // TODO 新規顧客の処理
     /**
      * 予約作成.
      * @param request 予約リクエスト
@@ -100,7 +90,9 @@ public class AdminReservationController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateReservation(@PathVariable Long id, @Valid @RequestBody UpdateReservationRequest request) {
-        try {
+        System.out.println("予約更新：" + request);
+    	
+    	try {
             Reservation updated = reservationService.updateWithItems(id, request);
             return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException ex) {
