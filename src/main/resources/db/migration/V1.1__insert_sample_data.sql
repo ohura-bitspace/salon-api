@@ -25,7 +25,7 @@ INSERT INTO salon_configs (salon_id, opening_time, closing_time, regular_holiday
 -- 認証情報（users）を先に投入
 INSERT INTO users (id, name, email, password_hash, is_active, is_system_admin) VALUES
 (1, '大浦 智史', 'ohura721@com', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, false),
-(2, '梶原 洋平', 'yohei@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, false),
+(2, 'YOHEI', 'yohei@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, false),
 (3, 'YOKO', 'yoko@mock.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, false),
 (4, 'システム管理者', 'admin@system.jp', '$2a$10$4hInjKtm/Kd.eZf24UBOFOAmgXFyf/ESW0KkpWfQIPhGyn.KExCtK', true, true);
 
