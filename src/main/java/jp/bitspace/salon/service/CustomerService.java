@@ -326,7 +326,12 @@ public class CustomerService {
 				})
 				.toList();
 		
-		// TODO 見直し
+		
+		long totSales = 0;
+		for (VisitHistoryDto visitHistoryDto : visitHistories) {
+			totSales += visitHistoryDto.price();
+		}
+		
 		return new CustomerDetailResponse(
 				customer.getId(),
 				buildCustomerName(customer),
@@ -337,6 +342,7 @@ public class CustomerService {
 				customer.getAdminMemo(),
 				visitHistories,
 				visitHistories.size(),
+				totSales,
 				customer.getLastName(),
 				customer.getFirstName(),
 				customer.getLastNameKana(),

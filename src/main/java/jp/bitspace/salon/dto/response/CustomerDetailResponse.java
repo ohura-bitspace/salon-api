@@ -19,6 +19,7 @@ public record CustomerDetailResponse(
         List<VisitHistoryDto> history,
         /** 来店回数. */
         int visitCount,
+        Long totalSales,
         // 以下、顧客パーソナル情報で使用する
         String lastName,
         String firstName,
