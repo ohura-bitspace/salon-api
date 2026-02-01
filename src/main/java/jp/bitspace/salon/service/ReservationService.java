@@ -276,9 +276,9 @@ public class ReservationService {
         }
 
         List<ReservationItem> items = reservationItemRepository.findByReservationId(reservation.getId());
-        String menuNames = items.isEmpty() ? "未設定" : items.stream()
+        String menuNames = items.isEmpty() ? "" : items.stream()
             .map(item -> {
-                if (item.getMenuId() == null) return "未設定";
+                if (item.getMenuId() == null) return "";
                 return menuRepository.findById(item.getMenuId()).map(Menu::getTitle).orElse("不明");
             })
             .collect(Collectors.joining("、"));
