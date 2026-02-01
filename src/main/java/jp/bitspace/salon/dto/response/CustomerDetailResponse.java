@@ -16,5 +16,7 @@ public record CustomerDetailResponse(
         String email,
         java.time.LocalDate birthday,
         String memo,
-        List<VisitHistoryDto> history
+        List<VisitHistoryDto> history,
+        /** 来店回数. */
+        int visitCount
 ) {}

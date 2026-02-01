@@ -334,7 +334,8 @@ public class CustomerService {
 				customer.getEmail(),
 				customer.getBirthday(),
 				customer.getAdminMemo(),
-				visitHistories);
+				visitHistories,
+				visitHistories.size());
 	}
 
     /**
