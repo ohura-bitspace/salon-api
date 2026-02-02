@@ -47,10 +47,16 @@ public class Reservation {
 
     @Column(name = "total_price", nullable = false)
     private Integer totalPrice = 0;
-
+    
+    /** 顧客側メモ. */
     @Column(columnDefinition = "TEXT")
     private String memo;
-
+    
+    /** 店舗側メモ. */
+    @Column(name = "staff_memo", columnDefinition = "TEXT")
+    private String staffMemo;
+    
+    /** 施術後メモ. */
     @Column(name = "treatment_memo", columnDefinition = "TEXT")
     private String treatmentMemo;
 

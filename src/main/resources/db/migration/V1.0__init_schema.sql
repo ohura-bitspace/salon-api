@@ -172,9 +172,9 @@ CREATE TABLE reservations (
     -- 拡張性を持たせるため ENUM
     booking_route ENUM('HP', 'PHONE', 'LINE', 'STORE', 'OTHER') DEFAULT NULL COMMENT '予約経路',
     
-    -- 施術前のメモ
-    memo TEXT COMMENT '店舗側メモ（申し送り事項など）',
-    -- 施術後のメモ（事後・カルテ・技術記録）
+    -- メモ項目
+    memo TEXT COMMENT 'お客様側メモ（要望・伝達事項など）',
+    staff_memo TEXT COMMENT '店側事前メモ（スタッフ間の共有事項・注意点など）',
     treatment_memo TEXT COMMENT '施術メモ（来店後の施術内容や顧客反応の記録）',
     
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
