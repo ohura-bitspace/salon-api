@@ -1,24 +1,26 @@
 package jp.bitspace.salon.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Comparator;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import jp.bitspace.salon.dto.request.CreateMenuRequest;
 import jp.bitspace.salon.dto.request.UpdateMenuRequest;
 import jp.bitspace.salon.dto.response.CategoryDto;
 import jp.bitspace.salon.dto.response.MenuDto;
-import jp.bitspace.salon.dto.response.SectionDto;
 import jp.bitspace.salon.dto.response.SalonMenuResponse;
+import jp.bitspace.salon.dto.response.SectionDto;
 import jp.bitspace.salon.model.Menu;
 import jp.bitspace.salon.model.MenuCategory;
-import jp.bitspace.salon.model.MenuSection;
 import jp.bitspace.salon.model.MenuItemType;
+import jp.bitspace.salon.model.MenuSection;
 import jp.bitspace.salon.repository.MenuCategoryRepository;
 import jp.bitspace.salon.repository.MenuRepository;
 import jp.bitspace.salon.repository.MenuSectionRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MenuService {
@@ -149,6 +151,21 @@ public class MenuService {
                 .orElse(null);
         }
 
+        // Determine displayOrder: if request explicitly passes 0, place it at the end
+        Integer requestedOrder = request.getDisplayOrder();
+        int displayOrderValue;
+        if (requestedOrder != null && requestedOrder == 0) {
+        	// 0の場合は、一番最後の番号を付与する
+            Menu lastMenu = menuRepository.findTopBySalonIdOrderByDisplayOrderDesc(salonId);
+            if (lastMenu != null && lastMenu.getDisplayOrder() != null) {
+                displayOrderValue = lastMenu.getDisplayOrder() + 1;
+            } else {
+                displayOrderValue = 0;
+            }
+        } else {
+            displayOrderValue = request.getDisplayOrder() != null ? request.getDisplayOrder() : 0;
+        }
+
         Menu menu = Menu.builder()
             .salonId(salonId)
             .menuCategory(menuCategory)
@@ -161,7 +178,7 @@ public class MenuService {
             .durationMinutes(request.getDurationMinutes())
             .itemType(MenuItemType.valueOf(request.getItemType()))
             .tag(request.getTag())
-            .displayOrder(request.getDisplayOrder() != null ? request.getDisplayOrder() : 0)
+            .displayOrder(displayOrderValue)
             .isActive(request.getIsActive() != null ? request.getIsActive() : true)
             .build();
 

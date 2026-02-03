@@ -13,4 +13,7 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 
     @EntityGraph(attributePaths = "menuCategory")
     List<Menu> findBySalonId(Long salonId);
+
+    // Get the menu with the highest displayOrder for a salon
+    Menu findTopBySalonIdOrderByDisplayOrderDesc(Long salonId);
 }
