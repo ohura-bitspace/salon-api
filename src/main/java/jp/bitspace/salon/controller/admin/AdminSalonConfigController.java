@@ -15,6 +15,8 @@ import jp.bitspace.salon.dto.response.SalonConfigResponse;
 import jp.bitspace.salon.model.SalonConfig;
 import jp.bitspace.salon.security.AdminRequestAuthUtil;
 import jp.bitspace.salon.service.SalonConfigService;
+import jp.bitspace.salon.service.SalonService;
+import jp.bitspace.salon.model.Salon;
 
 /**
  * サロン設定管理コントローラー.
@@ -24,11 +26,14 @@ import jp.bitspace.salon.service.SalonConfigService;
 public class AdminSalonConfigController {
     private final SalonConfigService salonConfigService;
     private final AdminRequestAuthUtil adminRequestAuthUtil;
+    private final SalonService salonService;
 
     public AdminSalonConfigController(SalonConfigService salonConfigService, 
-                                      AdminRequestAuthUtil adminRequestAuthUtil) {
+                                      AdminRequestAuthUtil adminRequestAuthUtil,
+                                      SalonService salonService) {
         this.salonConfigService = salonConfigService;
         this.adminRequestAuthUtil = adminRequestAuthUtil;
+        this.salonService = salonService;
     }
 
     /**
@@ -43,8 +48,14 @@ public class AdminSalonConfigController {
                         HttpStatus.NOT_FOUND, 
                         "サロン設定が見つかりません"
                 ));
+        Salon salon = salonService.findById(salonId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "サロンが見つかりません"
+            ));
 
-        return toResponse(config);
+        String planType = salon.getPlanType() != null ? salon.getPlanType().name() : null;
+        return toResponse(config, salon.getName(), planType);
     }
 
     /**
@@ -64,21 +75,34 @@ public class AdminSalonConfigController {
                 updateRequest.regularHolidays(),
                 updateRequest.slotInterval()
         );
-
-        return toResponse(updated);
+        // サロン名がリクエストに含まれていれば更新する
+        if (updateRequest.name() != null) {
+            Salon salon = salonService.findById(salonId)
+                .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "サロンが見つかりません"
+                ));
+            salon.setName(updateRequest.name());
+            salonService.save(salon);
+        }
+        String salonName = salonService.findById(salonId).map(Salon::getName).orElse(null);
+        String planType = salonService.findById(salonId).map(s -> s.getPlanType() != null ? s.getPlanType().name() : null).orElse(null);
+        return toResponse(updated, salonName, planType);
     }
 
     /**
      * エンティティからレスポンスDTOへ変換.
      */
-    private SalonConfigResponse toResponse(SalonConfig config) {
+    private SalonConfigResponse toResponse(SalonConfig config, String salonName, String planType) {
         return new SalonConfigResponse(
                 config.getId(),
                 config.getSalonId(),
                 config.getOpeningTime().toString(),
                 config.getClosingTime().toString(),
                 config.getRegularHolidays(),
-                config.getSlotInterval()
+                config.getSlotInterval(),
+                salonName,
+                planType
         );
     }
 }

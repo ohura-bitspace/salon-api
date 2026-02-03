@@ -12,5 +12,6 @@ public record UpdateSalonConfigRequest(
         String openingTime,
         String closingTime,
         String regularHolidays,
-        Integer slotInterval
+        Integer slotInterval,
+        String name
 ) {}

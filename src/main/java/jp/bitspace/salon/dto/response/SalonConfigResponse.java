@@ -16,5 +16,7 @@ public record SalonConfigResponse(
         String openingTime,
         String closingTime,
         String regularHolidays,
-        Integer slotInterval
+        Integer slotInterval,
+        String salonName,
+        String planType
 ) {}
