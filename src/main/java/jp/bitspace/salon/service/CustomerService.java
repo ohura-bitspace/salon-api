@@ -2,7 +2,9 @@ package jp.bitspace.salon.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +28,13 @@ import jp.bitspace.salon.model.Menu;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.model.ReservationItem;
 import jp.bitspace.salon.model.ReservationStatus;
+import jp.bitspace.salon.model.SalonConfig;
 import jp.bitspace.salon.model.Staff;
 import jp.bitspace.salon.repository.CustomerRepository;
 import jp.bitspace.salon.repository.MenuRepository;
 import jp.bitspace.salon.repository.ReservationItemRepository;
 import jp.bitspace.salon.repository.ReservationRepository;
+import jp.bitspace.salon.repository.SalonConfigRepository;
 import jp.bitspace.salon.repository.StaffRepository;
 
 /**
@@ -43,19 +47,22 @@ public class CustomerService {
     private final ReservationItemRepository reservationItemRepository;
     private final MenuRepository menuRepository;
     private final StaffRepository staffRepository;
+    private final SalonConfigRepository salonConfigRepository;
 
     public CustomerService(
             CustomerRepository customerRepository,
             ReservationRepository reservationRepository,
             ReservationItemRepository reservationItemRepository,
             MenuRepository menuRepository,
-            StaffRepository staffRepository
+            StaffRepository staffRepository,
+            SalonConfigRepository salonConfigRepository
     ) {
         this.customerRepository = customerRepository;
         this.reservationRepository = reservationRepository;
         this.reservationItemRepository = reservationItemRepository;
         this.menuRepository = menuRepository;
         this.staffRepository = staffRepository;
+        this.salonConfigRepository = salonConfigRepository;
     }
 
     public List<Customer> findAll() {
@@ -511,23 +518,44 @@ public class CustomerService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "from must be before to");
 		}
 
-		LocalDateTime fromDateTime = from.atStartOfDay();
-		LocalDateTime toDateTime = to.atStartOfDay();
-		
-		List<Reservation> reservations = reservationRepository
-		.findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeAsc(
-				salonId,
-				fromDateTime,
-				toDateTime
-		);
-		
-		// TODO 前後に30分の準備マージンを付加する
-		
-		return reservations.stream()
-				.map(r -> new ReservationTimeSlotDto(
-						r.getStartTime(),
-						r.getEndTime()
-				))
-				.toList();
+        SalonConfig salonConfig = salonConfigRepository.findBySalonId(salonId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "サロン設定が見つかりません"));
+        String regularHolidays = salonConfig.getRegularHolidays();
+        LocalTime openingTime = salonConfig.getOpeningTime();
+        LocalTime closingTime = salonConfig.getClosingTime();
+        Integer slotInterval = salonConfig.getSlotInterval();
+        if (openingTime == null || closingTime == null || slotInterval == null) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "サロン設定が不正です");
+        }
+
+        List<ReservationTimeSlotDto> slots = new ArrayList<>();
+        for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
+            if (isHolidaySlot(date, regularHolidays)) {
+                slots.add(new ReservationTimeSlotDto(date, null, null, true));
+                continue;
+            }
+
+            LocalDateTime start = date.atTime(openingTime);
+            LocalDateTime endLimit = date.atTime(closingTime);
+            while (!start.plusMinutes(slotInterval).isAfter(endLimit)) {
+                LocalDateTime end = start.plusMinutes(slotInterval);
+                slots.add(new ReservationTimeSlotDto(date, start, end, false));
+                start = end;
+            }
+        }
+
+        return slots;
 	}
+
+    private boolean isHolidaySlot(LocalDate date, String regularHolidays) {
+        if (regularHolidays == null || regularHolidays.length() < 7) {
+            regularHolidays = "0000000";
+        }
+        int dayOfWeek = date.getDayOfWeek().getValue() - 1; // 0=月曜, ..., 6=日曜
+        if (dayOfWeek < 0 || dayOfWeek >= regularHolidays.length()) {
+            return false;
+        }
+        char holidayFlag = regularHolidays.charAt(dayOfWeek);
+        return holidayFlag == '1';
+    }
 }

@@ -60,13 +60,8 @@ public class CustomerReservationController {
     	// 現在日-1日から、60日後で取得する
     	LocalDate from = LocalDate.now().minusDays(1);
     	LocalDate to = LocalDate.now().plusDays(60);
-    	
-    	List<ReservationTimeSlotDto> slList = customerService.findReservationTimeSlotsBySalonIdAndDateRange(salonId, from, to);
-    	for (ReservationTimeSlotDto reservationTimeSlotDto : slList) {
-			System.out.println(reservationTimeSlotDto);
-		}
-    	
-        return slList;
+
+        return customerService.findReservationTimeSlotsBySalonIdAndDateRange(salonId, from, to);
     }
     
     /**
