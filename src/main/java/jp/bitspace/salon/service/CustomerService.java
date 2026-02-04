@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -537,8 +536,16 @@ public class CustomerService {
                         false
                     ))
                 .toList();
+        
+        // salonConfigRepositoryから開店時刻、閉店時刻を取得して設定
+		Optional<SalonConfig> findBySalonId = salonConfigRepository.findBySalonId(salonId);
+		SalonConfig salonConfig = findBySalonId.orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "SalonConfig not found. salonId=" + salonId));
 
-        return new ReservationSlotsResponse(null, null, slots);
+		LocalTime openingTime = salonConfig.getOpeningTime();
+		LocalTime closingTime = salonConfig.getClosingTime();
+
+        return new ReservationSlotsResponse(openingTime, closingTime, slots);
     }
 
     private boolean isHolidaySlot(LocalDate date, String regularHolidays) {

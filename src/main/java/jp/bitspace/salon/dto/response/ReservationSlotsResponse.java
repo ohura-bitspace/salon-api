@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReservationSlotsResponse {
+	
 	/** 開店時刻 */
 	private LocalTime openingTime;
 	
