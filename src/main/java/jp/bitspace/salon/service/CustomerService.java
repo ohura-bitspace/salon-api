@@ -502,52 +502,44 @@ public class CustomerService {
 	}
 
 
-	/**
-	 * 顧客向け：予約時間帯一覧（営業時間情報とスロット）.
-	 * <p>
-	 * サロン設定から開店・閉店時刻を取得し、営業時間内のスロットを生成します。
-	 * 定休日は枠なしで holiday=true のエントリのみ返します。
-	 */
-	public ReservationSlotsResponse findReservationSlotsBySalonIdAndDateRange(Long salonId, LocalDate from, LocalDate to) {
+    /**
+     * 顧客向け：予約時間帯一覧（開始時刻と終了時刻のみ）.
+     * <p>
+     * from～to の日付範囲内の予約から、startTime と endTime のみを抽出して返します。
+     */
+    public ReservationSlotsResponse findReservationSlotsBySalonIdAndDateRange(Long salonId, LocalDate from, LocalDate to) {
 		
-		if (salonId == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "salonId is required");
-		}
-		if (from == null || to == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "from/to are required");
-		}
-		if (from.isAfter(to)) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "from must be before to");
-		}
+        if (salonId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "salonId is required");
+        }
+        if (from == null || to == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "from/to are required");
+        }
+        if (from.isAfter(to)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "from must be before to");
+        }
 
-		SalonConfig salonConfig = salonConfigRepository.findBySalonId(salonId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "サロン設定が見つかりません"));
-		String regularHolidays = salonConfig.getRegularHolidays();
-		LocalTime openingTime = salonConfig.getOpeningTime();
-		LocalTime closingTime = salonConfig.getClosingTime();
-		Integer slotInterval = salonConfig.getSlotInterval();
-		if (openingTime == null || closingTime == null || slotInterval == null) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "サロン設定が不正です");
-		}
+        LocalDateTime fromDateTime = from.atStartOfDay();
+        LocalDateTime toDateTime = to.atStartOfDay();
 
-		List<ReservationTimeSlotDto> slots = new ArrayList<>();
-		for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
-			if (isHolidaySlot(date, regularHolidays)) {
-				slots.add(new ReservationTimeSlotDto(date, null, null, true));
-				continue;
-			}
+        List<Reservation> reservations = reservationRepository
+                .findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeAsc(
+                        salonId,
+                        fromDateTime,
+                        toDateTime
+                    );
 
-			LocalDateTime start = date.atTime(openingTime);
-			LocalDateTime endLimit = date.atTime(closingTime);
-			while (!start.plusMinutes(slotInterval).isAfter(endLimit)) {
-				LocalDateTime end = start.plusMinutes(slotInterval);
-				slots.add(new ReservationTimeSlotDto(date, start, end, false));
-				start = end;
-			}
-		}
+        List<ReservationTimeSlotDto> slots = reservations.stream()
+                .map(r -> new ReservationTimeSlotDto(
+                        r.getStartTime().toLocalDate(),
+                        r.getStartTime(),
+                        r.getEndTime(),
+                        false
+                    ))
+                .toList();
 
-		return new ReservationSlotsResponse(openingTime, closingTime, slots);
-	}
+        return new ReservationSlotsResponse(null, null, slots);
+    }
 
     private boolean isHolidaySlot(LocalDate date, String regularHolidays) {
         if (regularHolidays == null || regularHolidays.length() < 7) {
