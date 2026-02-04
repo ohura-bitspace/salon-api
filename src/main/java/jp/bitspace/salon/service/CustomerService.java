@@ -22,6 +22,7 @@ import jp.bitspace.salon.dto.request.UpdateCustomerPersonalInfoRequest;
 import jp.bitspace.salon.dto.response.CustomerDetailResponse;
 import jp.bitspace.salon.dto.response.CustomerResponse;
 import jp.bitspace.salon.dto.response.ReservationTimeSlotDto;
+import jp.bitspace.salon.dto.response.ReservationSlotsResponse;
 import jp.bitspace.salon.dto.response.VisitHistoryDto;
 import jp.bitspace.salon.model.Customer;
 import jp.bitspace.salon.model.Menu;
@@ -502,7 +503,53 @@ public class CustomerService {
 
 
 	/**
-	 * 顧客向け：予約時間帯一覧（開始時刻と終了時刻のみ）.
+	 * 顧客向け：予約時間帯一覧（営業時間情報とスロット）.
+	 * <p>
+	 * サロン設定から開店・閉店時刻を取得し、営業時間内のスロットを生成します。
+	 * 定休日は枠なしで holiday=true のエントリのみ返します。
+	 */
+	public ReservationSlotsResponse findReservationSlotsBySalonIdAndDateRange(Long salonId, LocalDate from, LocalDate to) {
+		
+		if (salonId == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "salonId is required");
+		}
+		if (from == null || to == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "from/to are required");
+		}
+		if (from.isAfter(to)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "from must be before to");
+		}
+
+		SalonConfig salonConfig = salonConfigRepository.findBySalonId(salonId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "サロン設定が見つかりません"));
+		String regularHolidays = salonConfig.getRegularHolidays();
+		LocalTime openingTime = salonConfig.getOpeningTime();
+		LocalTime closingTime = salonConfig.getClosingTime();
+		Integer slotInterval = salonConfig.getSlotInterval();
+		if (openingTime == null || closingTime == null || slotInterval == null) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "サロン設定が不正です");
+		}
+
+		List<ReservationTimeSlotDto> slots = new ArrayList<>();
+		for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
+			if (isHolidaySlot(date, regularHolidays)) {
+				slots.add(new ReservationTimeSlotDto(date, null, null, true));
+				continue;
+			}
+
+			LocalDateTime start = date.atTime(openingTime);
+			LocalDateTime endLimit = date.atTime(closingTime);
+			while (!start.plusMinutes(slotInterval).isAfter(endLimit)) {
+				LocalDateTime end = start.plusMinutes(slotInterval);
+				slots.add(new ReservationTimeSlotDto(date, start, end, false));
+				start = end;
+			}
+		}
+
+		return new ReservationSlotsResponse(openingTime, closingTime, slots);
+	}
+
+	/**
 	 * <p>
 	 * from～to の日付範囲内の予約から、startTime と endTime のみを抽出して返します。
 	 */

@@ -18,7 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.Valid;
 import jp.bitspace.salon.dto.request.CreateReservationRequest;
-import jp.bitspace.salon.dto.response.ReservationTimeSlotDto;
+import jp.bitspace.salon.dto.response.ReservationSlotsResponse;
 import jp.bitspace.salon.dto.response.StaffResponse;
 import jp.bitspace.salon.dto.response.VisitHistoryDto;
 import jp.bitspace.salon.model.Reservation;
@@ -45,12 +45,12 @@ public class CustomerReservationController {
     }
 	
     /**
-     * 予約可能時間帯取得.
+     * 予約可能時間帯取得（営業時間含む）.
      * @param principal ログイン中の顧客情報
-     * @return 予約可能時間帯リスト
+     * @return 営業時間とスロットリスト
      */
     @GetMapping
-    public List<ReservationTimeSlotDto> getReservations(
+    public ReservationSlotsResponse getReservations(
             @AuthenticationPrincipal CustomerPrincipal principal) {
     	if (principal == null) {
     		throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
@@ -61,7 +61,7 @@ public class CustomerReservationController {
     	LocalDate from = LocalDate.now().minusDays(1);
     	LocalDate to = LocalDate.now().plusDays(60);
 
-        return customerService.findReservationTimeSlotsBySalonIdAndDateRange(salonId, from, to);
+        return customerService.findReservationSlotsBySalonIdAndDateRange(salonId, from, to);
     }
     
     /**
