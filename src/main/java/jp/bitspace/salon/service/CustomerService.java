@@ -532,13 +532,14 @@ public class CustomerService {
 		LocalTime closingTime = salonConfig.getClosingTime();
 		
 		String regularHolidays = salonConfig.getRegularHolidays();
-
-        List<Reservation> reservations = reservationRepository
-                .findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeAsc(
-                        salonId,
-                        fromDateTime,
-                        toDateTime
-                    );
+		
+		// キャンセルは除外して取得
+		List<Reservation> reservations = reservationRepository
+				.findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanAndStatusNotOrderByStartTimeAsc(
+						salonId,
+						fromDateTime,
+						toDateTime,
+						jp.bitspace.salon.model.ReservationStatus.CANCELED);
 
         List<ReservationTimeSlotDto> slots = new ArrayList<>(reservations.stream()
                 .map(r -> new ReservationTimeSlotDto(
