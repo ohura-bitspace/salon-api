@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -520,6 +521,17 @@ public class CustomerService {
 
         LocalDateTime fromDateTime = from.atStartOfDay();
         LocalDateTime toDateTime = to.atStartOfDay();
+        
+		// 営業時間取得
+		// salonConfigRepositoryから開店時刻、閉店時刻を取得して設定
+		Optional<SalonConfig> findBySalonId = salonConfigRepository.findBySalonId(salonId);
+		SalonConfig salonConfig = findBySalonId.orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "SalonConfig not found. salonId=" + salonId));
+
+		LocalTime openingTime = salonConfig.getOpeningTime();
+		LocalTime closingTime = salonConfig.getClosingTime();
+		
+		String regularHolidays = salonConfig.getRegularHolidays();
 
         List<Reservation> reservations = reservationRepository
                 .findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanOrderByStartTimeAsc(
@@ -528,35 +540,46 @@ public class CustomerService {
                         toDateTime
                     );
 
-        List<ReservationTimeSlotDto> slots = reservations.stream()
+        List<ReservationTimeSlotDto> slots = new ArrayList<>(reservations.stream()
                 .map(r -> new ReservationTimeSlotDto(
                         r.getStartTime().toLocalDate(),
                         r.getStartTime(),
                         r.getEndTime(),
                         false
                     ))
-                .toList();
-        
-        // salonConfigRepositoryから開店時刻、閉店時刻を取得して設定
-		Optional<SalonConfig> findBySalonId = salonConfigRepository.findBySalonId(salonId);
-		SalonConfig salonConfig = findBySalonId.orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "SalonConfig not found. salonId=" + salonId));
+                .toList());
 
-		LocalTime openingTime = salonConfig.getOpeningTime();
-		LocalTime closingTime = salonConfig.getClosingTime();
+        // regularHolidaysでフラグがたっている曜日は、ReservationTimeSlotDtoのholidayを真にし、対象日をセット
+        for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
+            if (isHolidaySlot(date, regularHolidays)) {
+                slots.add(new ReservationTimeSlotDto(date, null, null, true));
+            }
+        }
+        
+        // 日付順にソート
+        slots.sort((a, b) -> {
+            int dateComp = a.getDate().compareTo(b.getDate());
+            if (dateComp != 0) {
+                return dateComp;
+            }
+            if (a.getStartTime() == null) return -1;
+            if (b.getStartTime() == null) return 1;
+            return a.getStartTime().compareTo(b.getStartTime());
+        });
+        
 
         return new ReservationSlotsResponse(openingTime, closingTime, slots);
     }
 
-    private boolean isHolidaySlot(LocalDate date, String regularHolidays) {
-        if (regularHolidays == null || regularHolidays.length() < 7) {
-            regularHolidays = "0000000";
-        }
-        int dayOfWeek = date.getDayOfWeek().getValue() - 1; // 0=月曜, ..., 6=日曜
-        if (dayOfWeek < 0 || dayOfWeek >= regularHolidays.length()) {
-            return false;
-        }
-        char holidayFlag = regularHolidays.charAt(dayOfWeek);
-        return holidayFlag == '1';
-    }
+	private boolean isHolidaySlot(LocalDate date, String regularHolidays) {
+		if (regularHolidays == null || regularHolidays.length() < 7) {
+			regularHolidays = "0000000";
+		}
+		int dayOfWeek = date.getDayOfWeek().getValue() - 1; // 0=月曜, ..., 6=日曜
+		if (dayOfWeek < 0 || dayOfWeek >= regularHolidays.length()) {
+			return false;
+		}
+		char holidayFlag = regularHolidays.charAt(dayOfWeek);
+		return holidayFlag == '1';
+	}
 }
