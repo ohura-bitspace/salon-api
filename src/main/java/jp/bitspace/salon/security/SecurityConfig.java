@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/customer/auth/me").hasRole("CUSTOMER")
                 // それ以外の認証系は認証不要
                 .requestMatchers("/api/customer/auth/**").permitAll()
+                .requestMatchers("/api/webhooks/**").permitAll()
                 .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
                 // 既存（管理者含む）APIへの影響を避けるため、それ以外は現状通り許可
                 .anyRequest().permitAll()
