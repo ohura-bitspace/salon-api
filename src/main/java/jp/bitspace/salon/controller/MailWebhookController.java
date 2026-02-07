@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jp.bitspace.salon.dto.request.MailgunWebhookRequest;
@@ -37,55 +37,19 @@ public class MailWebhookController {
      * Mailgun はレスポンスの HTTP ステータスで成功/失敗を判断し、
      * 200 以外の場合はリトライを行う。
      * </p>
+     * <p>
+     * Mailgun から送信される multipart/form-data のパラメータ（body-plain, Message-Id 等）は、
+     * Spring の DataBinder によって自動的に MailgunWebhookRequest の camelCase フィールドにマッピングされる。
+     * </p>
      *
-     * @param sender         送信元メールアドレス
-     * @param from           From ヘッダ
-     * @param recipient      受信先メールアドレス
-     * @param to             To ヘッダ
-     * @param subject        件名
-     * @param bodyPlain      プレーンテキスト本文
-     * @param bodyHtml       HTML 本文
-     * @param strippedText   引用除去済みテキスト
-     * @param strippedHtml   引用除去済み HTML
-     * @param timestamp      タイムスタンプ
-     * @param token          トークン
-     * @param signature      HMAC署名
-     * @param messageId      メッセージ ID
+     * @param request Mailgun Webhook リクエスト（自動バインド）
      * @return 処理結果
      */
     @PostMapping(value = "/hotpepper", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MailWebhookResponse> handleHotpepperMail(
-            @RequestParam(value = "sender", required = false) String sender,
-            @RequestParam(value = "from", required = false) String from,
-            @RequestParam(value = "recipient", required = false) String recipient,
-            @RequestParam(value = "to", required = false) String to,
-            @RequestParam(value = "subject", required = false) String subject,
-            @RequestParam(value = "body-plain", required = false) String bodyPlain,
-            @RequestParam(value = "body-html", required = false) String bodyHtml,
-            @RequestParam(value = "stripped-text", required = false) String strippedText,
-            @RequestParam(value = "stripped-html", required = false) String strippedHtml,
-            @RequestParam(value = "timestamp", required = false) String timestamp,
-            @RequestParam(value = "token", required = false) String token,
-            @RequestParam(value = "signature", required = false) String signature,
-            @RequestParam(value = "Message-Id", required = false) String messageId
+            @ModelAttribute MailgunWebhookRequest request
     ) {
-        log.info("ホットペッパー Webhook 受信: subject={}, sender={}", subject, sender);
-
-        // DTO に詰め替え
-        MailgunWebhookRequest request = new MailgunWebhookRequest();
-        request.setSender(sender);
-        request.setFrom(from);
-        request.setRecipient(recipient);
-        request.setTo(to);
-        request.setSubject(subject);
-        request.setBodyPlain(bodyPlain);
-        request.setBodyHtml(bodyHtml);
-        request.setStrippedText(strippedText);
-        request.setStrippedHtml(strippedHtml);
-        request.setTimestamp(timestamp);
-        request.setToken(token);
-        request.setSignature(signature);
-        request.setMessageId(messageId);
+        log.info("ホットペッパー Webhook 受信: subject={}, sender={}", request.getSubject(), request.getSender());
 
         try {
             MailWebhookResponse response = mailWebhookService.processHotpepperMail(request);
