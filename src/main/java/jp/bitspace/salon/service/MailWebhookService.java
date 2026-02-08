@@ -2,7 +2,6 @@ package jp.bitspace.salon.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,9 +30,8 @@ public class MailWebhookService {
     private final HotpepperMailParserService hotpepperMailParserService;
     private final ReservationRepository reservationRepository;
 
-    /** Webhook 対象のサロン ID（設定で指定） */
-    @Value("${mailgun.webhook.default-salon-id:1}")
-    private Long defaultSalonId;
+    /** 対象のサロン ID. */
+    private Long defaultSalonId = 2L;
 
     /**
      * ホットペッパー予約通知メールを処理する.
