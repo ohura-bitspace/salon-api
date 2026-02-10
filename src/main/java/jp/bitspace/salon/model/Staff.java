@@ -58,7 +58,8 @@ public class Staff {
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "salon_id", nullable = false)
     private Salon salon;
-
+    
+    // TODO スタッフとメニューの紐づけを実装する
     /** 提供可能メニュー一覧. */
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
