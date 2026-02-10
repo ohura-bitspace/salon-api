@@ -150,6 +150,16 @@ CREATE TABLE menus (
     FOREIGN KEY (menu_section_id) REFERENCES menu_sections(id) ON DELETE SET NULL
 ) COMMENT='メニュー・クーポンマスタ';
 
+-- 4-3. スタッフ提供可能メニュー（中間テーブル）
+CREATE TABLE staff_available_menus (
+    staff_id BIGINT NOT NULL,
+    menu_id BIGINT NOT NULL,
+
+    PRIMARY KEY (staff_id, menu_id),
+    FOREIGN KEY (staff_id) REFERENCES staffs(id) ON DELETE CASCADE,
+    FOREIGN KEY (menu_id) REFERENCES menus(id) ON DELETE CASCADE
+) COMMENT='スタッフ提供可能メニュー';
+
 -- 5. 予約テーブル（ヘッダー情報）
 -- 誰が、いつ、どのスタッフで予約したかの基本情報
 CREATE TABLE reservations (

@@ -1,6 +1,8 @@
 package jp.bitspace.salon.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -13,6 +15,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -21,7 +25,9 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * スタッフエンティティ.
@@ -52,6 +58,18 @@ public class Staff {
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "salon_id", nullable = false)
     private Salon salon;
+
+    /** 提供可能メニュー一覧. */
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "staff_available_menus",
+        joinColumns = @JoinColumn(name = "staff_id"),
+        inverseJoinColumns = @JoinColumn(name = "menu_id")
+    )
+    @Builder.Default
+    private List<Menu> availableMenus = new ArrayList<>();
 
     /** 役割（ADMIN=管理者、STAFF=スタッフ）. */
     @Enumerated(EnumType.STRING)
