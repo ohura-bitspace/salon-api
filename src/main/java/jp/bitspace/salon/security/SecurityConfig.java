@@ -42,6 +42,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // /me はトークン確認用のため認証必須
                 .requestMatchers("/api/customer/auth/me").hasRole("CUSTOMER")
+                .requestMatchers("/api/customer/auth/refresh").hasRole("CUSTOMER")
                 // それ以外の認証系は認証不要
                 .requestMatchers("/api/customer/auth/**").permitAll()
                 .requestMatchers("/api/webhooks/**").permitAll()

@@ -169,6 +169,8 @@ public class CustomerAuthController {
     @PostMapping("/refresh")
     public ResponseEntity<CustomerAuthResponse> refresh(
             @AuthenticationPrincipal CustomerPrincipal principal) {
+    	System.out.println("refresh:" + principal);
+    	
         Customer customer = customerService.findByIdAndSalonIdOrThrow(
                 principal.getCustomerId(),
                 principal.getSalonId()

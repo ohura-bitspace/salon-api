@@ -30,21 +30,27 @@ public class JwtCustomerAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        // /api/customer/** のみ対象。認証エンドポイントは除外。
-        if (path == null) {
-            return true;
-        }
-        if (!path.startsWith("/api/customer/")) {
-            return true;
-        }
-        if (path.startsWith("/api/customer/auth/")) {
-            // /me はトークン確認用のためフィルタを通す
-            return !"/api/customer/auth/me".equals(path);
-        }
-        return false;
-    }
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		String path = request.getRequestURI();
+		// /api/customer/** のみ対象。認証エンドポイントは除外。
+		if (path == null) {
+			return true;
+		}
+		if (!path.startsWith("/api/customer/")) {
+			return true;
+		}
+
+		// 認証系エンドポイント（/api/customer/auth/**）の判定
+		if (path.startsWith("/api/customer/auth/")) {
+			// トークン確認用(/me) と トークン更新用(/refresh) は Principal が必要なのでフィルターを通す
+			// それ以外（login, callback等）はフィルターをスキップする
+			boolean isMe = "/api/customer/auth/me".equals(path);
+			boolean isRefresh = "/api/customer/auth/refresh".equals(path);
+
+			return !(isMe || isRefresh);
+		}
+		return false;
+	}
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
