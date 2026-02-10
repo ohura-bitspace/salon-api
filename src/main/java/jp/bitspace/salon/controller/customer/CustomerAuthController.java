@@ -162,6 +162,22 @@ public class CustomerAuthController {
         return ResponseEntity.ok(toDto(customer));
     }
 
+    /**
+     * トークンの有効期限を明示的にリフレッシュします。
+     * 現在有効なJWTを保持していることが前提です。
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<CustomerAuthResponse> refresh(
+            @AuthenticationPrincipal CustomerPrincipal principal) {
+        Customer customer = customerService.findByIdAndSalonIdOrThrow(
+                principal.getCustomerId(),
+                principal.getSalonId()
+        );
+
+        String newToken = jwtUtils.generateToken(customer.getId(), customer.getSalonId());
+        return ResponseEntity.ok(new CustomerAuthResponse(newToken, toDto(customer)));
+    }
+
     private CustomerDto toDto(Customer customer) {
         return new CustomerDto(
                 customer.getId(),
