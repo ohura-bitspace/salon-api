@@ -22,7 +22,7 @@ public class JwtUtils {
     private String secretKey;
 
     // 優先: jwt.expiration-ms -> 互換: app.jwt.expiration-ms -> 7日
-    @Value("${jwt.expiration-ms:${app.jwt.expiration-ms:604800000}}")
+    @Value("${jwt.expiration-ms:${app.jwt.admin.expiration-ms:604800000}}")
     private long expirationMs;
 
     private Key getSigningKey() {
