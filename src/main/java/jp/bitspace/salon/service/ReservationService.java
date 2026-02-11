@@ -220,6 +220,9 @@ public class ReservationService {
         reservation.setMemo(request.memo());
         reservation.setTotalPrice(totalPrice);
         reservation.setStatus(ReservationStatus.CONFIRMED);// 確定
+        if(request.status() != null) {
+        	reservation.setStatus(request.status());
+        }
 
         Reservation saved = reservationRepository.save(reservation);
 

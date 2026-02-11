@@ -5,6 +5,7 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
 import jp.bitspace.salon.model.BookingRoute;
+import jp.bitspace.salon.model.ReservationStatus;
 
 /**
  * 予約作成リクエスト.
@@ -20,6 +21,8 @@ public record CreateReservationRequest(
 	    Long staffId, // 指名なしならnull
 
 	    BookingRoute bookingRoute,
+	    /** ステータス. */
+	    ReservationStatus status,
 
 	    @NotNull
 	    LocalDateTime startTime,
