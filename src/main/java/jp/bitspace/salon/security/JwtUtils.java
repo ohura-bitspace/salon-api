@@ -22,10 +22,12 @@ public class JwtUtils {
     private String secretKey;
 
     // 優先: jwt.expiration-ms -> 互換: app.jwt.expiration-ms -> 7日
-    @Value("${jwt.expiration-ms:${app.jwt.admin.expiration-ms:604800000}}")
+    @Value("${jwt.expiration-ms:${app.jwt.expiration-ms:604800000}}")
     private long expirationMs;
     
     // TODO 管理者時間
+    @Value("${jwt.admin.expiration-ms:${app.jwt.admin.expiration-ms:604800000}}")
+    private long adminExpirationMs;
 
     private Key getSigningKey() {
         // Base64エンコードされたキーをデコードして使うのが安全
@@ -61,7 +63,7 @@ public class JwtUtils {
         .claim("userType", "STAFF")
         .claim("isSystemAdmin", isSystemAdmin != null && isSystemAdmin)
         .setIssuedAt(new Date())
-        .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+        .setExpiration(new Date(System.currentTimeMillis() + adminExpirationMs))
         .signWith(getSigningKey(), SignatureAlgorithm.HS256)
         .compact();
     	
