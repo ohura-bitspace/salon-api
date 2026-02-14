@@ -356,7 +356,8 @@ public class CustomerService {
 				customer.getLastName(),
 				customer.getFirstName(),
 				customer.getLastNameKana(),
-				customer.getFirstNameKana());
+				customer.getFirstNameKana(),
+				customer.getLinePictureUrl());
 	}
 
     /**

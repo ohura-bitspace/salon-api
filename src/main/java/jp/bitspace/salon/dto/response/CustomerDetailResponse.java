@@ -24,5 +24,6 @@ public record CustomerDetailResponse(
         String lastName,
         String firstName,
         String lastNameKana,
-        String firstNameKana
+        String firstNameKana,
+        String linePictureUrl
 ) {}
