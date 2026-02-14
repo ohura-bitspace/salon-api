@@ -10,6 +10,7 @@ public record CustomerResponse(
     /** 直近来店日. */
     String lastVisit,
     String lineDisplayName,
+    String linePictureUrl,
     String lastName,
     String firstName
 ) {}

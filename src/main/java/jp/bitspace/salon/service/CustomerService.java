@@ -168,6 +168,7 @@ public class CustomerService {
                 customer.getId(),
                 "", // 作成直後は来店履歴なし
                 customer.getLineDisplayName(),
+                customer.getLinePictureUrl(),
                 customer.getLastName(),
                 customer.getFirstName()
         );
@@ -238,6 +239,7 @@ public class CustomerService {
                             customer.getId(),
                             lastVisitString,
                             customer.getLineDisplayName(),
+                            customer.getLinePictureUrl(),
                             customer.getLastName(),
                             customer.getFirstName()
                     );
