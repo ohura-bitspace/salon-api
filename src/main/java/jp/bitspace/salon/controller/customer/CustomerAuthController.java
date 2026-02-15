@@ -143,7 +143,7 @@ public class CustomerAuthController {
 		String name = (customer.getLastName() != null && customer.getFirstName() != null)
 				? customer.getLastName() + " " + customer.getFirstName()
 				: customer.getLineDisplayName();
-
+		// TODO e-mailは取得しなくてもいいだろう
         return ResponseEntity.ok(new CustomerLineLoginResponse(
             jwt,
             customer.getSalonId(),
