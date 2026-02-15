@@ -25,8 +25,8 @@ public class JwtUtils {
     @Value("${jwt.expiration-ms:${app.jwt.expiration-ms:604800000}}")
     private long expirationMs;
     
-    // TODO 管理者時間
-    @Value("${jwt.admin.expiration-ms:${app.jwt.admin.expiration-ms:604800000}}")
+    /** 管理者セッション時間. */
+    @Value("${app.jwt.admin.expiration-ms:3600000}")
     private long adminExpirationMs;
 
     private Key getSigningKey() {
