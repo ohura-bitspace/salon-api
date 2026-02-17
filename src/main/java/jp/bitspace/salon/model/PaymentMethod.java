@@ -12,8 +12,6 @@ public enum PaymentMethod {
     CREDIT_CARD,
     /** QR決済. */
     QR_PAY,
-    /** 銀行振込. */
-    BANK_TRANSFER,
     /** その他. */
     OTHER
 }
