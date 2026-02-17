@@ -25,7 +25,7 @@ import jp.bitspace.salon.service.PaymentService;
 /**
  * 管理側決済コントローラ.
  * <p>
- * 手動登録された決済（MANUAL）の管理を行います。
+ * 手動登録された決済の管理を行います。
  */
 @RestController
 @RequestMapping("/api/admin/payments")
@@ -40,9 +40,7 @@ public class AdminPaymentController {
     }
     
     /**
-     * 決済を作成（手動登録）.
-     * <p>
-     * paymentSourceはMANUALで自動設定されます。
+     * 決済登録.
      * 
      * @param httpServletRequest HTTPリクエスト
      * @param request 決済リクエスト
