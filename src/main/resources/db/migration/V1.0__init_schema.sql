@@ -220,7 +220,9 @@ CREATE TABLE payments (
     reservation_id BIGINT DEFAULT NULL COMMENT '関連する予約ID（NULLなら予約外売上）',
     customer_id BIGINT DEFAULT NULL COMMENT '顧客ID',
 
-    amount INT NOT NULL COMMENT '決済金額',
+    original_amount INT NOT NULL COMMENT '元金額（割引前）',
+    discount_amount INT NOT NULL DEFAULT 0 COMMENT '割引額',
+    amount INT NOT NULL COMMENT '決済金額（original_amount - discount_amount）',
 
     -- 決済方法の管理
     payment_method ENUM('CASH', 'CREDIT_CARD', 'QR_PAY', 'BANK_TRANSFER', 'OTHER') NOT NULL COMMENT '決済方法',

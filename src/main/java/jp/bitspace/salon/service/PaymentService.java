@@ -55,6 +55,8 @@ public class PaymentService {
         payment.setSalonId(request.getSalonId());
         payment.setReservationId(request.getReservationId());
         payment.setCustomerId(request.getCustomerId());
+        payment.setOriginalAmount(request.getOriginalAmount());
+        payment.setDiscountAmount(request.getOriginalAmount() - request.getAmount());
         payment.setAmount(request.getAmount());
         payment.setPaymentMethod(request.getPaymentMethod());
         // 手動登録なのでMANUALで設定
@@ -167,9 +169,19 @@ public class PaymentService {
     private void validateCreatePaymentRequest(CreatePaymentRequest request) {
         // 基本的な検証（@NotNullなどのアノテーションで対応）
         
-        // 金額が負数でないか確認
+        // 元金額が正の値か確認
+        if (request.getOriginalAmount() == null || request.getOriginalAmount() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Original amount must be positive");
+        }
+
+        // 決済金額が正の値か確認
         if (request.getAmount() == null || request.getAmount() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must be positive");
+        }
+
+        // 決済金額が元金額を超えないか確認
+        if (request.getAmount() > request.getOriginalAmount()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must not exceed original amount");
         }
         
         // 決済日時が未来でないか確認（オプション）

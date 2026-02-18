@@ -27,6 +27,12 @@ public class PaymentResponse {
     /** 顧客ID. */
     private Long customerId;
     
+    /** 元金額（割引前、単位: 円）. */
+    private Integer originalAmount;
+
+    /** 割引額（単位: 円）. */
+    private Integer discountAmount;
+
     /** 決済金額（単位: 円）. */
     private Integer amount;
     
@@ -60,6 +66,8 @@ public class PaymentResponse {
             .salonId(payment.getSalonId())
             .reservationId(payment.getReservationId())
             .customerId(payment.getCustomerId())
+            .originalAmount(payment.getOriginalAmount())
+            .discountAmount(payment.getDiscountAmount())
             .amount(payment.getAmount())
             .paymentMethod(payment.getPaymentMethod())
             .paymentSource(payment.getPaymentSource())

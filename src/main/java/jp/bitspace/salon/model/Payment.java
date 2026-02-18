@@ -41,7 +41,15 @@ public class Payment {
     @Column(name = "customer_id")
     private Long customerId;
 
-    /** 決済金額（単位: 円）. */
+    /** 元金額（割引前、単位: 円）. */
+    @Column(name = "original_amount", nullable = false)
+    private Integer originalAmount;
+
+    /** 割引額（単位: 円）. */
+    @Column(name = "discount_amount", nullable = false)
+    private Integer discountAmount = 0;
+
+    /** 決済金額（original_amount - discount_amount、単位: 円）. */
     @Column(nullable = false)
     private Integer amount;
 

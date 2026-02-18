@@ -25,6 +25,11 @@ public class CreatePaymentRequest {
     /** 顧客ID（顧客が特定できない場合はNULL）. */
     private Long customerId;
     
+    /** 元金額（割引前、単位: 円）. */
+    @NotNull(message = "originalAmountは必須です")
+    @Positive(message = "originalAmountは正の値である必要があります")
+    private Integer originalAmount;
+
     /** 決済金額（単位: 円）. */
     @NotNull(message = "amountは必須です")
     @Positive(message = "amountは正の値である必要があります")
