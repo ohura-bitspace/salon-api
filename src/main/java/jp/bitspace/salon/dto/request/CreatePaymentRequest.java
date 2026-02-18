@@ -1,7 +1,5 @@
 package jp.bitspace.salon.dto.request;
 
-import java.time.LocalDateTime;
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jp.bitspace.salon.model.PaymentMethod;
@@ -38,10 +36,6 @@ public class CreatePaymentRequest {
     /** 決済方法. */
     @NotNull(message = "paymentMethodは必須です")
     private PaymentMethod paymentMethod;
-    
-    /** 決済日時（入金日時）. */
-    @NotNull(message = "paymentAtは必須です")
-    private LocalDateTime paymentAt;
     
     /** 会計に関するメモ. */
     private String memo;

@@ -61,7 +61,7 @@ public class PaymentService {
         payment.setPaymentMethod(request.getPaymentMethod());
         // 手動登録なのでMANUALで設定
         payment.setPaymentSource(PaymentSource.MANUAL);
-        payment.setPaymentAt(request.getPaymentAt());
+        payment.setPaymentAt(LocalDateTime.now());
         payment.setMemo(request.getMemo());
         
         // 保存
@@ -182,13 +182,6 @@ public class PaymentService {
         // 決済金額が元金額を超えないか確認
         if (request.getAmount() > request.getOriginalAmount()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must not exceed original amount");
-        }
-        
-        // 決済日時が未来でないか確認（オプション）
-        LocalDateTime now = LocalDateTime.now();
-        if (request.getPaymentAt().isAfter(now.plusMinutes(5))) {
-            // 5分程度の猶予を持たせる
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment date cannot be in the future");
         }
     }
 }
