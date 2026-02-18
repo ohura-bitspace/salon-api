@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SalonMenuResponse {
+	/** クーポンメニュー. */
     private List<MenuDto> coupons;
+    /** 通常メニュー. */
     private List<CategoryDto> categories;
 }
