@@ -16,7 +16,10 @@ import jp.bitspace.salon.dto.request.CreatePaymentRequest;
 import jp.bitspace.salon.dto.response.PaymentResponse;
 import jp.bitspace.salon.model.Payment;
 import jp.bitspace.salon.model.PaymentSource;
+import jp.bitspace.salon.model.Reservation;
+import jp.bitspace.salon.model.ReservationStatus;
 import jp.bitspace.salon.repository.PaymentRepository;
+import jp.bitspace.salon.repository.ReservationRepository;
 
 /**
  * 決済サービス.
@@ -27,9 +30,11 @@ import jp.bitspace.salon.repository.PaymentRepository;
 public class PaymentService {
     
     private final PaymentRepository paymentRepository;
-    
-    public PaymentService(PaymentRepository paymentRepository) {
+    private final ReservationRepository reservationRepository;
+
+    public PaymentService(PaymentRepository paymentRepository, ReservationRepository reservationRepository) {
         this.paymentRepository = paymentRepository;
+        this.reservationRepository = reservationRepository;
     }
     
     /**
@@ -59,7 +64,15 @@ public class PaymentService {
         
         // 保存
         Payment savedPayment = paymentRepository.save(payment);
-        
+
+        // 予約IDが指定されている場合、予約ステータスを来店済みに変更
+        if (request.getReservationId() != null) {
+            Reservation reservation = reservationRepository.findById(request.getReservationId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found"));
+            reservation.setStatus(ReservationStatus.VISITED);
+            reservationRepository.save(reservation);
+        }
+
         return PaymentResponse.fromEntity(savedPayment);
     }
     
