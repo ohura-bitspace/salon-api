@@ -108,7 +108,8 @@ public class MailWebhookService {
         if (content.getMemo() != null) {
             memo.append("[要望: ").append(content.getMemo()).append("]\n");
         }
-
+        
+        // 原文でいいかも
         reservation.setMemo(memo.toString().trim());
 
         // TODO: 顧客名・電話番号からCustomerを検索 or 新規作成して customer_id を設定
