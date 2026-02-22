@@ -73,7 +73,8 @@ public class AdminSalonConfigController {
                 updateRequest.openingTime(),
                 updateRequest.closingTime(),
                 updateRequest.regularHolidays(),
-                updateRequest.slotInterval()
+                updateRequest.slotInterval(),
+                updateRequest.preparationMarginMinutes()
         );
         // サロン名がリクエストに含まれていれば更新する
         if (updateRequest.name() != null) {
@@ -101,6 +102,7 @@ public class AdminSalonConfigController {
                 config.getClosingTime().toString(),
                 config.getRegularHolidays(),
                 config.getSlotInterval(),
+                config.getPreparationMarginMinutes(),
                 salonName,
                 planType
         );

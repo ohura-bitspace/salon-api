@@ -47,20 +47,25 @@ public class SalonConfigService {
      * @param closingTime 閉店時刻（HH:mm形式）
      * @param regularHolidays 定休日フラグ（7桁文字列）
      * @param slotInterval 予約枠の単位（分）
+     * @param preparationMarginMinutes 準備時間マージン（分）
      * @return 更新されたサロン設定
      */
     @Transactional
-    public SalonConfig updateOrCreate(Long salonId, String openingTime, String closingTime, 
-                                      String regularHolidays, Integer slotInterval) {
+    public SalonConfig updateOrCreate(Long salonId, String openingTime, String closingTime,
+                                      String regularHolidays, Integer slotInterval,
+                                      Integer preparationMarginMinutes) {
         SalonConfig config = salonConfigRepository.findBySalonId(salonId)
                 .orElse(new SalonConfig());
-        
+
         config.setSalonId(salonId);
         config.setOpeningTime(java.time.LocalTime.parse(openingTime));
         config.setClosingTime(java.time.LocalTime.parse(closingTime));
         config.setRegularHolidays(regularHolidays);
         config.setSlotInterval(slotInterval);
-        
+        if (preparationMarginMinutes != null) {
+            config.setPreparationMarginMinutes(preparationMarginMinutes);
+        }
+
         return salonConfigRepository.save(config);
     }
 }
