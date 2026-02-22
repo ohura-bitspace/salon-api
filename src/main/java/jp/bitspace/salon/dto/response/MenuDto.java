@@ -1,6 +1,5 @@
 package jp.bitspace.salon.dto.response;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,13 +11,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MenuDto {
     private Long id;
+    /** カテゴリID. */
     private Long menuCategoryId;
     private Long menuSectionId;
     private String title;
     private String description;
+    
     private String imageUrl;
+    /** オリジナル金額. */
     private Integer originalPrice;
+    /** ディスカウント金額. */
     private Integer discountedPrice;
+    /** 施術時間. */
     private Integer durationMinutes;
     private String itemType;
     private String tag;
