@@ -544,11 +544,13 @@ public class CustomerService {
 						toDateTime,
 						jp.bitspace.salon.model.ReservationStatus.CANCELED);
 
+        // TODO 準備時間を考慮し、前後に30分マージンを付加
+        final int MARGIN_MINUTES = 30;
         List<ReservationTimeSlotDto> slots = new ArrayList<>(reservations.stream()
                 .map(r -> new ReservationTimeSlotDto(
                         r.getStartTime().toLocalDate(),
-                        r.getStartTime(),
-                        r.getEndTime(),
+                        r.getStartTime().minusMinutes(MARGIN_MINUTES),
+                        r.getEndTime().plusMinutes(MARGIN_MINUTES),
                         false
                     ))
                 .toList());
@@ -571,7 +573,6 @@ public class CustomerService {
             return a.getStartTime().compareTo(b.getStartTime());
         });
         
-
         return new ReservationSlotsResponse(openingTime, closingTime, slots);
     }
 
