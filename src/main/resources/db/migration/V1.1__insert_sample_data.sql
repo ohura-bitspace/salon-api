@@ -13,9 +13,9 @@ INSERT INTO salons (id, name, plan_type, is_active) VALUES
 -- 各サロンの営業時間・定休日・予約枠の設定
 -- regular_holidays: 7桁文字列（0=営業、1=休み、月曜始まり）
 --   例: "0000011" = 土日休み、"0000000" = 年中無休
-INSERT INTO salon_configs (salon_id, opening_time, closing_time, regular_holidays, slot_interval) VALUES
-(1, '09:30:00', '21:00:00', '1000000', 30),  -- bit Salon
-(2, '10:00:00', '21:00:00', '0000000', 30);  -- salon up-S
+INSERT INTO salon_configs (salon_id, opening_time, closing_time, regular_holidays, slot_interval, preparation_margin_minutes) VALUES
+(1, '09:30:00', '21:00:00', '1000000', 30, 30),  -- bit Salon
+(2, '10:00:00', '21:00:00', '0000000', 30, 30);  -- salon up-S
 
 -- ============================================================
 -- 2. スタッフデータの投入
