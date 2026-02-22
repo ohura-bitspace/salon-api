@@ -18,6 +18,7 @@ CREATE TABLE salon_configs (
     closing_time TIME NOT NULL DEFAULT '21:00:00' COMMENT '閉店時刻',
     regular_holidays CHAR(7) NOT NULL DEFAULT '0000000' COMMENT '曜日フラグ(0=営業,1=休み。月曜始まり)',
     slot_interval INT NOT NULL DEFAULT 30 COMMENT '予約枠の単位(分)',
+    preparation_margin_minutes INT NOT NULL DEFAULT 30 COMMENT '準備時間マージン(分)。予約の前後に付加するバッファ',
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

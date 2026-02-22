@@ -46,6 +46,15 @@ public class SalonConfig {
     @Column(name = "slot_interval", nullable = false)
     private Integer slotInterval = 30;
 
+    /**
+     * 準備時間マージン（分）.
+     * <p>
+     * 予約の開始前・終了後に付加するバッファ時間。
+     * 例: 30 → 予約前後それぞれ30分を予約不可にする
+     */
+    @Column(name = "preparation_margin_minutes", nullable = false)
+    private Integer preparationMarginMinutes = 30;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

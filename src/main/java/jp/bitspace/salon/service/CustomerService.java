@@ -544,13 +544,14 @@ public class CustomerService {
 						toDateTime,
 						jp.bitspace.salon.model.ReservationStatus.CANCELED);
 
-        // TODO 準備時間を考慮し、前後に30分マージンを付加
-        final int MARGIN_MINUTES = 30;
+        // 準備時間マージン（DB設定値）を前後に付加
+        int marginMinutes = salonConfig.getPreparationMarginMinutes() != null
+                ? salonConfig.getPreparationMarginMinutes() : 0;
         List<ReservationTimeSlotDto> slots = new ArrayList<>(reservations.stream()
                 .map(r -> new ReservationTimeSlotDto(
                         r.getStartTime().toLocalDate(),
-                        r.getStartTime().minusMinutes(MARGIN_MINUTES),
-                        r.getEndTime().plusMinutes(MARGIN_MINUTES),
+                        r.getStartTime().minusMinutes(marginMinutes),
+                        r.getEndTime().plusMinutes(marginMinutes),
                         false
                     ))
                 .toList());
