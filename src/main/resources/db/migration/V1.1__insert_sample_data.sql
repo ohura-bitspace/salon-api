@@ -5,7 +5,7 @@
 -- ID=2: お客様の本番サロン
 INSERT INTO salons (id, name, plan_type, is_active) VALUES 
 (1, 'bit Salon', 'STANDARD', true),
-(2, 'salon up-S', 'STANDARD', true);
+(2, 'salon up-S', 'MONITOR', true);
 
 -- ============================================================
 -- 1-1. サロン設定データの投入
