@@ -68,20 +68,20 @@ public class HotpepperMailParserService {
         }
         
         
-        HotpepperMailContent content = HotpepperMailContent.builder()
-                .customerLastName(null)   // TODO: メール本文から抽出
-                .customerFirstName(null)  // TODO: メール本文から抽出
-                .customerLastNameKana(null)
-                .customerFirstNameKana(null)
-                .phoneNumber(null)        // TODO: メール本文から抽出
-                .email(null)              // TODO: メール本文から抽出
-                .startTime(null)          // TODO: メール本文から抽出
-                .endTime(null)            // TODO: メール本文から抽出
-                .menuName(null)           // TODO: メール本文から抽出
-                .staffName(null)          // TODO: メール本文から抽出
-                .memo(null)               // TODO: メール本文から抽出
-                .hotpepperReservationId(null) // TODO: メール本文から抽出
-                .build();
+		HotpepperMailContent content = HotpepperMailContent.builder()
+				.customerLastName(nameParts != null ? nameParts.lastName : null)
+				.customerFirstName(nameParts != null ? nameParts.firstName : null)
+				.customerLastNameKana(nameParts != null ? nameParts.lastNameKana : null)
+				.customerFirstNameKana(nameParts != null ? nameParts.firstNameKana : null)
+				.phoneNumber(null) // 通常本文にない想定（必要なら別途追加）
+				.email(null) // 通常本文にない想定（必要なら別途追加）
+				.startTime(startTime)
+				.endTime(endTime)
+				.menuName(menuName)
+				.staffName(staffName)
+				.memo(memo)
+				.hotpepperReservationId(reservationId)
+				.build();
 
         log.info("ホットペッパーメール解析完了: reservationId={}", content.getHotpepperReservationId());
         return content;
