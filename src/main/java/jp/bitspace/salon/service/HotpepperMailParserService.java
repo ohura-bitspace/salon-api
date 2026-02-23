@@ -66,7 +66,16 @@ public class HotpepperMailParserService {
         if (memo != null && memo.trim().equals("-")) {
             memo = null;
         }
-        
+		// TODO オリジナルを追加
+		// ------------------------------
+		StringBuilder sb = new StringBuilder();
+		sb.append(request.getBodyPlain());
+		if (memo != null && !memo.trim().equals("-")) {
+			sb.append(memo).append("\n"); // 既存のメモがあれば追加
+		}
+		memo = sb.toString();
+		//memo += request.getBodyPlain();
+		// ------------------------------
         
 		HotpepperMailContent content = HotpepperMailContent.builder()
 				.customerLastName(nameParts != null ? nameParts.lastName : null)
