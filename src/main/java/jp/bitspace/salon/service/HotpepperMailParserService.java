@@ -38,6 +38,7 @@ public class HotpepperMailParserService {
         }
 
         String normalized = normalizeBody(body);
+        log.info("ホットペッパーメール解析開始: normalized={}", normalized);
 
         // 予約番号
         String reservationId = extractValueByLabel(normalized, "予約番号", "■予約番号");
@@ -76,7 +77,10 @@ public class HotpepperMailParserService {
 		memo = sb.toString();
 		//memo += request.getBodyPlain();
 		// ------------------------------
-        
+		
+		// メール本文・件名からキャンセル判定
+		String type = detectType(normalized);
+
 		HotpepperMailContent content = HotpepperMailContent.builder()
 				.customerLastName(nameParts != null ? nameParts.lastName : null)
 				.customerFirstName(nameParts != null ? nameParts.firstName : null)
@@ -90,6 +94,7 @@ public class HotpepperMailParserService {
 				.staffName(staffName)
 				.memo(memo)
 				.hotpepperReservationId(reservationId)
+				.type(type)
 				.build();
 
         log.info("ホットペッパーメール解析完了: reservationId={}", content.getHotpepperReservationId());
@@ -113,6 +118,29 @@ public class HotpepperMailParserService {
     }
     
  // =========================================================
+    // Type detection (予約 / キャンセル)
+    // =========================================================
+
+    private static final Pattern CANCEL_PATTERN = Pattern.compile(
+            "キャンセル|cancel|取り消し", Pattern.CASE_INSENSITIVE
+    );
+
+    /**
+     * メール本文・件名からキャンセルかどうかを判定する.
+     *
+     * @param normalizedBody 正規化済み本文
+     * @param subject メール件名
+     * @return "キャンセル" or "予約"
+     */
+    private static String detectType(String normalizedBody) {
+        
+        if (normalizedBody != null && CANCEL_PATTERN.matcher(normalizedBody).find()) {
+            return "cancel";
+        }
+        return "reserve";
+    }
+
+    // =========================================================
     // Private helpers (robust extraction)
     // =========================================================
 

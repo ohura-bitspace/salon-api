@@ -54,15 +54,19 @@ public class MailWebhookService {
         //    return MailWebhookResponse.ok("予約通知メールではないためスキップしました");
         //}
 
-        // 3. メール本文を解析
-        HotpepperMailContent content = hotpepperMailParserService.parse(request);
+		// 3. メール本文を解析
+		HotpepperMailContent content = hotpepperMailParserService.parse(request);
 
-        // 4. 予約を作成
-        Reservation reservation = createReservationFromMail(content);
+		Long id = 0L;
+		if (!"cancel".equals(content.getType())) {
+			// 4. 予約を作成
+			Reservation reservation = createReservationFromMail(content);
+			id = reservation.getId();
+		}
 
-        log.info("ホットペッパー予約を登録しました: reservationId={}", reservation.getId());
-        return MailWebhookResponse.ok("予約を登録しました", reservation.getId());
-    }
+		log.info("ホットペッパー予約を登録しました: reservationId={}", id);
+		return MailWebhookResponse.ok("予約を登録しました", id);
+	}
 
     /**
      * 解析したメール内容から予約を作成する.

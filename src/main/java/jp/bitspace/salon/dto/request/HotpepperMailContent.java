@@ -50,4 +50,7 @@ public class HotpepperMailContent {
 
     /** 予約ID（ホットペッパー側の管理番号） */
     private String hotpepperReservationId;
+    
+    /** タイプ（予約/キャンセル/その他）. */
+    private String type;
 }
