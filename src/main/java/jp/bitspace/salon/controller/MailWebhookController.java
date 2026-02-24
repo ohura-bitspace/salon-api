@@ -2,7 +2,6 @@ package jp.bitspace.salon.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,7 +44,7 @@ public class MailWebhookController {
      * @param request Mailgun Webhook リクエスト（自動バインド）
      * @return 処理結果
      */
-    @PostMapping(value = "/hotpepper", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/hotpepper")
     public ResponseEntity<MailWebhookResponse> handleHotpepperMail(
             @ModelAttribute MailgunWebhookRequest request
     ) {
