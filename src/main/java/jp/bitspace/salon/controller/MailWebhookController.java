@@ -61,6 +61,12 @@ public class MailWebhookController {
         req.setStrippedText(firstNonBlank(params, "stripped-text", "stripped_text"));
         req.setStrippedHtml(firstNonBlank(params, "stripped-html", "stripped_html"));
         req.setStrippedSignature(firstNonBlank(params, "stripped-signature", "stripped_signature"));
+        
+        req.setTimestamp(firstNonBlank(params, "timestamp"));
+        req.setToken(firstNonBlank(params, "token"));
+        req.setSignature(firstNonBlank(params, "signature"));
+        
+        
         log.info("ホットペッパー Webhook 受信: subject={}, sender={}", req.getSubject(), req.getSender());
         log.info("ホットペッパー Webhook 受信1: bodyPlain={}", req.getBodyPlain());
         log.info("ホットペッパー Webhook 受信2: strippedHtml={}", req.getStrippedHtml());
