@@ -49,6 +49,9 @@ public class MailWebhookController {
             @ModelAttribute MailgunWebhookRequest request
     ) {
         log.info("ホットペッパー Webhook 受信: subject={}, sender={}", request.getSubject(), request.getSender());
+        log.info("ホットペッパー Webhook 受信1:", request.getBodyPlain());
+        log.info("ホットペッパー Webhook 受信2:", request.getStrippedHtml());
+        
 
         try {
             MailWebhookResponse response = mailWebhookService.processHotpepperMail(request);
