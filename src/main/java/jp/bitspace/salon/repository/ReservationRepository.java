@@ -57,4 +57,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                         GROUP BY r.customerId
                         """)
         List<CustomerLastVisitProjection> findLastVisitBySalonId(@Param("salonId") Long salonId);
+
+        /**
+         * サロンID・期間・ステータス（複数指定）で予約一覧を取得.
+         * <p>
+         * 売上レポートで「実績」「予定」を分けて取得する際に使用します。
+         */
+        List<Reservation> findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanAndStatusInOrderByStartTimeAsc(
+                Long salonId,
+                LocalDateTime from,
+                LocalDateTime to,
+                List<ReservationStatus> statuses);
 }

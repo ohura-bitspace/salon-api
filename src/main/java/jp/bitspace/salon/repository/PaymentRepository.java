@@ -45,4 +45,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
      * サロンIDと顧客IDで決済一覧を取得.
      */
     List<Payment> findBySalonIdAndCustomerId(Long salonId, Long customerId);
+
+    /**
+     * 予約IDリストで決済一覧を一括取得.
+     */
+    List<Payment> findByReservationIdIn(List<Long> reservationIds);
 }
