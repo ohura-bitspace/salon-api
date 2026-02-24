@@ -3,9 +3,10 @@ package jp.bitspace.salon.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jp.bitspace.salon.dto.request.MailgunWebhookRequest;
@@ -46,20 +47,41 @@ public class MailWebhookController {
      */
     @PostMapping(value = "/hotpepper")
     public ResponseEntity<MailWebhookResponse> handleHotpepperMail(
-            @ModelAttribute MailgunWebhookRequest request
-    ) {
-        log.info("ホットペッパー Webhook 受信: subject={}, sender={}", request.getSubject(), request.getSender());
-        log.info("ホットペッパー Webhook 受信1:", request.getBodyPlain());
-        log.info("ホットペッパー Webhook 受信2:", request.getStrippedHtml());
-        
+    		@RequestParam MultiValueMap<String, String> params) {
 
+        MailgunWebhookRequest req = new MailgunWebhookRequest();
+        req.setSubject(params.getFirst("subject"));
+        req.setSender(params.getFirst("sender"));
+        req.setFrom(params.getFirst("from"));
+        req.setTo(params.getFirst("to"));
+        req.setRecipient(params.getFirst("recipient"));
+
+        req.setBodyPlain(firstNonBlank(params, "body-plain", "body_plain"));
+        req.setBodyHtml(firstNonBlank(params, "body-html", "body_html"));
+        req.setStrippedText(firstNonBlank(params, "stripped-text", "stripped_text"));
+        req.setStrippedHtml(firstNonBlank(params, "stripped-html", "stripped_html"));
+        req.setStrippedSignature(firstNonBlank(params, "stripped-signature", "stripped_signature"));
+        log.info("ホットペッパー Webhook 受信: subject={}, sender={}", req.getSubject(), req.getSender());
+        log.info("ホットペッパー Webhook 受信1: bodyPlain={}", req.getBodyPlain());
+        log.info("ホットペッパー Webhook 受信2: strippedHtml={}", req.getStrippedHtml());
+        
+        log.info("mailgun keys={}", params.keySet());
+        
         try {
-            MailWebhookResponse response = mailWebhookService.processHotpepperMail(request);
+            MailWebhookResponse response = mailWebhookService.processHotpepperMail(req);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("ホットペッパー Webhook 処理エラー", e);
             // Mailgun にリトライさせないため 200 を返す（不正メールでリトライしても意味がない）
             return ResponseEntity.ok(MailWebhookResponse.error("処理中にエラーが発生しました: " + e.getMessage()));
         }
+    }
+    
+    private static String firstNonBlank(MultiValueMap<String, String> params, String... keys) {
+        for (String k : keys) {
+            String v = params.getFirst(k);
+            if (v != null && !v.isBlank()) return v;
+        }
+        return null;
     }
 }
