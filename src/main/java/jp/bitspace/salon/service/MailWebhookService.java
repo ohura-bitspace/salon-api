@@ -46,12 +46,13 @@ public class MailWebhookService {
             log.warn("Mailgun 署名検証失敗。リクエストを拒否します。");
             return MailWebhookResponse.error("署名検証に失敗しました");
         }
-
-        // 2. ホットペッパー予約メールか判定
-        if (!hotpepperMailParserService.isHotpepperReservationMail(request.getSubject())) {
-            log.info("ホットペッパー予約通知メールではありません: subject={}", request.getSubject());
-            return MailWebhookResponse.ok("予約通知メールではないためスキップしました");
-        }
+        
+        // TODO 件名フィルタは一旦はずす
+        // ホットペッパー予約メールか判定
+        //if (!hotpepperMailParserService.isHotpepperReservationMail(request.getSubject())) {
+        //    log.info("ホットペッパー予約通知メールではありません: subject={}", request.getSubject());
+        //    return MailWebhookResponse.ok("予約通知メールではないためスキップしました");
+        //}
 
         // 3. メール本文を解析
         HotpepperMailContent content = hotpepperMailParserService.parse(request);
