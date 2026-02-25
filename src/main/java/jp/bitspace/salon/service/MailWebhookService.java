@@ -56,13 +56,13 @@ public class MailWebhookService {
 
 		// 3. メール本文を解析
 		HotpepperMailContent content = hotpepperMailParserService.parse(request);
-
+		
+		// 予約作成
 		Long id = 0L;
-		if (!"cancel".equals(content.getType())) {
-			// 4. 予約を作成
-			Reservation reservation = createReservationFromMail(content);
-			id = reservation.getId();
-		}
+		Reservation reservation = createReservationFromMail(content);
+		id = reservation.getId();
+		//if (!"cancel".equals(content.getType())) {
+		//}
 
 		log.info("ホットペッパー予約を登録しました: reservationId={}", id);
 		return MailWebhookResponse.ok("予約を登録しました", id);

@@ -78,8 +78,9 @@ public class HotpepperMailParserService {
 		//memo += request.getBodyPlain();
 		// ------------------------------
 		
-		// メール本文・件名からキャンセル判定
-		String type = detectType(normalized);
+		// TODO 通常もはじくため一旦コメントアウト
+		// キャンセル判定
+		// String type = detectType(normalized);
 
 		HotpepperMailContent content = HotpepperMailContent.builder()
 				.customerLastName(nameParts != null ? nameParts.lastName : null)
@@ -94,7 +95,7 @@ public class HotpepperMailParserService {
 				.staffName(staffName)
 				.memo(memo)
 				.hotpepperReservationId(reservationId)
-				.type(type)
+				//.type(type)
 				.build();
 
         log.info("ホットペッパーメール解析完了: reservationId={}", content.getHotpepperReservationId());
