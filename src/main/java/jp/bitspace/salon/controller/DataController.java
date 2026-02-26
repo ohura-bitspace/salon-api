@@ -1,6 +1,7 @@
 package jp.bitspace.salon.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -21,6 +23,7 @@ import jp.bitspace.salon.dto.request.UpdateCustomerPersonalInfoRequest;
 import jp.bitspace.salon.dto.request.UpdateTreatmentMemoRequest;
 import jp.bitspace.salon.dto.response.CustomerDetailResponse;
 import jp.bitspace.salon.dto.response.CustomerResponse;
+import jp.bitspace.salon.dto.response.VisitPhotoDto;
 import jp.bitspace.salon.model.Customer;
 import jp.bitspace.salon.model.Salon;
 import jp.bitspace.salon.model.Staff;
@@ -28,6 +31,7 @@ import jp.bitspace.salon.security.AdminRequestAuthUtil;
 import jp.bitspace.salon.service.CustomerService;
 import jp.bitspace.salon.service.SalonService;
 import jp.bitspace.salon.service.StaffService;
+import jp.bitspace.salon.service.VisitPhotoService;
 
 @RestController
 @RequestMapping("/api")
@@ -35,12 +39,14 @@ public class DataController {
     private final SalonService salonService;
     private final StaffService staffService;
     private final CustomerService customerService;
+    private final VisitPhotoService visitPhotoService;
     private final AdminRequestAuthUtil adminRequestAuthUtil;
 
-    public DataController(SalonService salonService, StaffService staffService, CustomerService customerService, AdminRequestAuthUtil adminRequestAuthUtil) {
+    public DataController(SalonService salonService, StaffService staffService, CustomerService customerService, VisitPhotoService visitPhotoService, AdminRequestAuthUtil adminRequestAuthUtil) {
         this.salonService = salonService;
         this.staffService = staffService;
         this.customerService = customerService;
+        this.visitPhotoService = visitPhotoService;
         this.adminRequestAuthUtil = adminRequestAuthUtil;
     }
 
@@ -165,5 +171,47 @@ public class DataController {
         adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
         customerService.updateCustomerPersonalInfo(customerId, salonId, request);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 施術写真一覧取得.
+     * GET /api/visit-histories/{visitId}/photos?salonId={salonId}
+     */
+    @GetMapping("/visit-histories/{visitId}/photos")
+    public ResponseEntity<List<VisitPhotoDto>> getVisitPhotos(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long visitId,
+            @RequestParam Long salonId) {
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+        return ResponseEntity.ok(visitPhotoService.getPhotos(visitId, salonId));
+    }
+
+    /**
+     * 施術写真アップロード.
+     * POST /api/visit-histories/{visitId}/photos?salonId={salonId}
+     */
+    @PostMapping("/visit-histories/{visitId}/photos")
+    public ResponseEntity<VisitPhotoDto> uploadVisitPhoto(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long visitId,
+            @RequestParam Long salonId,
+            @RequestParam("file") MultipartFile file) {
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+        return ResponseEntity.ok(visitPhotoService.uploadPhoto(visitId, salonId, file));
+    }
+
+    /**
+     * 施術写真削除.
+     * DELETE /api/visit-histories/{visitId}/photos/{photoId}?salonId={salonId}
+     */
+    @DeleteMapping("/visit-histories/{visitId}/photos/{photoId}")
+    public ResponseEntity<?> deleteVisitPhoto(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long visitId,
+            @PathVariable Long photoId,
+            @RequestParam Long salonId) {
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+        visitPhotoService.deletePhoto(visitId, photoId, salonId);
+        return ResponseEntity.ok(Map.of("deleted", true));
     }
 }
