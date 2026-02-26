@@ -181,7 +181,7 @@ public class DataController {
     public ResponseEntity<List<VisitPhotoDto>> getVisitPhotos(
             HttpServletRequest httpServletRequest,
             @PathVariable Long visitId,
-            @RequestParam Long salonId) {
+            @RequestParam(name = "salonId") Long salonId) {
         adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
         return ResponseEntity.ok(visitPhotoService.getPhotos(visitId, salonId));
     }
