@@ -34,18 +34,19 @@ public class ImageUploadService {
     /**
      * ファイルを検証してディスクに保存し、アクセス用URLを返す.
      *
-     * @param file アップロードされたファイル
-     * @return 画像アクセスURL（例: /uploads/xxxx.jpg）
+     * @param file     アップロードされたファイル
+     * @param salonId  サロンID（サブディレクトリに使用）
+     * @return 画像アクセスURL（例: /uploads/1/xxxx.jpg）
      * @throws ResponseStatusException バリデーション失敗時は 400、保存失敗時は 500
      */
-    public String save(MultipartFile file) {
+    public String save(MultipartFile file, Long salonId) {
         validate(file);
 
         String extension = getExtension(file.getOriginalFilename());
         String fileName = UUID.randomUUID() + extension;
 
         try {
-            Path uploadPath = Paths.get(uploadDir);
+            Path uploadPath = Paths.get(uploadDir, salonId.toString());
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
@@ -55,7 +56,7 @@ public class ImageUploadService {
                     "ファイルの保存に失敗しました: " + e.getMessage());
         }
 
-        return "/uploads/" + fileName;
+        return "/uploads/" + salonId + "/" + fileName;
     }
 
     private void validate(MultipartFile file) {

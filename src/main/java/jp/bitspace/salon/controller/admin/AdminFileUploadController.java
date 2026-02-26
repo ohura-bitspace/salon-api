@@ -43,7 +43,7 @@ public class AdminFileUploadController {
             @RequestParam("file") MultipartFile file) {
         adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
         try {
-            String imageUrl = imageUploadService.save(file);
+            String imageUrl = imageUploadService.save(file, salonId);
             return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).body(Map.of("error", e.getReason()));

@@ -38,7 +38,7 @@ public class VisitPhotoService {
     public VisitPhotoDto uploadPhoto(Long visitId, Long salonId, MultipartFile file) {
         Reservation reservation = findAndVerify(visitId, salonId);
 
-        String imageUrl = imageUploadService.save(file);
+        String imageUrl = imageUploadService.save(file, salonId);
 
         VisitPhoto photo = new VisitPhoto();
         photo.setReservationId(reservation.getId());
