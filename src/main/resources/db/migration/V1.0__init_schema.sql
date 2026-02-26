@@ -244,3 +244,16 @@ CREATE TABLE payments (
     FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE SET NULL,
     FOREIGN KEY (customer_id) REFERENCES customers(id)
 ) COMMENT='決済・売上詳細データ';
+
+-- 8. 施術写真テーブル
+-- 1件の来店(reservation)に対して複数枚の写真を保持する
+CREATE TABLE visit_photos (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '写真ID',
+    reservation_id BIGINT NOT NULL COMMENT '予約ID（来店履歴ID）',
+    image_url VARCHAR(500) NOT NULL COMMENT '画像ファイルのパス',
+    display_order INT NOT NULL DEFAULT 0 COMMENT '表示順序（昇順）',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE CASCADE,
+    INDEX idx_visit_photos_reservation (reservation_id)
+) COMMENT='施術写真';
