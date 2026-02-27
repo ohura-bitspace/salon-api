@@ -56,8 +56,10 @@ public class PaymentService {
         payment.setReservationId(request.getReservationId());
         payment.setCustomerId(request.getCustomerId());
         payment.setOriginalAmount(request.getOriginalAmount());
-        payment.setDiscountAmount(request.getOriginalAmount() - request.getAmount());
+        payment.setDiscountAmount(request.getDiscountAmount() != null ? request.getDiscountAmount() : 0);
+        payment.setPointDiscountAmount(request.getPointDiscountAmount() != null ? request.getPointDiscountAmount() : 0);
         payment.setAmount(request.getAmount());
+        payment.setReceivedAmount(request.getReceivedAmount());
         payment.setPaymentMethod(request.getPaymentMethod());
         // 手動登録なのでMANUALで設定
         payment.setPaymentSource(PaymentSource.MANUAL);
@@ -167,21 +169,25 @@ public class PaymentService {
      * @param request 決済リクエスト
      */
     private void validateCreatePaymentRequest(CreatePaymentRequest request) {
-        // 基本的な検証（@NotNullなどのアノテーションで対応）
-        
-        // 元金額が正の値か確認
-        if (request.getOriginalAmount() == null || request.getOriginalAmount() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Original amount must be positive");
+        int discountAmount = request.getDiscountAmount() != null ? request.getDiscountAmount() : 0;
+        int pointDiscountAmount = request.getPointDiscountAmount() != null ? request.getPointDiscountAmount() : 0;
+        int expectedAmount = request.getOriginalAmount() - discountAmount - pointDiscountAmount;
+
+        // 実際の決済金額が計算値と一致するか確認
+        if (!request.getAmount().equals(expectedAmount)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "amountが不正です。originalAmount - discountAmount - pointDiscountAmount と一致する必要があります");
         }
 
-        // 決済金額が正の値か確認
-        if (request.getAmount() == null || request.getAmount() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must be positive");
+        // 決済金額が負にならないか確認
+        if (request.getAmount() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "amountが負の値になっています");
         }
 
-        // 決済金額が元金額を超えないか確認
-        if (request.getAmount() > request.getOriginalAmount()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must not exceed original amount");
+        // 現金払い以外でお預かり金額が設定されていないか確認
+        if (request.getReceivedAmount() != null
+                && request.getPaymentMethod() != jp.bitspace.salon.model.PaymentMethod.CASH) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "receivedAmountは現金払い(CASH)のみ設定可能です");
         }
     }
 }

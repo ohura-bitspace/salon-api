@@ -30,11 +30,17 @@ public class PaymentResponse {
     /** 元金額（割引前、単位: 円）. */
     private Integer originalAmount;
 
-    /** 割引額（単位: 円）. */
+    /** 通常割引額（単位: 円）. */
     private Integer discountAmount;
 
-    /** 決済金額（単位: 円）. */
+    /** ポイント割引額（単位: 円）. */
+    private Integer pointDiscountAmount;
+
+    /** 実際の決済金額（単位: 円）. */
     private Integer amount;
+
+    /** お預かり金額（現金払い時のみ、単位: 円）. */
+    private Integer receivedAmount;
     
     /** 決済方法. */
     private PaymentMethod paymentMethod;
@@ -68,7 +74,9 @@ public class PaymentResponse {
             .customerId(payment.getCustomerId())
             .originalAmount(payment.getOriginalAmount())
             .discountAmount(payment.getDiscountAmount())
+            .pointDiscountAmount(payment.getPointDiscountAmount())
             .amount(payment.getAmount())
+            .receivedAmount(payment.getReceivedAmount())
             .paymentMethod(payment.getPaymentMethod())
             .paymentSource(payment.getPaymentSource())
             .externalTransactionId(payment.getExternalTransactionId())

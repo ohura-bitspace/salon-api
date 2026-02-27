@@ -222,16 +222,15 @@ CREATE TABLE payments (
     customer_id BIGINT DEFAULT NULL COMMENT '顧客ID',
 
     original_amount INT NOT NULL COMMENT '元金額（割引前）',
-    discount_amount INT NOT NULL DEFAULT 0 COMMENT '割引額',
-    amount INT NOT NULL COMMENT '決済金額（original_amount - discount_amount）',
+    discount_amount INT NOT NULL DEFAULT 0 COMMENT '通常割引額',
+    point_discount_amount INT NOT NULL DEFAULT 0 COMMENT 'ポイント割引額',
+    -- amount = original_amount - discount_amount - point_discount_amount
+    amount INT NOT NULL COMMENT '実際の決済金額',
 
-    -- 決済方法の管理
-    payment_method ENUM('CASH', 'CREDIT_CARD', 'QR_PAY', 'BANK_TRANSFER', 'OTHER') NOT NULL COMMENT '決済方法',
+    payment_method ENUM('CASH', 'CARD', 'OTHER') NOT NULL COMMENT '決済方法',
+    received_amount INT DEFAULT NULL COMMENT 'お預かり金額（現金払い時のみ、おつり履歴用）',
 
-    -- データの出所（Square同期か手動か）
     payment_source ENUM('SQUARE', 'MANUAL') DEFAULT 'MANUAL' COMMENT 'データソース',
-
-    -- Square連携時の外部ID（二重取り込み防止用）
     external_transaction_id VARCHAR(255) DEFAULT NULL COMMENT 'Square等の外部決済ID',
 
     payment_at DATETIME NOT NULL COMMENT '決済日時',

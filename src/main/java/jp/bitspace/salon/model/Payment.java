@@ -45,13 +45,21 @@ public class Payment {
     @Column(name = "original_amount", nullable = false)
     private Integer originalAmount;
 
-    /** 割引額（単位: 円）. */
+    /** 通常割引額（単位: 円）. */
     @Column(name = "discount_amount", nullable = false)
     private Integer discountAmount = 0;
 
-    /** 決済金額（original_amount - discount_amount、単位: 円）. */
+    /** ポイント割引額（単位: 円）. */
+    @Column(name = "point_discount_amount", nullable = false)
+    private Integer pointDiscountAmount = 0;
+
+    /** 実際の決済金額（original_amount - discount_amount - point_discount_amount、単位: 円）. */
     @Column(nullable = false)
     private Integer amount;
+
+    /** お預かり金額（現金払い時のみ、単位: 円）. */
+    @Column(name = "received_amount")
+    private Integer receivedAmount;
 
     /** 決済方法. */
     @Enumerated(EnumType.STRING)
