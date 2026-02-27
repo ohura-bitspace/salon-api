@@ -34,5 +34,7 @@ public record AdminReservationResponse(
 		/** ステータス（日本語表示用） */
 		String status,
 		/** メモ */
-		String memo) {
+		String memo,
+		/** 会計情報（未会計の場合はnull） */
+		PaymentResponse payment) {
 }

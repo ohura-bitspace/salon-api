@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import jp.bitspace.salon.dto.request.CreateReservationRequest;
 import jp.bitspace.salon.dto.request.UpdateReservationRequest;
 import jp.bitspace.salon.dto.response.AdminReservationResponse;
+import jp.bitspace.salon.dto.response.PaymentResponse;
 import jp.bitspace.salon.model.Customer;
 import jp.bitspace.salon.model.Menu;
 import jp.bitspace.salon.model.Reservation;
@@ -22,6 +23,7 @@ import jp.bitspace.salon.model.ReservationStatus;
 import jp.bitspace.salon.model.Staff;
 import jp.bitspace.salon.repository.CustomerRepository;
 import jp.bitspace.salon.repository.MenuRepository;
+import jp.bitspace.salon.repository.PaymentRepository;
 import jp.bitspace.salon.repository.ReservationItemRepository;
 import jp.bitspace.salon.repository.ReservationRepository;
 import jp.bitspace.salon.repository.StaffRepository;
@@ -33,19 +35,22 @@ public class ReservationService {
     private final MenuRepository menuRepository;
     private final CustomerRepository customerRepository;
     private final StaffRepository staffRepository;
+    private final PaymentRepository paymentRepository;
 
     public ReservationService(
         ReservationRepository reservationRepository,
         ReservationItemRepository reservationItemRepository,
         MenuRepository menuRepository,
         CustomerRepository customerRepository,
-        StaffRepository staffRepository
+        StaffRepository staffRepository,
+        PaymentRepository paymentRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationItemRepository = reservationItemRepository;
         this.menuRepository = menuRepository;
         this.customerRepository = customerRepository;
         this.staffRepository = staffRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     public List<Reservation> findAll() {
@@ -62,7 +67,7 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<AdminReservationResponse> findAdminBySalonId(Long salonId) {
         List<Reservation> reservations = reservationRepository.findBySalonIdOrderByStartTimeDesc(salonId);
-        return reservations.stream().map(this::toAdminReservationResponse).collect(Collectors.toList());
+        return reservations.stream().map(r -> toAdminReservationResponse(r, null)).collect(Collectors.toList());
     }
 
     /**
@@ -93,7 +98,7 @@ public class ReservationService {
                         jp.bitspace.salon.model.ReservationStatus.CANCELED
                 );
 
-        return reservations.stream().map(this::toAdminReservationResponse).collect(Collectors.toList());
+        return reservations.stream().map(r -> toAdminReservationResponse(r, null)).collect(Collectors.toList());
     }
 
     public Optional<Reservation> findById(Long id) {
@@ -116,7 +121,13 @@ public class ReservationService {
                 .filter(r -> r.getSalonId() != null && r.getSalonId().equals(salonId))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found"));
 
-        return toAdminReservationResponse(reservation);
+        PaymentResponse payment = paymentRepository.findByReservationId(reservationId)
+                .stream()
+                .findFirst()
+                .map(PaymentResponse::fromEntity)
+                .orElse(null);
+
+        return toAdminReservationResponse(reservation, payment);
     }
 
     public List<ReservationItem> findItemsByReservationId(Long reservationId) {
@@ -253,7 +264,7 @@ public class ReservationService {
         return menu.getOriginalPrice() != null ? menu.getOriginalPrice() : 0;
     }
 
-    private AdminReservationResponse toAdminReservationResponse(Reservation reservation) {
+    private AdminReservationResponse toAdminReservationResponse(Reservation reservation, PaymentResponse payment) {
         String customerName = "";
         if (reservation.getCustomerId() != null) {
             Optional<Customer> customerOpt = customerRepository.findById(reservation.getCustomerId());
@@ -310,7 +321,8 @@ public class ReservationService {
             staffName,
             reservation.getBookingRoute(),
             statusText,
-            reservation.getMemo()
+            reservation.getMemo(),
+            payment
         );
     }
 
