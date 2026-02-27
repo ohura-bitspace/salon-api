@@ -21,11 +21,13 @@ import jp.bitspace.salon.dto.request.CreateCustomerRequest;
 import jp.bitspace.salon.dto.request.UpdateCustomerPersonalInfoRequest;
 import jp.bitspace.salon.dto.response.CustomerDetailResponse;
 import jp.bitspace.salon.dto.response.CustomerResponse;
+import jp.bitspace.salon.dto.response.PaymentResponse;
 import jp.bitspace.salon.dto.response.ReservationSlotsResponse;
 import jp.bitspace.salon.dto.response.ReservationTimeSlotDto;
 import jp.bitspace.salon.dto.response.VisitHistoryDto;
 import jp.bitspace.salon.model.Customer;
 import jp.bitspace.salon.model.Menu;
+import jp.bitspace.salon.model.Payment;
 import jp.bitspace.salon.model.Reservation;
 import jp.bitspace.salon.model.ReservationItem;
 import jp.bitspace.salon.model.ReservationStatus;
@@ -33,6 +35,7 @@ import jp.bitspace.salon.model.SalonConfig;
 import jp.bitspace.salon.model.Staff;
 import jp.bitspace.salon.repository.CustomerRepository;
 import jp.bitspace.salon.repository.MenuRepository;
+import jp.bitspace.salon.repository.PaymentRepository;
 import jp.bitspace.salon.repository.ReservationItemRepository;
 import jp.bitspace.salon.repository.ReservationRepository;
 import jp.bitspace.salon.repository.SalonConfigRepository;
@@ -49,6 +52,7 @@ public class CustomerService {
     private final MenuRepository menuRepository;
     private final StaffRepository staffRepository;
     private final SalonConfigRepository salonConfigRepository;
+    private final PaymentRepository paymentRepository;
 
     public CustomerService(
             CustomerRepository customerRepository,
@@ -56,7 +60,8 @@ public class CustomerService {
             ReservationItemRepository reservationItemRepository,
             MenuRepository menuRepository,
             StaffRepository staffRepository,
-            SalonConfigRepository salonConfigRepository
+            SalonConfigRepository salonConfigRepository,
+            PaymentRepository paymentRepository
     ) {
         this.customerRepository = customerRepository;
         this.reservationRepository = reservationRepository;
@@ -64,6 +69,7 @@ public class CustomerService {
         this.menuRepository = menuRepository;
         this.staffRepository = staffRepository;
         this.salonConfigRepository = salonConfigRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     public List<Customer> findAll() {
@@ -292,6 +298,12 @@ public class CustomerService {
 		Map<Long, Staff> staffById = staffRepository.findAllById(staffIds).stream()
 				.collect(Collectors.toMap(Staff::getId, s -> s));
 
+		// 予約IDで payments を一括取得し、reservationId をキーにしたMapを作成
+		List<Long> reservationIds = reservations.stream().map(Reservation::getId).toList();
+		Map<Long, PaymentResponse> paymentByReservationId = paymentRepository.findByReservationIdIn(reservationIds)
+				.stream()
+				.collect(Collectors.toMap(Payment::getReservationId, PaymentResponse::fromEntity));
+
 		List<VisitHistoryDto> visitHistories = reservations.stream()
 				.map(reservation -> {
 					List<ReservationItem> items = reservationItemRepository.findByReservationId(reservation.getId());
@@ -320,8 +332,8 @@ public class CustomerService {
                         LocalDateTime visitDateTime = reservation.getStartTime();
                         String memo = reservation.getMemo() != null ? reservation.getMemo() : "";
                         String treatmentMemo = reservation.getTreatmentMemo() != null ? reservation.getTreatmentMemo() : "";
-                        // 予約ステータス
                         ReservationStatus status = reservation.getStatus();
+                        PaymentResponse payment = paymentByReservationId.get(reservation.getId());
 
                         return new VisitHistoryDto(
                             reservation.getId(),
@@ -332,7 +344,8 @@ public class CustomerService {
                             price,
                             status,
                             memo,
-                            treatmentMemo);
+                            treatmentMemo,
+                            payment);
 				})
 				.toList();
 		
@@ -496,6 +509,7 @@ public class CustomerService {
                             staffName,
                             price,
                             status,
+                            null,
                             null,
                             null);
                 })

@@ -26,5 +26,7 @@ public record VisitHistoryDto(
         /** 予約メモ（編集可能） */
         String memo,
         /** 施術メモ（編集可能） */
-        String treatmentMemo
+        String treatmentMemo,
+        /** 会計情報（未会計の場合はnull） */
+        PaymentResponse payment
 ) {}
