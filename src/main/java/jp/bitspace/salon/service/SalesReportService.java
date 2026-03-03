@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jp.bitspace.salon.dto.response.SalesReportItemDto;
 import jp.bitspace.salon.dto.response.SalesReportResponse;
 import jp.bitspace.salon.dto.response.SalesReportResponse.SalesReportItem;
 import jp.bitspace.salon.dto.response.SalesReportResponse.SalesReportSummary;
@@ -212,5 +213,140 @@ public class SalesReportService {
         if (staffId == null) return null;
         Staff s = staffById.get(staffId);
         return s != null ? s.getUser().getName() : null;
+    }
+
+    /**
+     * 売上レポート明細一覧を取得（フラット配列形式）.
+     *
+     * @param salonId サロンID
+     * @param year    対象年
+     * @param month   対象月（1〜12。nullの場合は年間集計）
+     * @return 売上明細リスト
+     */
+    @Transactional(readOnly = true)
+    public List<SalesReportItemDto> getSalesItems(Long salonId, int year, Integer month) {
+        LocalDateTime from;
+        LocalDateTime to;
+        if (month != null) {
+            LocalDate start = LocalDate.of(year, month, 1);
+            from = start.atStartOfDay();
+            to = start.plusMonths(1).atStartOfDay();
+        } else {
+            from = LocalDate.of(year, 1, 1).atStartOfDay();
+            to = LocalDate.of(year + 1, 1, 1).atStartOfDay();
+        }
+
+        List<Reservation> actualReservations = reservationRepository
+                .findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanAndStatusInOrderByStartTimeAsc(
+                        salonId, from, to, List.of(ReservationStatus.VISITED));
+
+        List<Reservation> scheduledReservations = reservationRepository
+                .findBySalonIdAndStartTimeGreaterThanEqualAndStartTimeLessThanAndStatusInOrderByStartTimeAsc(
+                        salonId, from, to, List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED));
+
+        List<Long> allReservationIds = Stream.concat(
+                actualReservations.stream().map(Reservation::getId),
+                scheduledReservations.stream().map(Reservation::getId))
+                .collect(Collectors.toList());
+
+        Map<Long, List<ReservationItem>> itemsByReservationId = reservationItemRepository
+                .findByReservationIdIn(allReservationIds).stream()
+                .collect(Collectors.groupingBy(ReservationItem::getReservationId));
+
+        Set<Long> menuIds = itemsByReservationId.values().stream()
+                .flatMap(List::stream)
+                .map(ReservationItem::getMenuId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, Menu> menuById = menuRepository.findAllById(menuIds).stream()
+                .collect(Collectors.toMap(Menu::getId, m -> m));
+
+        List<Long> actualIds = actualReservations.stream().map(Reservation::getId).collect(Collectors.toList());
+        Map<Long, Payment> paymentByReservationId = paymentRepository
+                .findByReservationIdIn(actualIds).stream()
+                .collect(Collectors.toMap(
+                        Payment::getReservationId,
+                        p -> p,
+                        (a, b) -> a));
+
+        Set<Long> customerIds = Stream.concat(
+                actualReservations.stream().map(Reservation::getCustomerId),
+                scheduledReservations.stream().map(Reservation::getCustomerId))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, Customer> customerById = customerRepository.findAllById(customerIds).stream()
+                .collect(Collectors.toMap(Customer::getId, c -> c));
+
+        Set<Long> staffIds = Stream.concat(
+                actualReservations.stream().map(Reservation::getStaffId),
+                scheduledReservations.stream().map(Reservation::getStaffId))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, Staff> staffById = staffRepository.findAllById(staffIds).stream()
+                .collect(Collectors.toMap(Staff::getId, s -> s));
+
+        List<SalesReportItemDto> items = new ArrayList<>();
+
+        for (Reservation r : actualReservations) {
+            Payment payment = paymentByReservationId.get(r.getId());
+            int amount = payment != null ? payment.getAmount() : r.getTotalPrice();
+            String paymentMethodLabel = payment != null ? toPaymentMethodLabel(payment.getPaymentMethod()) : null;
+            items.add(buildSalesItem(r, "done", paymentMethodLabel, amount,
+                    customerById, itemsByReservationId, menuById, staffById));
+        }
+
+        for (Reservation r : scheduledReservations) {
+            items.add(buildSalesItem(r, "scheduled", null, r.getTotalPrice(),
+                    customerById, itemsByReservationId, menuById, staffById));
+        }
+
+        items.sort(Comparator.comparing(SalesReportItemDto::date));
+
+        return items;
+    }
+
+    private SalesReportItemDto buildSalesItem(
+            Reservation r,
+            String status,
+            String paymentMethodLabel,
+            int amount,
+            Map<Long, Customer> customerById,
+            Map<Long, List<ReservationItem>> itemsByReservationId,
+            Map<Long, Menu> menuById,
+            Map<Long, Staff> staffById) {
+
+        List<Menu> menus = itemsByReservationId.getOrDefault(r.getId(), List.of()).stream()
+                .map(ri -> ri.getMenuId() != null ? menuById.get(ri.getMenuId()) : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        String menuName = menus.stream().map(Menu::getTitle).collect(Collectors.joining("、"));
+        Menu firstMenu = menus.isEmpty() ? null : menus.get(0);
+        Long categoryId = firstMenu != null && firstMenu.getMenuCategory() != null
+                ? firstMenu.getMenuCategory().getId() : null;
+        String categoryName = firstMenu != null && firstMenu.getMenuCategory() != null
+                ? firstMenu.getMenuCategory().getName() : null;
+
+        return new SalesReportItemDto(
+                r.getId(),
+                status,
+                r.getStartTime().toLocalDate(),
+                r.getStartTime().toLocalTime().toString().substring(0, 5),
+                resolveCustomerName(r.getCustomerId(), customerById),
+                menuName.isEmpty() ? null : menuName,
+                categoryId,
+                categoryName,
+                resolveStaffName(r.getStaffId(), staffById),
+                paymentMethodLabel,
+                amount);
+    }
+
+    private String toPaymentMethodLabel(jp.bitspace.salon.model.PaymentMethod method) {
+        if (method == null) return null;
+        return switch (method) {
+            case CASH -> "現金";
+            case CARD -> "カード";
+            case OTHER -> "その他";
+        };
     }
 }
