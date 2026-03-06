@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jp.bitspace.salon.dto.request.SendMessageRequest;
 import jp.bitspace.salon.dto.response.MessageResponse;
+import jp.bitspace.salon.dto.response.MessageThreadResponse;
 import jp.bitspace.salon.security.AdminRequestAuthUtil;
 import jp.bitspace.salon.service.MessageService;
 
@@ -36,8 +37,24 @@ public class AdminMessageController {
         this.messageService = messageService;
         this.adminRequestAuthUtil = adminRequestAuthUtil;
     }
-    
-    
+    /**
+     * メッセージスレッド一覧（顧客ごとの最新メッセージ・未読数付き）.
+     *
+     * @param httpServletRequest HTTPリクエスト
+     * @param salonId サロンID
+     * @return スレッド一覧
+     */
+    @GetMapping("/threads")
+    public ResponseEntity<List<MessageThreadResponse>> getThreads(
+            HttpServletRequest httpServletRequest,
+            @RequestParam(name = "salonId") Long salonId) {
+
+        adminRequestAuthUtil.requireStaffAndSalonMatch(httpServletRequest, salonId);
+
+        List<MessageThreadResponse> threads = messageService.getThreads(salonId);
+        return ResponseEntity.ok(threads);
+    }
+
     // TODO ページネーション（あとで）
     /**
      * 顧客とのメッセージ履歴を取得.

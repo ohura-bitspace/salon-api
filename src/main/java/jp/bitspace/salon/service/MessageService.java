@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jp.bitspace.salon.dto.request.SendMessageRequest;
 import jp.bitspace.salon.dto.response.MessageResponse;
+import jp.bitspace.salon.dto.response.MessageThreadResponse;
 import jp.bitspace.salon.model.Message;
 import jp.bitspace.salon.model.MessageType;
 import jp.bitspace.salon.model.SenderType;
@@ -68,6 +69,25 @@ public class MessageService {
             message.setReadAt(now);
         }
         messageRepository.saveAll(unreadMessages);
+    }
+
+    /**
+     * メッセージスレッド一覧を取得（顧客ごとの最新メッセージ・未読数付き）.
+     */
+    @Transactional(readOnly = true)
+    public List<MessageThreadResponse> getThreads(Long salonId) {
+        return messageRepository.findThreadsBySalonId(salonId)
+            .stream()
+            .map(row -> MessageThreadResponse.builder()
+                .customerId(((Number) row[0]).longValue())
+                .customerName((String) row[1])
+                .lastMessage((String) row[2])
+                .lastMessageAt(row[3] instanceof java.sql.Timestamp ts
+                    ? ts.toLocalDateTime()
+                    : (LocalDateTime) row[3])
+                .unreadCount(((Number) row[4]).longValue())
+                .build())
+            .collect(Collectors.toList());
     }
 
     /**
