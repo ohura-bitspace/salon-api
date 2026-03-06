@@ -256,3 +256,33 @@ CREATE TABLE visit_photos (
     FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE CASCADE,
     INDEX idx_visit_photos_reservation (reservation_id)
 ) COMMENT='施術写真';
+
+-- 9. メッセージテーブル
+CREATE TABLE messages (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    salon_id BIGINT NOT NULL,
+    customer_id BIGINT NOT NULL,
+    
+    -- 1. 送信種別（ENUMの方が整合性が保てます）
+    sender_type ENUM('LINE_USER', 'ADMIN') NOT NULL COMMENT '送信者種別',
+    
+    -- 2. メッセージ種別（画像やスタンプへの拡張用）
+    message_type ENUM('TEXT', 'IMAGE', 'STAMP', 'OTHER') DEFAULT 'TEXT' NOT NULL,
+    
+    text TEXT DEFAULT NULL COMMENT 'メッセージ本文（IMAGE/STAMPの場合はNULL可）',
+    
+    -- 3. LINE側のメッセージID（Webhookの重複検知・既読管理用）
+    line_message_id VARCHAR(255) DEFAULT NULL,
+    
+    -- 4. 既読管理（バッジ表示に必須！）
+    is_read BOOLEAN NOT NULL DEFAULT FALSE COMMENT '管理者側の既読フラグ',
+    read_at DATETIME DEFAULT NULL,
+    
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (salon_id) REFERENCES salons(id),
+    FOREIGN KEY (customer_id) REFERENCES customers(id),
+    INDEX idx_messages_salon_customer (salon_id, customer_id),
+    INDEX idx_messages_unread_count (salon_id, is_read) COMMENT '未読バッジ集計用',
+    INDEX idx_messages_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='LINEメッセージ履歴';
