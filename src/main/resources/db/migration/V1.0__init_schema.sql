@@ -291,3 +291,32 @@ CREATE TABLE messages (
     INDEX idx_messages_unread_count (salon_id, is_read) COMMENT '未読バッジ集計用',
     INDEX idx_messages_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='LINEメッセージ履歴';
+
+-- 10. メール Webhook 受信ログテーブル
+-- Mailgun 経由で受信したホットペッパー予約メール等の生データを保存
+CREATE TABLE mail_webhook_logs (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    salon_id BIGINT NOT NULL COMMENT '対象サロンID',
+
+    -- 処理結果
+    status ENUM('SUCCESS', 'FAILED', 'SKIPPED') NOT NULL DEFAULT 'SUCCESS' COMMENT '処理ステータス',
+    reservation_id BIGINT DEFAULT NULL COMMENT '作成された予約ID（成功時）',
+    error_message VARCHAR(500) DEFAULT NULL COMMENT 'エラー内容（失敗時）',
+
+    -- メール情報
+    subject VARCHAR(500) DEFAULT NULL COMMENT '件名',
+    sender VARCHAR(255) DEFAULT NULL COMMENT '送信元',
+    recipient VARCHAR(255) DEFAULT NULL COMMENT '受信先',
+    body_plain MEDIUMTEXT DEFAULT NULL COMMENT 'プレーンテキスト本文',
+
+    -- Mailgun メタ情報
+    mailgun_message_id VARCHAR(255) DEFAULT NULL COMMENT 'Mailgun メッセージID',
+    mailgun_timestamp VARCHAR(20) DEFAULT NULL COMMENT 'Mailgun タイムスタンプ',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (salon_id) REFERENCES salons(id),
+    FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE SET NULL,
+    INDEX idx_mail_webhook_logs_salon (salon_id),
+    INDEX idx_mail_webhook_logs_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='メール Webhook 受信ログ';
