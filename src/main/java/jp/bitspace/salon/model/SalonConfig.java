@@ -55,6 +55,18 @@ public class SalonConfig {
     @Column(name = "preparation_margin_minutes", nullable = false)
     private Integer preparationMarginMinutes = 30;
 
+    /** LINE Messaging API チャネルID. */
+    @Column(name = "line_channel_id", length = 255)
+    private String lineChannelId;
+
+    /** LINE Messaging API チャネルシークレット（Webhook署名検証用）. */
+    @Column(name = "line_channel_secret", length = 255)
+    private String lineChannelSecret;
+
+    /** LINE Messaging API チャネルアクセストークン（メッセージ送信用）. */
+    @Column(name = "line_channel_access_token", length = 500)
+    private String lineChannelAccessToken;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

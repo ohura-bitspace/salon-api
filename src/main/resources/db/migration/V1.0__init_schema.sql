@@ -20,6 +20,11 @@ CREATE TABLE salon_configs (
     slot_interval INT NOT NULL DEFAULT 30 COMMENT '予約枠の単位(分)',
     preparation_margin_minutes INT NOT NULL DEFAULT 30 COMMENT '準備時間マージン(分)。予約の前後に付加するバッファ',
 
+    -- LINE Messaging API 連携
+    line_channel_id VARCHAR(255) DEFAULT NULL COMMENT 'LINE Messaging API チャネルID',
+    line_channel_secret VARCHAR(255) DEFAULT NULL COMMENT 'LINE Messaging API チャネルシークレット（Webhook署名検証用）',
+    line_channel_access_token VARCHAR(500) DEFAULT NULL COMMENT 'LINE Messaging API チャネルアクセストークン（メッセージ送信用）',
+
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
