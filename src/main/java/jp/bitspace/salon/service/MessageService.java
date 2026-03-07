@@ -4,15 +4,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import jp.bitspace.salon.dto.request.SendMessageRequest;
 import jp.bitspace.salon.dto.response.MessageResponse;
 import jp.bitspace.salon.dto.response.MessageThreadResponse;
+import jp.bitspace.salon.model.Customer;
 import jp.bitspace.salon.model.Message;
 import jp.bitspace.salon.model.MessageType;
 import jp.bitspace.salon.model.SenderType;
+import jp.bitspace.salon.repository.CustomerRepository;
 import jp.bitspace.salon.repository.MessageRepository;
 
 /**
@@ -22,9 +26,15 @@ import jp.bitspace.salon.repository.MessageRepository;
 public class MessageService {
 
     private final MessageRepository messageRepository;
+    private final CustomerRepository customerRepository;
+    private final LineMessagingClient lineMessagingClient;
 
-    public MessageService(MessageRepository messageRepository) {
+    public MessageService(MessageRepository messageRepository,
+                          CustomerRepository customerRepository,
+                          LineMessagingClient lineMessagingClient) {
         this.messageRepository = messageRepository;
+        this.customerRepository = customerRepository;
+        this.lineMessagingClient = lineMessagingClient;
     }
 
     /**
@@ -40,9 +50,20 @@ public class MessageService {
 
     /**
      * 管理者からメッセージを送信.
+     * <p>
+     * DB保存後、顧客の line_user_id を使って LINE Messaging API でプッシュ送信します。
      */
     @Transactional
     public MessageResponse sendMessage(SendMessageRequest request) {
+        // 顧客の line_user_id を取得
+        Customer customer = customerRepository.findById(request.getCustomerId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "顧客が見つかりません"));
+
+        if (customer.getLineUserId() == null || customer.getLineUserId().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "この顧客はLINE連携されていません");
+        }
+
+        // DB保存
         Message message = new Message();
         message.setSalonId(request.getSalonId());
         message.setCustomerId(request.getCustomerId());
@@ -52,6 +73,14 @@ public class MessageService {
         message.setIsRead(true); // 管理者が送信したメッセージは既読扱い
 
         Message saved = messageRepository.save(message);
+
+        // LINE Messaging API でプッシュ送信
+        lineMessagingClient.pushTextMessage(
+            request.getSalonId(),
+            customer.getLineUserId(),
+            request.getText()
+        );
+
         return MessageResponse.fromEntity(saved);
     }
 
