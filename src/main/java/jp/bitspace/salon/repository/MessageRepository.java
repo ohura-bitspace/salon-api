@@ -31,33 +31,36 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findBySalonIdAndCustomerIdAndIsReadFalse(Long salonId, Long customerId);
 
     /**
-     * サロンのメッセージスレッド一覧を取得（顧客ごとの最新メッセージ・未読数）.
+     * サロンのメッセージスレッド一覧を取得（LINE連携済み顧客すべて＋最新メッセージ・未読数）.
      */
     @Query(value = """
         SELECT
-            m.customer_id AS customerId,
+            c.id AS customerId,
             COALESCE(CONCAT(c.last_name, ' ', c.first_name), c.line_display_name, '') AS customerName,
             latest.text AS lastMessage,
             latest.created_at AS lastMessageAt,
             COALESCE(unread.cnt, 0) AS unreadCount
-        FROM (
+        FROM customers c
+        LEFT JOIN (
             SELECT customer_id, MAX(created_at) AS max_created_at
             FROM messages
             WHERE salon_id = :salonId
             GROUP BY customer_id
-        ) m
-        JOIN messages latest
-            ON latest.customer_id = m.customer_id
+        ) m ON m.customer_id = c.id
+        LEFT JOIN messages latest
+            ON latest.customer_id = c.id
             AND latest.salon_id = :salonId
             AND latest.created_at = m.max_created_at
-        JOIN customers c ON c.id = m.customer_id
         LEFT JOIN (
             SELECT customer_id, COUNT(*) AS cnt
             FROM messages
             WHERE salon_id = :salonId AND is_read = false
             GROUP BY customer_id
-        ) unread ON unread.customer_id = m.customer_id
-        ORDER BY latest.created_at DESC
+        ) unread ON unread.customer_id = c.id
+        WHERE c.salon_id = :salonId
+            AND c.line_user_id IS NOT NULL
+            AND (c.is_deleted = false OR c.is_deleted IS NULL)
+        ORDER BY latest.created_at DESC NULLS LAST
         """, nativeQuery = true)
     List<Object[]> findThreadsBySalonId(@Param("salonId") Long salonId);
 }

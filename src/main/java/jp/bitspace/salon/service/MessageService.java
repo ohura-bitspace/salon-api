@@ -111,9 +111,10 @@ public class MessageService {
                 .customerId(((Number) row[0]).longValue())
                 .customerName((String) row[1])
                 .lastMessage((String) row[2])
-                .lastMessageAt(row[3] instanceof java.sql.Timestamp ts
-                    ? ts.toLocalDateTime()
-                    : (LocalDateTime) row[3])
+                .lastMessageAt(row[3] == null ? null
+                    : row[3] instanceof java.sql.Timestamp ts
+                        ? ts.toLocalDateTime()
+                        : (LocalDateTime) row[3])
                 .unreadCount(((Number) row[4]).longValue())
                 .build())
             .collect(Collectors.toList());
