@@ -60,7 +60,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
         WHERE c.salon_id = :salonId
             AND c.line_user_id IS NOT NULL
             AND (c.is_deleted = false OR c.is_deleted IS NULL)
-        ORDER BY latest.created_at DESC NULLS LAST
+        ORDER BY CASE WHEN latest.created_at IS NULL THEN 1 ELSE 0 END, latest.created_at DESC
         """, nativeQuery = true)
     List<Object[]> findThreadsBySalonId(@Param("salonId") Long salonId);
 }
