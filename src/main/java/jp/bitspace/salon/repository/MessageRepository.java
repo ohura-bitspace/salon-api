@@ -37,6 +37,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
         SELECT
             c.id AS customerId,
             COALESCE(CONCAT(c.last_name, ' ', c.first_name), c.line_display_name, '') AS customerName,
+            c.line_picture_url AS linePictureUrl,
             latest.text AS lastMessage,
             latest.created_at AS lastMessageAt,
             COALESCE(unread.cnt, 0) AS unreadCount

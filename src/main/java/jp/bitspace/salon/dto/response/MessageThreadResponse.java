@@ -14,6 +14,7 @@ public class MessageThreadResponse {
 
     private Long customerId;
     private String customerName;
+    private String linePictureUrl;
     private String lastMessage;
     private LocalDateTime lastMessageAt;
     private Long unreadCount;

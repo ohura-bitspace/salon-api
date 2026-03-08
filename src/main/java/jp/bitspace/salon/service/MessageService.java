@@ -110,12 +110,13 @@ public class MessageService {
             .map(row -> MessageThreadResponse.builder()
                 .customerId(((Number) row[0]).longValue())
                 .customerName((String) row[1])
-                .lastMessage((String) row[2])
-                .lastMessageAt(row[3] == null ? null
-                    : row[3] instanceof java.sql.Timestamp ts
+                .linePictureUrl((String) row[2])
+                .lastMessage((String) row[3])
+                .lastMessageAt(row[4] == null ? null
+                    : row[4] instanceof java.sql.Timestamp ts
                         ? ts.toLocalDateTime()
-                        : (LocalDateTime) row[3])
-                .unreadCount(((Number) row[4]).longValue())
+                        : (LocalDateTime) row[4])
+                .unreadCount(((Number) row[5]).longValue())
                 .build())
             .collect(Collectors.toList());
     }
